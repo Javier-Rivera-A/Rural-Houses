@@ -21,7 +21,7 @@ import java.util.List;
 public class DataInitializer {
 
     @Bean
-    @Profile("!test")
+    @Profile("dev")
     public CommandLineRunner initData(OwnerService ownerService, CountryHouseService houseService) {
         return args -> {
             log.info("=== Cargando datos de prueba ===");
