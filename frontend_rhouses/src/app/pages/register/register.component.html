@@ -35,8 +35,8 @@
       <div class="flex-1 p-8 lg:p-12 flex flex-col">
         <div class="mb-8">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-[#333745]">Create Account</h2>
-            <span class="text-sm font-semibold text-[#2ba692]">Step {{step}} of 3</span>
+            <h2 class="text-2xl font-bold text-[#333745]">Crea tu cuenta</h2>
+            <span class="text-sm font-semibold text-[#2ba692]">Paso {{step}} de 3</span>
           </div>
           <!-- Progress Bar -->
           <div class="w-full bg-slate-100 h-2 rounded-full mb-2">
@@ -49,15 +49,15 @@
         </div>
 
         <form class="space-y-4 flex-1 flex flex-col" (ngSubmit)="onNext()" #registerForm="ngForm">
-          <!-- Step 1: Personal Information -->
+          <!-- Step 1: Información personal -->
           <div *ngIf="step === 1" class="space-y-4 animate-slide-in">
             <div class="space-y-1">
-              <label class="block text-sm font-semibold text-[#333745]">Full Name</label>
+              <label class="block text-sm font-semibold text-[#333745]">Nombre completo</label>
               <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <input
                   [class]="'w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#2ba692]/20 focus:border-[#2ba692] outline-none transition-all text-[#333745] ' + (errors.fullName ? 'border-red-500' : 'border-slate-200')"
-                  placeholder="John Doe"
+                  placeholder="Tu nombre"
                   type="text"
                   name="fullName"
                   [(ngModel)]="formData.fullName"
@@ -68,12 +68,12 @@
             </div>
 
             <div class="space-y-1">
-              <label class="block text-sm font-semibold text-[#333745]">Email Address</label>
+              <label class="block text-sm font-semibold text-[#333745]">Dirección de correo</label>
               <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7"/></svg>
                 <input
                   [class]="'w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#2ba692]/20 focus:border-[#2ba692] outline-none transition-all text-[#333745] ' + (errors.email ? 'border-red-500' : 'border-slate-200')"
-                  placeholder="john@example.com"
+                  placeholder="tuCorreo@ejemplo.com"
                   type="email"
                   name="email"
                   [(ngModel)]="formData.email"
@@ -84,14 +84,14 @@
             </div>
 
             <div class="space-y-1">
-              <label class="block text-sm font-semibold text-[#333745]">Phone Number</label>
+              <label class="block text-sm font-semibold text-[#333745]">Numero telefonico</label>
               <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 <input
                   [class]="'w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#2ba692]/20 focus:border-[#2ba692] outline-none transition-all text-[#333745] ' + (errors.phone ? 'border-red-500' : 'border-slate-200')"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+57 000-000-0000"
                   type="tel"
-                  name="phone"
+                  name="telefono"
                   [(ngModel)]="formData.phone"
                   (ngModelChange)="onInputChange('phone')"
                 />
@@ -100,17 +100,17 @@
             </div>
           </div>
 
-          <!-- Step 2: Account Credentials -->
+          <!-- Step 2: Credenciales de tu cuenta -->
           <div *ngIf="step === 2" class="space-y-4 animate-slide-in">
             <div class="space-y-1">
-              <label class="block text-sm font-semibold text-[#333745]">Username</label>
+              <label class="block text-sm font-semibold text-[#333745]">Nombre de usuario</label>
               <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <input
                   [class]="'w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#2ba692]/20 focus:border-[#2ba692] outline-none transition-all text-[#333745] ' + (errors.username ? 'border-red-500' : 'border-slate-200')"
-                  placeholder="john_doe"
+                  placeholder="tu nombre de usuario"
                   type="text"
-                  name="username"
+                  name="nombre de usuario"
                   [(ngModel)]="formData.username"
                   (ngModelChange)="onInputChange('username')"
                 />
@@ -119,7 +119,7 @@
             </div>
 
             <div class="space-y-1">
-              <label class="block text-sm font-semibold text-[#333745]">Password</label>
+              <label class="block text-sm font-semibold text-[#333745]">Contraseña</label>
               <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <input
@@ -143,7 +143,7 @@
             </div>
 
             <div class="space-y-1">
-              <label class="block text-sm font-semibold text-[#333745]">Confirm Password</label>
+              <label class="block text-sm font-semibold text-[#333745]">Confirma tu contraseña</label>
               <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 <input
@@ -263,7 +263,7 @@
               [disabled]="isLoading"
             >
               <span>
-                {{isLoading ? 'Processing...' : step === 3 ? 'Create Account' : 'Continue'}}
+                {{isLoading ? 'Processing...' : step === 3 ? 'Create Account' : 'Continua'}}
               </span>
               <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </button>
@@ -277,7 +277,7 @@
             </div>
             <div class="relative flex justify-center text-sm">
               <span class="px-4 bg-white text-slate-500 uppercase tracking-widest text-xs font-bold">
-                Or register with
+                o registrate con
               </span>
             </div>
           </div>
@@ -310,10 +310,10 @@
         </div>
 
         <div class="mt-6 text-center">
-          <p class="text-slate-500">Already have an account?</p>
+          <p class="text-slate-500">¿Ya tienes una cuenta?</p>
           <a routerLink="/" class="text-[#AA4465] font-bold hover:underline inline-flex items-center gap-1 mt-1">
             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
-            Back to Login
+            Devuelvete al acceso
           </a>
         </div>
       </div>
