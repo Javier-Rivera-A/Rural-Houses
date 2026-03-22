@@ -1,6 +1,6 @@
 package co.uniquindio.rural_house.Rural_House.service.impl;
 
-import co.uniquindio.rural_house.Rural_House.dto.*;
+
 import co.uniquindio.rural_house.Rural_House.dto.request.*;
 import co.uniquindio.rural_house.Rural_House.dto.response.*;
 import co.uniquindio.rural_house.Rural_House.entity.enums.*;

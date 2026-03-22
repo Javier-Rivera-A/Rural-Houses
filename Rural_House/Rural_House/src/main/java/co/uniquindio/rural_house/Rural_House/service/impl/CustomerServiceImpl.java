@@ -22,12 +22,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public Customer register(RegisterOwnerRequest request) {
+    public Customer register(RegisterCustomerRequest request) {
+        // Verificar si el nombre de usuario ya existe (en toda la tabla users)
         if (userRepository.existsByUserName(request.getUserName())) {
-            throw new BusinessException("El nombre de usuario '" + request.getUserName() + "' ya está en uso");
+            throw new BusinessException(
+                "El nombre de usuario '" + request.getUserName() + "' ya está en uso. Elige otro."
+            );
         }
-        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException("El email ya está registrado");
+        // Verificar si el email ya existe (en toda la tabla users)
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException(
+                "El email '" + request.getEmail() + "' ya está registrado en el sistema."
+            );
         }
 
         Customer customer = new Customer();
@@ -44,13 +50,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional(readOnly = true)
     public Customer login(LoginRequest request) {
         Customer customer = customerRepository.findByUserName(request.getUserName())
-                .orElseThrow(() -> new UnauthorizedException("Credenciales incorrectas"));
+                .orElseThrow(() -> new UnauthorizedException("Usuario o contraseña incorrectos"));
 
         if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
-            throw new UnauthorizedException("Credenciales incorrectas");
+            throw new UnauthorizedException("Usuario o contraseña incorrectos");
         }
         if (customer.getAccountState() != EnumAccountState.ACTIVE) {
-            throw new UnauthorizedException("La cuenta está desactivada");
+            throw new UnauthorizedException("La cuenta está desactivada. Contacta con soporte.");
         }
         return customer;
     }

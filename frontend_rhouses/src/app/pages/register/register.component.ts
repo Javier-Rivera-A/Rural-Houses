@@ -113,8 +113,21 @@ export class RegisterComponent {
         },
         error: (errorServidor) => {
           console.error('Error al registrar:', errorServidor);
-          this.toastr.error('Ocurrió un error en el servidor', 'Por favor intenta nuevamente');
           this.isLoading = false;
+          
+          let errorMsg = 'Por favor intenta nuevamente';
+          
+          if (errorServidor.error && errorServidor.error.message) {
+            errorMsg = errorServidor.error.message;
+            // Si hay errores de validación, tratar de ser más específico
+            if (errorServidor.error.data) {
+              const detalles = Object.values(errorServidor.error.data).join('\n');
+              this.toastr.error(detalles, errorMsg);
+              return;
+            }
+          }
+          
+          this.toastr.error(errorMsg, 'Error al registrarse');
         }
       });
     }

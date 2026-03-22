@@ -1,8 +1,7 @@
 package co.uniquindio.rural_house.Rural_House.controller;
 
-
 import co.uniquindio.rural_house.Rural_House.dto.request.LoginRequest;
-import co.uniquindio.rural_house.Rural_House.dto.request.RegisterOwnerRequest;
+import co.uniquindio.rural_house.Rural_House.dto.request.RegisterCustomerRequest;
 import co.uniquindio.rural_house.Rural_House.dto.response.ApiResponse;
 import co.uniquindio.rural_house.Rural_House.entity.Customer;
 import co.uniquindio.rural_house.Rural_House.service.CustomerService;
@@ -21,10 +20,11 @@ public class CustomerController {
 
     /**
      * POST /api/customers/register
-     * Registra un nuevo cliente.
+     * Registra un nuevo cliente. Valida formato de email, contraseña segura
+     * y verifica que el usuario/email no existan previamente.
      */
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterOwnerRequest request) {
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterCustomerRequest request) {
         Customer customer = customerService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Cliente registrado correctamente", customer.getId()));

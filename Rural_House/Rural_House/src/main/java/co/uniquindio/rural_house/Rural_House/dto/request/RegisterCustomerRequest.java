@@ -3,8 +3,12 @@ package co.uniquindio.rural_house.Rural_House.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+/**
+ * DTO para el registro de clientes.
+ * A diferencia del propietario, el cliente no tiene accessWord.
+ */
 @Data
-public class RegisterOwnerRequest {
+public class RegisterCustomerRequest {
 
     @NotBlank(message = "El nombre de usuario es obligatorio")
     @Size(min = 4, max = 30, message = "El nombre de usuario debe tener entre 4 y 30 caracteres")
@@ -21,10 +25,6 @@ public class RegisterOwnerRequest {
         message = "La contraseña debe contener al menos una mayúscula, un número y un carácter especial"
     )
     private String password;
-
-    @NotBlank(message = "La palabra de acceso es obligatoria")
-    @Size(min = 4, message = "La palabra de acceso debe tener al menos 4 caracteres")
-    private String accessWord;
 
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El formato del email no es válido (ejemplo: usuario@dominio.com)")
