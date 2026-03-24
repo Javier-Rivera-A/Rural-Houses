@@ -14,8 +14,7 @@ interface RegisterForm {
   username: string;
   password: string;
   confirmPassword: string;
-  isOwner: boolean;
-  accessWord: string;
+
 }
 
 interface FormErrors {
@@ -25,7 +24,6 @@ interface FormErrors {
   username?: string;
   password?: string;
   confirmPassword?: string;
-  accessWord?: string;
 }
 
 @Component({
@@ -40,14 +38,13 @@ export class RegisterComponent {
   step = 1; //Formulario en el que esta el usuario
   formData: RegisterForm = {
     fullName: '', email: '', phone: '', username: '',
-    password: '', confirmPassword: '', isOwner: false, accessWord: ''
+    password: '', confirmPassword: ''
   }; //Formulario para el registro de un usuario
 
   errors: FormErrors = {}; //Errores que se van recopilando por cada falta de imformacion en un campo en especifico
   isLoading = false;
   showPassword = false;
   showConfirmPassword = false;
-  showAccessWord = false;
 
   // --- INYECCIÓN DE DEPENDENCIAS ---
   constructor(
@@ -105,7 +102,7 @@ export class RegisterComponent {
       // Nos SUSCRIBIMOS a la respuesta del backend
       this.registerService.crearUsuario(datosParaBackend).subscribe({
         next: (respuestaDelServidor) => {
-          const userType = this.formData.isOwner ? 'propietario' : 'usuario';
+          const userType = 'propietario';
           this.toastr.success(`Bienvenido ${this.formData.fullName} como ${userType}`, '¡Cuenta creada exitosamente!');
           console.log('Respuesta exitosa del servidor:', respuestaDelServidor);
           this.isLoading = false;
@@ -114,9 +111,9 @@ export class RegisterComponent {
         error: (errorServidor) => {
           console.error('Error al registrar:', errorServidor);
           this.isLoading = false;
-          
+
           let errorMsg = 'Por favor intenta nuevamente';
-          
+
           if (errorServidor.error && errorServidor.error.message) {
             errorMsg = errorServidor.error.message;
             // Si hay errores de validación, tratar de ser más específico
@@ -126,7 +123,7 @@ export class RegisterComponent {
               return;
             }
           }
-          
+
           this.toastr.error(errorMsg, 'Error al registrarse');
         }
       });
@@ -147,13 +144,7 @@ export class RegisterComponent {
     }
   }
 
-  onOwnerCheckChange(): void {
-    // Si desmarca la casilla de propietario, limpiamos la palabra de acceso
-    if (!this.formData.isOwner) {
-      this.formData.accessWord = '';
-      delete this.errors.accessWord;
-    }
-  }
+
 
   onSocialRegister(provider: string): void {
     this.toastr.info('Esta es una demostración', `Registrando con ${provider}...`);
@@ -161,7 +152,6 @@ export class RegisterComponent {
 
   togglePasswordVisibility(): void { this.showPassword = !this.showPassword; }
   toggleConfirmPasswordVisibility(): void { this.showConfirmPassword = !this.showConfirmPassword; }
-  toggleAccessWordVisibility(): void { this.showAccessWord = !this.showAccessWord; }
 
   // --- MÉTODOS DE VALIDACIÓN ---
   validateEmail(email: string): boolean {
@@ -169,58 +159,70 @@ export class RegisterComponent {
     return emailRegex.test(email);
   }
 
+  // 1. Actualizamos la validación del teléfono según el Backend
   validatePhone(phone: string): boolean {
-    const phoneRegex = /^\+?[\d\s\-()]+$/;
-    return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
+    const phoneRegex = /^\+?[0-9]{7,15}$/;
+    return phoneRegex.test(phone);
   }
 
   public validateStep1(): FormErrors {
     const newErrors: FormErrors = {};
+
+    // El fullName se valida en el frontend, aunque el backend no lo guarde por ahora
     if (!this.formData.fullName) {
       newErrors.fullName = 'El nombre completo es requerido';
     } else if (this.formData.fullName.length < 3) {
       newErrors.fullName = 'El nombre debe tener al menos 3 caracteres';
     }
+
     if (!this.formData.email) {
       newErrors.email = 'El correo electrónico es requerido';
     } else if (!this.validateEmail(this.formData.email)) {
       newErrors.email = 'Por favor ingresa un correo válido';
     }
+
     if (!this.formData.phone) {
       newErrors.phone = 'El teléfono es requerido';
     } else if (!this.validatePhone(this.formData.phone)) {
-      newErrors.phone = 'Ingresa un teléfono válido (mínimo 10 dígitos)';
+      newErrors.phone = 'Ingresa entre 7 y 15 dígitos (puede incluir "+" al inicio)';
     }
+
     return newErrors;
   }
 
   public validateStep2(): FormErrors {
     const newErrors: FormErrors = {};
+
+    // 2. Actualizamos validación del Usuario según el Backend
+    const userNameRegex = /^[a-zA-Z0-9_.-]+$/;
+
     if (!this.formData.username) {
       newErrors.username = 'El nombre de usuario es requerido';
-    } else if (this.formData.username.length < 3) {
-      newErrors.username = 'El usuario debe tener al menos 3 caracteres';
+    } else if (this.formData.username.length < 4 || this.formData.username.length > 30) {
+      newErrors.username = 'El usuario debe tener entre 4 y 30 caracteres';
+    } else if (!userNameRegex.test(this.formData.username)) {
+      newErrors.username = 'Solo letras, números, puntos, guiones y guiones bajos';
     }
+
+    // 3. Actualizamos validación de la Contraseña según el Backend
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/;
+
     if (!this.formData.password) {
       newErrors.password = 'La contraseña es requerida';
-    } else if (this.formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    } else if (this.formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    } else if (!passwordRegex.test(this.formData.password)) {
+      newErrors.password = 'Debe contener al menos una mayúscula, un número y un carácter especial';
     }
+
     if (!this.formData.confirmPassword) {
       newErrors.confirmPassword = 'Confirma tu contraseña';
     } else if (this.formData.password !== this.formData.confirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
-    if (this.formData.isOwner) {
-      if (!this.formData.accessWord) {
-        newErrors.accessWord = 'La palabra de acceso es requerida para propietarios';
-      } else if (this.formData.accessWord.length < 4) {
-        newErrors.accessWord = 'La palabra de acceso debe tener al menos 4 caracteres';
-      }
-    }
+
     return newErrors;
   }
-
   public validateStep3(): FormErrors {
     return {};
   }
