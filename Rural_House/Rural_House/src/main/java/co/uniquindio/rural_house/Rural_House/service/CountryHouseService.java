@@ -3,9 +3,11 @@ package co.uniquindio.rural_house.Rural_House.service;
 
 
 import co.uniquindio.rural_house.Rural_House.dto.request.CountryHouseRequest;
+import co.uniquindio.rural_house.Rural_House.dto.request.PhotoRequest;
 import co.uniquindio.rural_house.Rural_House.dto.request.RentalPackageRequest;
 import co.uniquindio.rural_house.Rural_House.dto.response.AvailabilityResponse;
 import co.uniquindio.rural_house.Rural_House.dto.response.CountryHouseResponse;
+import co.uniquindio.rural_house.Rural_House.dto.response.PhotoResponse;
 import co.uniquindio.rural_house.Rural_House.dto.response.RentalPackageResponse;
 import co.uniquindio.rural_house.Rural_House.entity.CountryHouse;
 
@@ -36,4 +38,7 @@ public interface CountryHouseService {
     CountryHouse getEntityByCode(String code);
     CountryHouse getEntityById(String id);
     void verifyOwnership(String ownerId, String houseId);
+
+    //Fotos
+    PhotoResponse addPhoto(String ownerId, String houseId, PhotoRequest request);
 }

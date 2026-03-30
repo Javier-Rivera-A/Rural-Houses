@@ -141,4 +141,17 @@ public class CountryHouseController {
             @RequestParam int nights) {
         return ResponseEntity.ok(ApiResponse.ok(countryHouseService.checkAvailability(code, checkIn, nights)));
     }
+
+    //Fotos
+    @PostMapping("/{houseId}/photos")
+    public ResponseEntity<ApiResponse<PhotoResponse>> addPhoto(
+            @RequestParam String ownerId,
+            @PathVariable String houseId,
+            @Valid @RequestBody PhotoRequest request) {
+
+        PhotoResponse response = countryHouseService.addPhoto(ownerId, houseId, request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Imagen agregada correctamente", response));
+    }
 }

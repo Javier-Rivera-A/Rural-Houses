@@ -2,19 +2,19 @@ package co.uniquindio.rural_house.Rural_House.service.impl;
 
 
 import co.uniquindio.rural_house.Rural_House.dto.request.*;
-import co.uniquindio.rural_house.Rural_House.dto.response.*;
-import co.uniquindio.rural_house.Rural_House.entity.enums.*;
-import co.uniquindio.rural_house.Rural_House.repository.*;
-import co.uniquindio.rural_house.Rural_House.service.*;
-import co.uniquindio.rural_house.Rural_House.entity.*;
-import co.uniquindio.rural_house.Rural_House.exception.*;
-import lombok.RequiredArgsConstructor;
+        import co.uniquindio.rural_house.Rural_House.dto.response.*;
+        import co.uniquindio.rural_house.Rural_House.entity.enums.*;
+        import co.uniquindio.rural_house.Rural_House.repository.*;
+        import co.uniquindio.rural_house.Rural_House.service.*;
+        import co.uniquindio.rural_house.Rural_House.entity.*;
+        import co.uniquindio.rural_house.Rural_House.exception.*;
+        import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+        import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -255,19 +255,37 @@ public class CountryHouseServiceImpl implements CountryHouseService {
     }
 
     private void validateHouseRules(CountryHouseRequest request) {
-        // UML: mínimo 3 habitaciones
+        // Mínimo 3 habitaciones
         if (request.getBedrooms() == null || request.getBedrooms().size() < 3) {
             throw new BusinessException("La casa rural debe tener al menos 3 habitaciones");
         }
-        // UML: mínimo 1 cocina/comedor
+
+        // Mínimo 1 cocina
         if (request.getDiningRooms() == null || request.getDiningRooms().isEmpty()) {
             throw new BusinessException("La casa rural debe tener al menos 1 cocina");
         }
-        // UML: mínimo 2 baños
+
+        // Mínimo 2 baños
         int totalBaths = (request.getPrivateBathrooms() != null ? request.getPrivateBathrooms() : 0)
                 + (request.getPublicBathrooms() != null ? request.getPublicBathrooms() : 0);
+
         if (totalBaths < 2) {
             throw new BusinessException("La casa rural debe tener al menos 2 baños");
+        }
+
+        //código único de habitaciones
+        Set<Integer> bedroomCodes = new HashSet<>();
+
+        for (BedroomRequest bedroom : request.getBedrooms()) {
+            if (bedroom.getBedroomCode() == null) {
+                throw new BusinessException("Cada habitación debe tener un código");
+            }
+
+            if (!bedroomCodes.add(bedroom.getBedroomCode())) {
+                throw new BusinessException(
+                        "El código de habitación '" + bedroom.getBedroomCode() + "' está repetido"
+                );
+            }
         }
     }
 
@@ -325,5 +343,37 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         r.setTypeRental(pkg.getTypeRental());
         r.setCountryHouseCode(pkg.getCountryHouse().getCode());
         return r;
+    }
+
+    //Fotos
+    @Override
+    @Transactional
+    public PhotoResponse addPhoto(String ownerId, String houseId, PhotoRequest request) {
+        verifyOwnership(ownerId, houseId);
+
+        if (request.getUrl() == null || request.getUrl().isBlank()) {
+            throw new BusinessException("La URL de la imagen es obligatoria");
+        }
+
+        CountryHouse house = getEntityById(houseId);
+
+        Photo photo = new Photo();
+        photo.setUrl(request.getUrl());
+        photo.setDescription(request.getDescription());
+        photo.setCountryHouse(house);
+
+        house.getPhoto().add(photo);
+
+        CountryHouse savedHouse = countryHouseRepository.save(house);
+
+        Photo savedPhoto = savedHouse.getPhoto()
+                .get(savedHouse.getPhoto().size() - 1);
+
+        PhotoResponse response = new PhotoResponse();
+        response.setId(savedPhoto.getId());
+        response.setUrl(savedPhoto.getUrl());
+        response.setDescription(savedPhoto.getDescription());
+
+        return response;
     }
 }
