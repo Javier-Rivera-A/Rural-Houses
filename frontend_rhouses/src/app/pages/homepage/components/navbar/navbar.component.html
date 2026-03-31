@@ -1,0 +1,87 @@
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <div class="flex-shrink-0">
+        <h1 class="text-2xl font-bold" style="color: var(--rhouses-primary)">
+          rhouses
+        </h1>
+      </div>
+
+      <!-- Barra de búsqueda central (oculta en móvil) -->
+      <div class="hidden md:flex flex-1 max-w-md mx-8">
+        <div class="relative w-full">
+          <input
+            type="text"
+            placeholder="Buscar población..."
+            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent"
+          />
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Botones de autenticación - Estado no logueado -->
+      <div *ngIf="!isLoggedIn" class="flex items-center gap-3">
+        <button 
+          class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-[var(--rhouses-background-light)] transition-colors"
+          style="color: var(--rhouses-secondary-dark)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" x2="3" y1="12" y2="12"></line>
+          </svg>
+          <span>Iniciar sesión</span>
+        </button>
+        <button 
+          class="flex items-center gap-2 px-4 py-2 rounded-xl text-white transition-colors hover:opacity-90"
+          style="background-color: var(--rhouses-accent)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="hidden sm:inline">Registrarse</span>
+        </button>
+      </div>
+
+      <!-- Botones de usuario - Estado logueado -->
+      <div *ngIf="isLoggedIn" class="flex items-center gap-3">
+        <button 
+          class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-[var(--rhouses-background-light)] transition-colors"
+          style="color: var(--rhouses-secondary-dark)"
+        >
+          Mi cuenta
+        </button>
+        <button 
+          class="flex items-center justify-center w-10 h-10 rounded-full text-white transition-colors hover:opacity-90"
+          style="background-color: var(--rhouses-accent)"
+          aria-label="Usuario"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de búsqueda móvil -->
+    <div class="md:hidden pb-3">
+      <div class="relative w-full">
+        <input
+          type="text"
+          placeholder="Buscar población..."
+          class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent"
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</nav>

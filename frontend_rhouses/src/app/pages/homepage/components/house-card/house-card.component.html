@@ -1,0 +1,118 @@
+<div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+  <!-- Imagen -->
+  <div class="relative h-56 overflow-hidden">
+    <img
+      [src]="house.image"
+      [alt]="house.name"
+      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+    />
+    
+    <!-- Badge de disponibilidad -->
+    <div class="absolute top-3 right-3">
+      <span *ngIf="house.available" class="flex items-center gap-1 px-3 py-1 bg-green-500 text-white text-sm font-semibold rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <path d="m9 11 3 3L22 4"></path>
+        </svg>
+        Disponible
+      </span>
+      <span *ngIf="!house.available" class="flex items-center gap-1 px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m15 9-6 6"></path>
+          <path d="m9 9 6 6"></path>
+        </svg>
+        No disponible
+      </span>
+    </div>
+
+    <!-- Badge de tipo -->
+    <div class="absolute top-3 left-3">
+      <span 
+        class="px-3 py-1 text-white text-sm font-semibold rounded-full"
+        style="background-color: var(--rhouses-primary)"
+      >
+        {{typeLabel}}
+      </span>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="p-5">
+    <!-- Nombre y ubicación -->
+    <div class="mb-3">
+      <h3 class="text-lg font-semibold mb-1" style="color: var(--rhouses-secondary-dark)">
+        {{house.name}}
+      </h3>
+      <div class="flex items-center gap-1 text-gray-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="text-sm">{{house.location}}</span>
+      </div>
+    </div>
+
+    <!-- Características -->
+    <div class="flex flex-wrap items-center gap-4 mb-4 text-gray-600">
+      <div class="flex items-center gap-1" title="Dormitorios">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+          <path d="M2 4v16"></path>
+          <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+          <path d="M2 17h20"></path>
+          <path d="M6 8v9"></path>
+        </svg>
+        <span class="text-sm">{{house.bedrooms}}</span>
+      </div>
+      <div class="flex items-center gap-1" title="Baños">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+          <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path>
+          <line x1="10" x2="8" y1="5" y2="7"></line>
+          <line x1="2" x2="22" y1="12" y2="12"></line>
+          <line x1="7" x2="7" y1="19" y2="21"></line>
+          <line x1="17" x2="17" y1="19" y2="21"></line>
+        </svg>
+        <span class="text-sm">{{house.bathrooms}}</span>
+      </div>
+      <div class="flex items-center gap-1" title="Capacidad">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span class="text-sm">{{house.capacity}}</span>
+      </div>
+      <div *ngIf="house.parking && house.parking > 0" class="flex items-center gap-1" title="Plazas de garaje">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
+          <circle cx="7" cy="17" r="2"></circle>
+          <path d="M9 17h6"></path>
+          <circle cx="17" cy="17" r="2"></circle>
+        </svg>
+        <span class="text-sm">{{house.parking}}</span>
+      </div>
+    </div>
+
+    <!-- Precio y botón -->
+    <div class="flex items-center justify-between pt-4 border-t">
+      <div>
+        <p class="text-sm text-gray-600">Precio por paquete</p>
+        <p class="text-2xl font-bold" style="color: var(--rhouses-primary)">
+          {{house.price}}€
+        </p>
+      </div>
+      <button
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+        style="background-color: var(--rhouses-accent)"
+        [disabled]="!house.available"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Ver detalles
+      </button>
+    </div>
+  </div>
+</div>
