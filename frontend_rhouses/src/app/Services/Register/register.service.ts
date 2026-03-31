@@ -1,29 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserRegister } from './register.model';
+
+export interface CustomerRegisterPayload {
+  userName: string;
+  password: string;
+  email: string;
+  phone: string;
+}
+
+export interface OwnerRegisterPayload {
+  userName: string;
+  password: string;
+  accessWord: string;
+  email: string;
+  phone: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegisterService {
   private apiCustomersUrl = 'http://localhost:8081/api/customers/register';
+  private apiOwnersUrl = 'http://localhost:8081/api/owners/register';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  crearUsuario(usuario: UserRegister): Observable<any> {
-    // Definimos qué URL usar según el rol
-    const url = this.apiCustomersUrl;
+  registrarCliente(payload: CustomerRegisterPayload): Observable<any> {
+    return this.http.post(this.apiCustomersUrl, payload);
+  }
 
-    // Adaptar el payload en función de los DTOs que espera Spring Boot
-    const requestPayload: any = {
-      userName: usuario.username,
-      password: usuario.password,
-      email: usuario.email,
-      phone: usuario.phone
-    };
-
-
-    return this.http.post(url, requestPayload);
+  registrarPropietario(payload: OwnerRegisterPayload): Observable<any> {
+    return this.http.post(this.apiOwnersUrl, payload);
   }
 }
