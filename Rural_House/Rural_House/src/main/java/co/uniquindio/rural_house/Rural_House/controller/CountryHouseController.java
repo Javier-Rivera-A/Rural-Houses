@@ -1,6 +1,5 @@
 package co.uniquindio.rural_house.Rural_House.controller;
 
-import co.uniquindio.rural_house.Rural_House.entity.*;
 import co.uniquindio.rural_house.Rural_House.service.*;
 import co.uniquindio.rural_house.Rural_House.dto.response.*;
 import co.uniquindio.rural_house.Rural_House.dto.request.*;
@@ -126,6 +125,15 @@ public class CountryHouseController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CountryHouseResponse>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findById(id)));
+    }
+
+    /**
+     * GET /api/houses
+     * Lista todas las casas rurales activas (homepage).
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> getAll() {
+        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findAll()));
     }
 
     // ─── Disponibilidad ───────────────────────────────────────────────────────

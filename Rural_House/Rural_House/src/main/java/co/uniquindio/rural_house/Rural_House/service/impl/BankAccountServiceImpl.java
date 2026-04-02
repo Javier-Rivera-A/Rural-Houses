@@ -1,8 +1,10 @@
 package co.uniquindio.rural_house.Rural_House.service.impl;
 
 
+import co.uniquindio.rural_house.Rural_House.dto.request.BankAccountRequest;
 import co.uniquindio.rural_house.Rural_House.entity.BankAccount;
 import co.uniquindio.rural_house.Rural_House.entity.User;
+import co.uniquindio.rural_house.Rural_House.exception.UnauthorizedException;
 import co.uniquindio.rural_house.Rural_House.repository.BankAccountRepository;
 import co.uniquindio.rural_house.Rural_House.repository.UserRepository;
 import co.uniquindio.rural_house.Rural_House.service.BankAccountService;
@@ -46,5 +48,32 @@ public class BankAccountServiceImpl implements BankAccountService {
     public BankAccount findById(String id) {
         return bankAccountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta bancaria no encontrada: " + id));
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccount(String userId, String accountId){
+        BankAccount account = bankAccountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta bancaria no encontrada: " + accountId));
+        if(!account.getUser().getId().equals(userId)){
+            throw new UnauthorizedException("No tienes permiso para eliminar esta cuenta");
+        }
+        bankAccountRepository.delete(account);
+    }
+
+    @Override
+    @Transactional
+    public BankAccount updateAccount(String userId, String accountId, BankAccountRequest request){
+        BankAccount account = bankAccountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cuenta bancaria no encontrada: " +  accountId));
+        if (!account.getUser().getId().equals(userId)){
+            throw new UnauthorizedException("No tienes permiso para modificar esta cuenta");
+        }
+
+        account.setNumberAccount(request.getNumberAccount());
+        account.setBank(request.getBank());
+        account.setAccountType(request.getAccountType());
+
+        return bankAccountRepository.save(account);
     }
 }

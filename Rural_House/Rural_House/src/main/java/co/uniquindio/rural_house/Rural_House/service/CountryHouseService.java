@@ -30,6 +30,7 @@ public interface CountryHouseService {
     List<CountryHouseResponse> findByPopulation(String populationName);
     CountryHouseResponse findByCode(String code);
     CountryHouseResponse findById(String id);
+    List<CountryHouseResponse> findAll();
 
     // Disponibilidad
     AvailabilityResponse checkAvailability(String houseCode, LocalDate checkIn, int nights);
