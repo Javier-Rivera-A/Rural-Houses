@@ -175,6 +175,13 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         return toResponse(getEntityById(id));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<CountryHouseResponse> findAll(){
+        return countryHouseRepository.findAllActive()
+                .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
     // ─── Disponibilidad ───────────────────────────────────────────────────────
 
     @Override
