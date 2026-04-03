@@ -1,6 +1,5 @@
 package co.uniquindio.rural_house.Rural_House.controller;
 
-import co.uniquindio.rural_house.Rural_House.entity.*;
 import co.uniquindio.rural_house.Rural_House.service.*;
 import co.uniquindio.rural_house.Rural_House.dto.response.*;
 import co.uniquindio.rural_house.Rural_House.dto.request.*;
@@ -128,6 +127,15 @@ public class CountryHouseController {
         return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findById(id)));
     }
 
+    /**
+     * GET /api/houses
+     * Lista todas las casas rurales activas (homepage).
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> getAll() {
+        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findAll()));
+    }
+
     // ─── Disponibilidad ───────────────────────────────────────────────────────
 
     /**
@@ -140,5 +148,18 @@ public class CountryHouseController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
             @RequestParam int nights) {
         return ResponseEntity.ok(ApiResponse.ok(countryHouseService.checkAvailability(code, checkIn, nights)));
+    }
+
+    //Fotos
+    @PostMapping("/{houseId}/photos")
+    public ResponseEntity<ApiResponse<PhotoResponse>> addPhoto(
+            @RequestParam String ownerId,
+            @PathVariable String houseId,
+            @Valid @RequestBody PhotoRequest request) {
+
+        PhotoResponse response = countryHouseService.addPhoto(ownerId, houseId, request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Imagen agregada correctamente", response));
     }
 }

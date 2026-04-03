@@ -1,36 +1,38 @@
 <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden" style="font-family: 'Be Vietnam Pro', sans-serif">
+
   <!-- Navigation -->
   <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#E1E5F2] bg-white px-10 py-3 z-10">
     <div class="flex items-center gap-4 text-[#333745]">
       <div class="size-6 text-[#2CA58D]">
         <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-          <path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill-rule="evenodd" />
+          <path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill-rule="evenodd"/>
         </svg>
       </div>
       <h2 class="text-[#333745] text-xl font-bold leading-tight tracking-[-0.015em]">Rural Rental</h2>
     </div>
     <div class="flex flex-1 justify-end gap-8">
       <div class="flex items-center gap-9">
-        <a class="text-[#333745] text-sm font-medium hover:text-[#2CA58D] transition-colors" href="#">Browse Cabins</a>
-        <a class="text-[#333745] text-sm font-medium hover:text-[#2CA58D] transition-colors" href="#">Host Your Home</a>
-        <a class="text-[#333745] text-sm font-medium hover:text-[#2CA58D] transition-colors" href="#">Help</a>
+        <a class="text-[#333745] text-sm font-medium hover:text-[#2CA58D] transition-colors" href="#">Explorar Cabañas</a>
+        <a class="text-[#333745] text-sm font-medium hover:text-[#2CA58D] transition-colors" href="#">Publica tu Casa</a>
+        <a class="text-[#333745] text-sm font-medium hover:text-[#2CA58D] transition-colors" href="#">Ayuda</a>
       </div>
       <div class="flex gap-2">
         <button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#2CA58D] text-white text-sm font-bold">
-          Log In
+          Entrar
         </button>
         <a routerLink="/register">
           <button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#f8f6f7] text-[#333745] text-sm font-bold border border-[#E1E5F2]">
-            Sign Up
+            Registrarse
           </button>
         </a>
       </div>
     </div>
   </header>
 
-  <!-- Main Content (Split Screen) -->
+  <!-- Main Content -->
   <main class="flex flex-1">
-    <!-- Left Side: Cozy Cabin Image -->
+
+    <!-- Left: Image -->
     <div
       class="hidden lg:flex lg:w-1/2 bg-cover bg-center relative"
       style="background-image: url('https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=1200&h=1200&fit=crop')"
@@ -38,35 +40,83 @@
       <div class="absolute inset-0 bg-black/10"></div>
       <div class="absolute bottom-12 left-12 right-12 text-white">
         <h1 class="text-5xl font-black leading-tight tracking-tight mb-4 drop-shadow-md">
-          Escape to the <br />peace of nature.
+          Escapa a la<br/>paz de la naturaleza.
         </h1>
         <p class="text-lg font-medium drop-shadow-sm max-w-md">
-          Discover hand-picked cabins and rural retreats away from the city noise.
+          Descubre cabañas y retiros rurales seleccionados lejos del ruido de la ciudad.
         </p>
       </div>
     </div>
 
-    <!-- Right Side: Login Form -->
+    <!-- Right: Login Form -->
     <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-      <div class="w-full max-w-[440px] flex flex-col gap-8">
+      <div class="w-full max-w-[440px] flex flex-col gap-7">
+
         <div class="flex flex-col gap-2">
-          <h2 class="text-3xl font-black text-[#333745] tracking-tight">Welcome Back</h2>
-          <p class="text-[#333745]/70 text-base">Please enter your details to sign in to your account.</p>
+          <h2 class="text-3xl font-black text-[#333745] tracking-tight">Bienvenido de Nuevo</h2>
+          <p class="text-[#333745]/70 text-base">Selecciona tu tipo de cuenta e ingresa tus datos.</p>
         </div>
 
-        <form class="flex flex-col gap-5" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <!-- Account Type Selector -->
+        <div class="flex flex-col gap-2">
+          <p class="text-sm font-bold text-[#333745]">Acceder como:</p>
+          <div class="grid grid-cols-2 gap-3">
+
+            <!-- Customer -->
+            <button
+              type="button"
+              (click)="selectAccountType('customer')"
+              [class]="'flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer ' +
+                (formData.accountType === 'customer'
+                  ? 'border-[#2CA58D] bg-[#2CA58D]/5'
+                  : 'border-[#E1E5F2] hover:border-slate-300')"
+            >
+              <div [class]="'w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 ' +
+                (formData.accountType === 'customer' ? 'bg-[#2CA58D] text-white' : 'bg-slate-100')">
+                👤
+              </div>
+              <div class="text-left">
+                <p [class]="'text-sm font-bold leading-tight ' + (formData.accountType === 'customer' ? 'text-[#2CA58D]' : 'text-[#333745]')">Cliente</p>
+                <p class="text-xs text-slate-400">Busco cabañas</p>
+              </div>
+            </button>
+
+            <!-- Owner -->
+            <button
+              type="button"
+              (click)="selectAccountType('owner')"
+              [class]="'flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer ' +
+                (formData.accountType === 'owner'
+                  ? 'border-[#AA4465] bg-[#AA4465]/5'
+                  : 'border-[#E1E5F2] hover:border-slate-300')"
+            >
+              <div [class]="'w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 ' +
+                (formData.accountType === 'owner' ? 'bg-[#AA4465] text-white' : 'bg-slate-100')">
+                🏡
+              </div>
+              <div class="text-left">
+                <p [class]="'text-sm font-bold leading-tight ' + (formData.accountType === 'owner' ? 'text-[#AA4465]' : 'text-[#333745]')">Propietario</p>
+                <p class="text-xs text-slate-400">Gestiono casas</p>
+              </div>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Form -->
+        <form class="flex flex-col gap-4" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+
           <!-- Username -->
-          <div class="flex flex-col gap-2">
-            <label class="text-sm font-bold text-[#333745] px-1" for="username">
-              Username
-            </label>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-bold text-[#333745] px-1" for="username">Nombre de usuario</label>
             <div class="relative flex items-center">
-              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <input
-                [class]="'w-full h-14 pl-12 pr-4 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:ring-[#2CA58D]/20 focus:border-[#2CA58D] outline-none transition-all placeholder:text-[#333745]/30 ' + (errors.username ? 'border-red-500' : 'border-[#E1E5F2]')"
+                [class]="'w-full h-14 pl-12 pr-4 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:border-[#2CA58D] outline-none transition-all placeholder:text-[#333745]/30 ' +
+                  (errors.username ? 'border-red-400 focus:ring-red-400/20' : 'border-[#E1E5F2] focus:ring-[#2CA58D]/20')"
                 id="username"
                 name="username"
-                placeholder="john_doe"
+                placeholder="tu_usuario"
                 type="text"
                 [(ngModel)]="formData.username"
                 (ngModelChange)="onInputChange('username')"
@@ -75,40 +125,17 @@
             <p *ngIf="errors.username" class="text-red-500 text-xs px-1">{{errors.username}}</p>
           </div>
 
-          <!-- Email -->
-          <div class="flex flex-col gap-2">
-            <label class="text-sm font-bold text-[#333745] px-1" for="email">
-              Email Address
-            </label>
-            <div class="relative flex items-center">
-              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m2 7 8.97 5.7a1.94 1.94 0 0 0 2.06 0L22 7"/></svg>
-              <input
-                [class]="'w-full h-14 pl-12 pr-4 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:ring-[#2CA58D]/20 focus:border-[#2CA58D] outline-none transition-all placeholder:text-[#333745]/30 ' + (errors.email ? 'border-red-500' : 'border-[#E1E5F2]')"
-                id="email"
-                name="email"
-                placeholder="you@example.com"
-                type="email"
-                [(ngModel)]="formData.email"
-                (ngModelChange)="onInputChange('email')"
-              />
-            </div>
-            <p *ngIf="errors.email" class="text-red-500 text-xs px-1">{{errors.email}}</p>
-          </div>
-
-          <!-- Password -->
-          <div class="flex flex-col gap-2">
+          <!-- Password (clientes) -->
+          <div *ngIf="!isOwner" class="flex flex-col gap-1.5">
             <div class="flex justify-between items-center px-1">
-              <label class="text-sm font-bold text-[#333745]" for="password">
-                Password
-              </label>
-              <a class="text-xs font-bold text-[#AA4465] hover:underline" href="#">
-                Forgot Password?
-              </a>
+              <label class="text-sm font-bold text-[#333745]" for="password">Contraseña</label>
+              <a class="text-xs font-bold text-[#AA4465] hover:underline" href="#">¿Olvidaste tu contraseña?</a>
             </div>
             <div class="relative flex items-center">
-              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               <input
-                [class]="'w-full h-14 pl-12 pr-12 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:ring-[#2CA58D]/20 focus:border-[#2CA58D] outline-none transition-all placeholder:text-[#333745]/30 ' + (errors.password ? 'border-red-500' : 'border-[#E1E5F2]')"
+                [class]="'w-full h-14 pl-12 pr-12 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:border-[#2CA58D] outline-none transition-all placeholder:text-[#333745]/30 ' +
+                  (errors.password ? 'border-red-400 focus:ring-red-400/20' : 'border-[#E1E5F2] focus:ring-[#2CA58D]/20')"
                 id="password"
                 name="password"
                 placeholder="••••••••"
@@ -116,56 +143,34 @@
                 [(ngModel)]="formData.password"
                 (ngModelChange)="onInputChange('password')"
               />
-              <button
-                type="button"
-                class="absolute right-4 text-[#333745]/40 hover:text-[#333745]/70 transition-colors"
-                (click)="togglePasswordVisibility()"
-              >
-                <svg *ngIf="!showPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                <svg *ngIf="showPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+              <button type="button" class="absolute right-4 text-[#333745]/40 hover:text-[#333745]/70 transition-colors" (click)="togglePasswordVisibility()">
+                <svg *ngIf="!showPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg *ngIf="showPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
               </button>
             </div>
             <p *ngIf="errors.password" class="text-red-500 text-xs px-1">{{errors.password}}</p>
           </div>
 
-          <!-- Owner Checkbox -->
-          <div class="flex items-center gap-2 px-1">
-            <input
-              class="size-4 rounded border-[#E1E5F2] text-[#2CA58D] focus:ring-[#2CA58D]"
-              id="isOwner"
-              name="isOwner"
-              type="checkbox"
-              [(ngModel)]="formData.isOwner"
-              (ngModelChange)="onOwnerCheckChange()"
-            />
-            <label class="text-sm text-[#333745] font-semibold cursor-pointer" for="isOwner">
-              Ingresar como propietario
-            </label>
-          </div>
-
-          <!-- Access Word (conditional) -->
-          <div *ngIf="formData.isOwner" class="flex flex-col gap-2 animate-fade-in">
-            <label class="text-sm font-bold text-[#333745] px-1" for="accessWord">
-              Palabra de Acceso (Propietarios)
+          <!-- Access Word (propietarios) -->
+          <div *ngIf="isOwner" class="flex flex-col gap-1.5 animate-fade-in">
+            <label class="text-sm font-bold text-[#AA4465] px-1" for="accessWord">
+              🔑 Palabra de Acceso
             </label>
             <div class="relative flex items-center">
-              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+              <svg class="absolute left-4 text-[#333745]/40 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
               <input
-                [class]="'w-full h-14 pl-12 pr-12 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:ring-[#2CA58D]/20 focus:border-[#2CA58D] outline-none transition-all placeholder:text-[#333745]/30 ' + (errors.accessWord ? 'border-red-500' : 'border-[#E1E5F2]')"
+                [class]="'w-full h-14 pl-12 pr-12 rounded-xl border bg-white text-[#333745] focus:ring-2 focus:border-[#AA4465] outline-none transition-all placeholder:text-[#333745]/30 ' +
+                  (errors.accessWord ? 'border-red-400 focus:ring-red-400/20' : 'border-[#AA4465]/40 focus:ring-[#AA4465]/20')"
                 id="accessWord"
                 name="accessWord"
-                placeholder="Palabra de acceso"
+                placeholder="Tu palabra de acceso"
                 [type]="showAccessWord ? 'text' : 'password'"
                 [(ngModel)]="formData.accessWord"
                 (ngModelChange)="onInputChange('accessWord')"
               />
-              <button
-                type="button"
-                class="absolute right-4 text-[#333745]/40 hover:text-[#333745]/70 transition-colors"
-                (click)="toggleAccessWordVisibility()"
-              >
-                <svg *ngIf="!showAccessWord" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                <svg *ngIf="showAccessWord" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+              <button type="button" class="absolute right-4 text-[#333745]/40 hover:text-[#333745]/70 transition-colors" (click)="toggleAccessWordVisibility()">
+                <svg *ngIf="!showAccessWord" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg *ngIf="showAccessWord" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
               </button>
             </div>
             <p *ngIf="errors.accessWord" class="text-red-500 text-xs px-1">{{errors.accessWord}}</p>
@@ -181,38 +186,38 @@
               [(ngModel)]="formData.rememberMe"
             />
             <label class="text-sm text-[#333745]/70 cursor-pointer" for="remember">
-              Remember me for 30 days
+              Recuérdame por 30 días
             </label>
           </div>
 
           <button
-            class="w-full h-14 bg-[#2CA58D] text-white rounded-xl font-bold text-lg shadow-lg shadow-[#2CA58D]/20 hover:bg-[#2CA58D]/90 transition-all active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            [class]="'w-full h-14 text-white rounded-xl font-bold text-lg shadow-lg transition-all active:scale-[0.98] mt-1 disabled:opacity-50 disabled:cursor-not-allowed ' +
+              (isOwner
+                ? 'bg-[#AA4465] shadow-[#AA4465]/20 hover:bg-[#AA4465]/90'
+                : 'bg-[#2CA58D] shadow-[#2CA58D]/20 hover:bg-[#2CA58D]/90')"
             type="submit"
             [disabled]="isLoading"
           >
-            {{isLoading ? 'Logging In...' : 'Log In'}}
+            {{isLoading ? 'Ingresando...' : 'Entrar'}}
           </button>
+
         </form>
 
-        <div class="relative flex py-2 items-center">
+        <!-- Divider -->
+        <div class="relative flex py-1 items-center">
           <div class="flex-grow border-t border-[#E1E5F2]"></div>
-          <span class="flex-shrink mx-4 text-[#333745]/40 text-xs font-bold uppercase tracking-widest">
-            or continue with
-          </span>
+          <span class="flex-shrink mx-4 text-[#333745]/40 text-xs font-bold uppercase tracking-widest">o continúa con</span>
           <div class="flex-grow border-t border-[#E1E5F2]"></div>
         </div>
 
-        <div class="flex gap-4">
+        <!-- Social login -->
+        <div class="flex gap-3">
           <button
             class="flex-1 h-12 flex items-center justify-center gap-2 border border-[#E1E5F2] rounded-xl hover:bg-[#f8f6f7] transition-colors text-sm font-bold text-[#333745]"
             type="button"
             (click)="onSocialLogin('Google')"
           >
-            <img
-              alt="Google"
-              class="size-5"
-              src="https://www.google.com/favicon.ico"
-            />
+            <img alt="Google" class="size-5" src="https://www.google.com/favicon.ico"/>
             Google
           </button>
           <button
@@ -222,28 +227,28 @@
           >
             <span class="material-symbols-outlined text-xl">apple</span>
             Apple
-          </button>
+        </button>
         </div>
 
         <p class="text-center text-sm text-[#333745]/70">
-          Don't have an account?
-          <a routerLink="/register" class="text-[#AA4465] font-bold hover:underline">
-            Create Account
-          </a>
+          ¿No tienes una cuenta?
+          <a routerLink="/register" class="text-[#AA4465] font-bold hover:underline">Crear Cuenta</a>
         </p>
+
       </div>
     </div>
   </main>
 
-  <!-- Minimal Footer -->
-  <footer class="bg-white border-t border-[#E1E5F2] px-10 py-6 text-center lg:text-left">
-    <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
-      <p class="text-xs text-[#333745]/50">© 2024 Rural Rental Inc. All rights reserved.</p>
-      <div class="flex gap-6 text-xs text-[#333745]/50 font-medium">
-        <a class="hover:text-[#2CA58D]" href="#">Privacy Policy</a>
-        <a class="hover:text-[#2CA58D]" href="#">Terms of Service</a>
-        <a class="hover:text-[#2CA58D]" href="#">Cookie Settings</a>
+  <!-- Footer -->
+  <footer class="bg-white border-t border-[#E1E5F2] px-10 py-5 text-center lg:text-left">
+    <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-3">
+      <p class="text-xs text-[#333745]/50">© 2024 Rural Rental Inc. Todos los derechos reservados.</p>
+      <div class="flex gap-5 text-xs text-[#333745]/50 font-medium">
+        <a class="hover:text-[#2CA58D]" href="#">Política de Privacidad</a>
+        <a class="hover:text-[#2CA58D]" href="#">Términos de Servicio</a>
+        <a class="hover:text-[#2CA58D]" href="#">Cookies</a>
       </div>
     </div>
   </footer>
+
 </div>

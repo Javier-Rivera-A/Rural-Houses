@@ -6,13 +6,17 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoginService {
-  private apiOwnersUrl = 'http://localhost:8081/api/owners/login';
-  private apiCustomersUrl = 'http://localhost:8081/api/customers/login';
+  private readonly base = 'http://localhost:8081';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  loginUsuario(credenciales: any, isOwner: boolean): Observable<any> {
-    const url = isOwner ? this.apiOwnersUrl : this.apiCustomersUrl;
-    return this.http.post(url, credenciales);
+  loginUsuario(credenciales: { userName: string; password: string }, isOwner: boolean): Observable<any> {
+    if (isOwner) {
+      // /auth/login devuelve { data: { token, type, ownerId, userName } }
+      return this.http.post(`${this.base}/auth/login`, credenciales);
+    } else {
+      // /api/customers/login devuelve { data: "customerId" }
+      return this.http.post(`${this.base}/api/customers/login`, credenciales);
+    }
   }
 }

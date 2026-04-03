@@ -1,0 +1,302 @@
+<div *ngIf="isOpen" class="bg-white rounded-xl shadow-md p-6 h-fit sticky top-20">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-2 cursor-pointer" (click)="onClose()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" style="color: var(--rhouses-primary)">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+      </svg>
+      <h2 class="text-xl font-semibold" style="color: var(--rhouses-secondary-dark)">
+        Filtros
+      </h2>
+    </div>
+    <button
+      (click)="onClose()"
+      class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+      aria-label="Cerrar filtros"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+    <!-- Filtros básicos -->
+    <div>
+      <h3 class="font-semibold mb-3" style="color: var(--rhouses-secondary-dark)">
+        Búsqueda básica
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Población</label>
+          <input
+            type="text"
+            placeholder="Nombre de la población"
+            [(ngModel)]="filters.poblacion"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Código de casa</label>
+          <input
+            type="text"
+            placeholder="Código opcional"
+            [(ngModel)]="filters.codigoCasa"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-3" style="color: var(--rhouses-secondary-dark)">
+        Disponibilidad
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Fecha de entrada</label>
+          <input
+            type="date"
+            [(ngModel)]="filters.fechaEntrada"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Número de noches</label>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="filters.noches"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tipo de alquiler -->
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-3" style="color: var(--rhouses-secondary-dark)">
+        Tipo de alquiler
+      </h3>
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="completa" 
+            [(ngModel)]="filters.casaCompleta"
+            class="rounded border-gray-300 text-[var(--rhouses-accent)] focus:ring-[var(--rhouses-accent)]"
+          />
+          <label for="completa" class="text-sm text-gray-700 cursor-pointer">
+            Casa completa
+          </label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="habitaciones" 
+            [(ngModel)]="filters.porHabitaciones"
+            class="rounded border-gray-300 text-[var(--rhouses-accent)] focus:ring-[var(--rhouses-accent)]"
+          />
+          <label for="habitaciones" class="text-sm text-gray-700 cursor-pointer">
+            Por habitaciones
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capacidad -->
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-3" style="color: var(--rhouses-secondary-dark)">
+        Capacidad
+      </h3>
+      <div>
+        <label class="text-sm mb-1 block text-gray-600">Número de personas</label>
+        <input
+          type="number"
+          min="1"
+          [(ngModel)]="filters.numPersonas"
+          placeholder="Personas"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+        />
+      </div>
+    </div>
+
+    <!-- Características -->
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-3" style="color: var(--rhouses-secondary-dark)">
+        Características
+      </h3>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Dormitorios</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="filters.dormitorios"
+            placeholder="0+"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Baños</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="filters.banos"
+            placeholder="0+"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Cocinas</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="filters.cocinas"
+            placeholder="0+"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+        <div>
+          <label class="text-sm mb-1 block text-gray-600">Garajes</label>
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="filters.garajes"
+            placeholder="0+"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalles -->
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-3" style="color: var(--rhouses-secondary-dark)">
+        Detalles
+      </h3>
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="bano-privado" 
+            [(ngModel)]="filters.habitacionesConBano"
+            class="rounded border-gray-300 text-[var(--rhouses-accent)] focus:ring-[var(--rhouses-accent)]"
+          />
+          <label for="bano-privado" class="text-sm text-gray-700 cursor-pointer">
+            Habitaciones con baño
+          </label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="lavavajillas" 
+            [(ngModel)]="filters.lavavajillas"
+            class="rounded border-gray-300 text-[var(--rhouses-accent)] focus:ring-[var(--rhouses-accent)]"
+          />
+          <label for="lavavajillas" class="text-sm text-gray-700 cursor-pointer">
+            Cocina con lavavajillas
+          </label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="lavadora" 
+            [(ngModel)]="filters.lavadora"
+            class="rounded border-gray-300 text-[var(--rhouses-accent)] focus:ring-[var(--rhouses-accent)]"
+          />
+          <label for="lavadora" class="text-sm text-gray-700 cursor-pointer">
+            Cocina con lavadora
+          </label>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="text-sm mb-1 block text-gray-600">Tipo de camas</label>
+        <select 
+          [(ngModel)]="filters.tipoCamas"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent text-sm"
+        >
+          <option value="todas">Todas</option>
+          <option value="simples">Camas simples</option>
+          <option value="dobles">Camas dobles</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Precio -->
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-4" style="color: var(--rhouses-secondary-dark)">
+        Rango de precio
+      </h3>
+      <div class="space-y-4">
+        <div class="relative pt-6 pb-2">
+          <!-- Etiquetas dinámicas sobre el slider -->
+          <div class="absolute top-0 left-0 right-0 flex justify-between">
+            <span 
+              class="text-sm font-semibold px-2 py-1 rounded"
+              style="color: var(--rhouses-accent); background-color: var(--rhouses-background-light)"
+            >
+              {{priceRange[0]}}€
+            </span>
+            <span 
+              class="text-sm font-semibold px-2 py-1 rounded"
+              style="color: var(--rhouses-accent); background-color: var(--rhouses-background-light)"
+            >
+              {{priceRange[1]}}€
+            </span>
+          </div>
+          
+          <!-- Slider personalizado con doble control -->
+          <div class="price-slider-container">
+            <input 
+              type="range" 
+              [min]="minPrice" 
+              [max]="maxPrice" 
+              [value]="priceRange[0]"
+              (input)="onPriceChange('min', $event)"
+              class="price-slider price-slider-min"
+            />
+            <input 
+              type="range" 
+              [min]="minPrice" 
+              [max]="maxPrice" 
+              [value]="priceRange[1]"
+              (input)="onPriceChange('max', $event)"
+              class="price-slider price-slider-max"
+            />
+            <div class="slider-track"></div>
+            <div 
+              class="slider-range" 
+              [style.left.%]="(priceRange[0] / maxPrice) * 100"
+              [style.right.%]="100 - (priceRange[1] / maxPrice) * 100"
+            ></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-sm text-gray-600">
+          <span>0€</span>
+          <span>1000€</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón aplicar filtros -->
+    <button
+      (click)="applyFilters()"
+      class="w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+      style="background-color: var(--rhouses-accent)"
+    >
+      Aplicar filtros
+    </button>
+
+    <!-- Botón limpiar filtros -->
+    <button
+      (click)="clearFilters()"
+      class="w-full py-2 rounded-xl border-2 font-semibold hover:bg-gray-50 transition-colors"
+      style="border-color: var(--rhouses-primary); color: var(--rhouses-primary)"
+    >
+      Limpiar filtros
+    </button>
+  </div>
+</div>

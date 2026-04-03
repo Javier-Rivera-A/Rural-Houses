@@ -1,0 +1,154 @@
+<!-- Cargando -->
+<div *ngIf="loading" class="flex flex-col items-center justify-center py-20">
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" class="animate-spin mb-4"
+       style="color: var(--rhouses-accent)">
+    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+  </svg>
+  <p class="text-lg text-gray-600">Cargando casas disponibles...</p>
+</div>
+
+<!-- Sin resultados -->
+<div *ngIf="empty" class="flex flex-col items-center justify-center py-20 px-4 text-center">
+  <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+       style="background-color: var(--rhouses-background-light)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.5" style="color: var(--rhouses-primary)">
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+      <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    </svg>
+  </div>
+  <h3 class="text-2xl font-semibold mb-2" style="color: var(--rhouses-secondary-dark)">
+    No se encontraron casas
+  </h3>
+  <p class="text-gray-500 max-w-md">
+    No hay casas activas que coincidan con tu búsqueda. Prueba con otra población o ajusta los filtros.
+  </p>
+</div>
+
+<!-- Resultados -->
+<div *ngIf="!loading && !empty">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold" style="color: var(--rhouses-secondary-dark)">
+        {{ searchParams.poblacion ? 'Casas en "' + searchParams.poblacion + '"' : 'Casas rurales disponibles' }}
+      </h2>
+      <p class="text-gray-500 mt-1">{{ enrichedHouses.length }} propiedad(es) encontrada(s)</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-6">
+    <div *ngFor="let house of enrichedHouses; trackBy: trackByHouseId"
+         class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+
+      <!-- Imagen -->
+      <div class="relative h-56 overflow-hidden">
+        <img [src]="getFirstPhoto(house)" [alt]="house.description || house.code"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+
+        <!-- Badge disponibilidad -->
+        <div class="absolute top-3 right-3">
+          <span *ngIf="house.checkingAvailability"
+                class="flex items-center gap-1 px-3 py-1 bg-gray-500 text-white text-xs font-semibold rounded-full">
+            <svg class="animate-spin" width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            Verificando
+          </span>
+          <span *ngIf="house.availabilityLoaded && house.entireHouseAvailable === true"
+                class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+            ✓ Disponible
+          </span>
+          <span *ngIf="house.availabilityLoaded && house.entireHouseAvailable === false"
+                class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full">
+            Reservada
+          </span>
+          <span *ngIf="!house.checkingAvailability && !house.availabilityLoaded"
+                class="px-3 py-1 text-white text-xs font-semibold rounded-full"
+                style="background-color: var(--rhouses-primary)">
+            Activa
+          </span>
+        </div>
+
+        <!-- Badge población -->
+        <div class="absolute top-3 left-3">
+          <span class="px-3 py-1 text-white text-xs font-semibold rounded-full"
+                style="background-color: var(--rhouses-accent)">
+            {{ house.populationName }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Contenido -->
+      <div class="p-5">
+        <div class="mb-3">
+          <h3 class="text-lg font-semibold mb-0.5 line-clamp-1"
+              style="color: var(--rhouses-secondary-dark)">
+            {{ house.description || 'Casa Rural' }}
+          </h3>
+          <p class="text-xs text-gray-400 font-mono">Código: {{ house.code }}</p>
+        </div>
+
+        <!-- Características -->
+        <div class="flex flex-wrap items-center gap-4 mb-4 text-gray-500 text-sm">
+          <div class="flex items-center gap-1" title="Habitaciones">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/>
+              <path d="M2 17h20"/><path d="M6 8v9"/>
+            </svg>
+            <span>{{ house.bedrooms?.length ?? 0 }} hab.</span>
+          </div>
+          <div class="flex items-center gap-1" title="Baños">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>
+              <line x1="2" x2="22" y1="12" y2="12"/>
+            </svg>
+            <span>{{ getTotalBathrooms(house) }} baños</span>
+          </div>
+          <div *ngIf="house.garagePlaces > 0" class="flex items-center gap-1" title="Garaje">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+              <circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>
+            </svg>
+            <span>{{ house.garagePlaces }} garaje(s)</span>
+          </div>
+          <div *ngIf="house.diningRooms?.length" class="flex items-center gap-1" title="Cocinas">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+              <path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+            </svg>
+            <span>{{ house.diningRooms.length }} cocina(s)</span>
+          </div>
+        </div>
+
+        <!-- Footer card -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div>
+            <p class="text-xs text-gray-400">Propietario</p>
+            <p class="text-sm font-semibold" style="color: var(--rhouses-secondary-dark)">
+              {{ house.ownerUserName }}
+            </p>
+          </div>
+          <!-- Botón navega a /houses/:id -->
+          <button
+            (click)="navigateToDetail(house.id)"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold
+                   hover:opacity-90 transition-opacity"
+            style="background-color: var(--rhouses-accent)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Ver detalles
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

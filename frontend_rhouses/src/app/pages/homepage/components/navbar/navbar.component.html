@@ -1,0 +1,192 @@
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <a routerLink="/" class="flex-shrink-0 cursor-pointer">
+        <h1 class="text-2xl font-bold" style="color: var(--rhouses-primary)">rhouses</h1>
+      </a>
+
+      <!-- Barra de búsqueda central -->
+      <div class="hidden md:flex flex-1 max-w-md mx-8">
+        <div class="relative w-full">
+          <input
+            type="text"
+            placeholder="Buscar población..."
+            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent"
+          />
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ───── Estado NO logueado ───── -->
+      <div *ngIf="!authService.isLoggedIn()" class="flex items-center gap-3">
+        <a routerLink="/login">
+          <button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-[var(--rhouses-background-light)] transition-colors font-semibold text-sm" style="color: var(--rhouses-secondary-dark)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+            Iniciar sesión
+          </button>
+        </a>
+        <a routerLink="/register">
+          <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 shadow-md" style="background-color: var(--rhouses-accent)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="hidden sm:inline">Registrarse</span>
+          </button>
+        </a>
+      </div>
+
+      <!-- ───── Estado LOGUEADO ───── -->
+      <div *ngIf="authService.isLoggedIn()" class="flex items-center gap-3 relative">
+
+        <!-- Badge tipo de cuenta -->
+        <span
+          class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold tracking-wide"
+          [ngClass]="authService.isOwner()
+            ? 'bg-[#AA4465]/10 text-[#AA4465]'
+            : 'bg-[var(--rhouses-accent)]/10 text-[var(--rhouses-accent)]'"
+        >
+          {{ authService.isOwner() ? '🏡 Propietario' : '👤 Cliente' }}
+        </span>
+
+        <!-- Botón Registrar Casa (solo propietarios) -->
+        <a *ngIf="authService.isOwner()" routerLink="/register-house">
+          <button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all hover:opacity-90 border-2"
+                  style="border-color: #AA4465; color: #AA4465;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Añadir casa
+          </button>
+        </a>
+
+        <!-- Botón avatar con nombre -->
+        <button
+          id="user-menu-btn"
+          (click)="toggleDropdown()"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 hover:shadow-md transition-all"
+          [ngClass]="authService.isOwner()
+            ? 'border-[#AA4465]/30 hover:border-[#AA4465]'
+            : 'border-[var(--rhouses-accent)]/30 hover:border-[var(--rhouses-accent)]'"
+        >
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner"
+            [ngClass]="authService.isOwner() ? 'bg-[#AA4465]' : 'bg-[var(--rhouses-accent)]'"
+          >
+            {{ authService.userInitial() }}
+          </div>
+          <span class="hidden sm:block text-sm font-semibold max-w-[120px] truncate" style="color: var(--rhouses-secondary-dark)">
+            {{ authService.user()?.userName }}
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+            class="transition-transform duration-200 text-gray-400"
+            [class.rotate-180]="dropdownOpen"
+          >
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown menú -->
+        <div
+          id="user-dropdown"
+          *ngIf="dropdownOpen"
+          class="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+          style="animation: fadeSlideIn 0.15s ease-out;"
+        >
+          <!-- Header del dropdown -->
+          <div
+            class="px-4 py-4 border-b border-gray-100"
+            [ngClass]="authService.isOwner() ? 'bg-[#AA4465]/5' : 'bg-[var(--rhouses-accent)]/5'"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-lg shadow"
+                [ngClass]="authService.isOwner() ? 'bg-[#AA4465]' : 'bg-[var(--rhouses-accent)]'"
+              >
+                {{ authService.userInitial() }}
+              </div>
+              <div>
+                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">
+                  {{ authService.user()?.userName }}
+                </p>
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-semibold"
+                  [ngClass]="authService.isOwner() ? 'text-[#AA4465]' : 'text-[var(--rhouses-accent)]'"
+                >
+                  {{ authService.isOwner() ? '🏡 Propietario' : '👤 Cliente' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Opciones -->
+          <div class="py-2">
+
+            <!-- Opción solo para propietarios: registrar casa -->
+            <a *ngIf="authService.isOwner()" routerLink="/register-house" (click)="closeDropdown()">
+              <button
+                class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[#AA4465]/5 transition-colors text-left"
+                style="color: #AA4465"
+              >
+                <div class="w-8 h-8 rounded-lg bg-[#AA4465]/10 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                </div>
+                <div>
+                  <p class="font-semibold">Registrar casa rural</p>
+                  <p class="text-xs opacity-70">Publica una nueva propiedad</p>
+                </div>
+              </button>
+            </a>
+
+            <button
+              (click)="goToSettings()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors text-left"
+              style="color: var(--rhouses-secondary-dark)"
+            >
+              <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <div>
+                <p class="font-semibold">Configuración de cuenta</p>
+                <p class="text-xs text-gray-400">Datos bancarios y perfil</p>
+              </div>
+            </button>
+
+            <div class="border-t border-gray-100 mt-1 pt-1">
+              <button
+                (click)="logout()"
+                class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-red-50 transition-colors text-left text-red-500"
+              >
+                <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </div>
+                <span class="font-semibold">Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- ───── fin estado logueado ───── -->
+
+    </div>
+
+    <!-- Barra búsqueda móvil -->
+    <div class="md:hidden pb-3">
+      <div class="relative w-full">
+        <input type="text" placeholder="Buscar población..." class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--rhouses-accent)] focus:border-transparent"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
