@@ -18,6 +18,7 @@ public class Photo {
     @Column(nullable = false)
     private String url;
 
+
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
