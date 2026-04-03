@@ -111,6 +111,15 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         countryHouseRepository.save(house);
     }
 
+    @Override
+    @Transactional
+    public void reactivate(String ownerId, String houseId){
+        verifyOwnership(ownerId, houseId);
+        CountryHouse house = getEntityById(houseId);
+        house.setStateCountryHouse(StateCountryHouse.ACTIVE);
+        countryHouseRepository.save(house);
+    }
+
     // ─── Paquetes de alquiler ──────────────────────────────────────────────────
 
     @Override
@@ -180,6 +189,13 @@ public class CountryHouseServiceImpl implements CountryHouseService {
     public List<CountryHouseResponse> findAll(){
         return countryHouseRepository.findAllActive()
                 .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CountryHouseResponse> findByOwner(String ownerId) {
+        return countryHouseRepository.findByOwner_Id(ownerId)
+            .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     // ─── Disponibilidad ───────────────────────────────────────────────────────

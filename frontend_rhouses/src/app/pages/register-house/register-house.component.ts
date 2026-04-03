@@ -109,6 +109,10 @@ export class RegisterHouseComponent implements OnInit {
 
   bedRange(n: number): number[] { return Array.from({ length: n }, (_, i) => i); }
 
+  trackByIndex(index: number): number {
+    return index;
+  }
+
   // ── Cocinas ───────────────────────────────────────────────────────────────
 
   addKitchen(): void {

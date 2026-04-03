@@ -20,13 +20,21 @@ export class FilterSidebarComponent implements OnChanges {
   @Output() filtered = new EventEmitter<CountryHouseResponse[]>();
 
   filters = {
-    minBathrooms: 0,
-    minBedrooms: 0,
-    minGarage: 0,
-    habitacionesConBano: false,
-    lavavajillas: false,
-    lavadora: false,
-    tipoCamas: 'todas'
+    poblacion:            '',
+    codigoCasa:           '',
+    fechaEntrada:         '',
+    noches:               1,
+    casaCompleta:         false,
+    porHabitaciones:      false,
+    numPersonas:          0,
+    dormitorios:          0,
+    banos:                0,
+    cocinas:              0,
+    garajes:              0,
+    habitacionesConBano:  false,
+    lavavajillas:         false,
+    lavadora:             false,
+    tipoCamas:            'todas'
   };
 
   priceRange = [50, 500];
@@ -52,35 +60,90 @@ export class FilterSidebarComponent implements OnChanges {
   applyFilters(): void {
     let result = [...this.houses];
 
-    if (this.filters.minBathrooms > 0) {
+    // Filtro por población
+    if (this.filters.poblacion?.trim()) {
       result = result.filter(h =>
-        (h.privateBathrooms ?? 0) + (h.publicBathrooms ?? 0) >= this.filters.minBathrooms
+        h.populationName?.toLowerCase().includes(this.filters.poblacion.toLowerCase())
       );
     }
 
-    if (this.filters.minBedrooms > 0) {
-      result = result.filter(h => (h.bedrooms?.length ?? 0) >= this.filters.minBedrooms);
+    // Filtro por código de casa
+    if (this.filters.codigoCasa?.trim()) {
+      result = result.filter(h =>
+        h.code?.toLowerCase().includes(this.filters.codigoCasa.toLowerCase())
+      );
     }
 
-    if (this.filters.minGarage > 0) {
-      result = result.filter(h => (h.garagePlaces ?? 0) >= this.filters.minGarage);
+    // Filtro por tipo de alquiler
+    if (this.filters.casaCompleta && !this.filters.porHabitaciones) {
+      // Solo casas que permitan alquiler completo — filtramos por tener pocas habitaciones
+      // (lógica aproximada, ya que el tipo de alquiler viene del paquete, no de la casa)
+      result = result.filter(h => (h.bedrooms?.length ?? 0) > 0);
     }
 
+    // Filtro por número mínimo de personas (aproximado con camas)
+    if (this.filters.numPersonas > 0) {
+      result = result.filter(h => {
+        const totalCamas = h.bedrooms?.reduce((acc, b) => acc + (b.numberBeds ?? 0), 0) ?? 0;
+        return totalCamas >= this.filters.numPersonas;
+      });
+    }
+
+    // Filtro por número mínimo de dormitorios
+    if (this.filters.dormitorios > 0) {
+      result = result.filter(h =>
+        (h.bedrooms?.length ?? 0) >= this.filters.dormitorios
+      );
+    }
+
+    // Filtro por número mínimo de baños
+    if (this.filters.banos > 0) {
+      result = result.filter(h =>
+        ((h.privateBathrooms ?? 0) + (h.publicBathrooms ?? 0)) >= this.filters.banos
+      );
+    }
+
+    // Filtro por número mínimo de cocinas
+    if (this.filters.cocinas > 0) {
+      result = result.filter(h =>
+        (h.diningRooms?.length ?? 0) >= this.filters.cocinas
+      );
+    }
+
+    // Filtro por garajes mínimos
+    if (this.filters.garajes > 0) {
+      result = result.filter(h =>
+        (h.garagePlaces ?? 0) >= this.filters.garajes
+      );
+    }
+
+    // Filtro habitaciones con baño privado
     if (this.filters.habitacionesConBano) {
-      result = result.filter(h => h.bedrooms?.some(b => b.bathroom));
+      result = result.filter(h =>
+        h.bedrooms?.some(b => b.bathroom)
+      );
     }
 
+    // Filtro lavavajillas
     if (this.filters.lavavajillas) {
-      result = result.filter(h => h.diningRooms?.some(k => k.dishWasher));
+      result = result.filter(h =>
+        h.diningRooms?.some(k => k.dishWasher)
+      );
     }
 
+    // Filtro lavadora
     if (this.filters.lavadora) {
-      result = result.filter(h => h.diningRooms?.some(k => k.washingMachine));
+      result = result.filter(h =>
+        h.diningRooms?.some(k => k.washingMachine)
+      );
     }
 
+    // Filtro por tipo de camas
     if (this.filters.tipoCamas !== 'todas') {
       const tipo = this.filters.tipoCamas === 'dobles' ? 'DOUBLE' : 'SIMPLE';
-      result = result.filter(h => h.bedrooms?.some(b => b.typesOfBeds?.includes(tipo)));
+      result = result.filter(h =>
+        h.bedrooms?.some(b => b.typesOfBeds?.includes(tipo))
+      );
     }
 
     this.filtered.emit(result);
@@ -88,13 +151,21 @@ export class FilterSidebarComponent implements OnChanges {
 
   clearFilters(): void {
     this.filters = {
-      minBathrooms: 0,
-      minBedrooms: 0,
-      minGarage: 0,
-      habitacionesConBano: false,
-      lavavajillas: false,
-      lavadora: false,
-      tipoCamas: 'todas'
+      poblacion:            '',
+      codigoCasa:           '',
+      fechaEntrada:         '',
+      noches:               1,
+      casaCompleta:         false,
+      porHabitaciones:      false,
+      numPersonas:          0,
+      dormitorios:          0,
+      banos:                0,
+      cocinas:              0,
+      garajes:              0,
+      habitacionesConBano:  false,
+      lavavajillas:         false,
+      lavadora:             false,
+      tipoCamas:            'todas'
     };
     this.priceRange = [50, 500];
     this.filtered.emit([...this.houses]);

@@ -20,6 +20,7 @@ public interface CountryHouseService {
     CountryHouseResponse register(String ownerId, CountryHouseRequest request);
     CountryHouseResponse update(String ownerId, String houseId, CountryHouseRequest request);
     void deactivate(String ownerId, String houseId);
+    void reactivate(String ownerId, String houseId);
 
     // Paquetes de alquiler
     RentalPackageResponse addRentalPackage(String ownerId, String houseId, RentalPackageRequest request);
@@ -31,6 +32,7 @@ public interface CountryHouseService {
     CountryHouseResponse findByCode(String code);
     CountryHouseResponse findById(String id);
     List<CountryHouseResponse> findAll();
+    List<CountryHouseResponse> findByOwner(String ownerId);
 
     // Disponibilidad
     AvailabilityResponse checkAvailability(String houseCode, LocalDate checkIn, int nights);

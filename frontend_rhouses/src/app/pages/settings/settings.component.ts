@@ -164,7 +164,8 @@ export class SettingsComponent implements OnInit {
     const payload: BankAccountPayload = {
       numberAccount: this.formData.accountNumber,
       bank:          this.formData.bankName,
-      accountType:   this.formData.accountType
+      accountType:   this.formData.accountType,
+      mount: parseFloat(this.formData.balance) || 0
     };
 
     if (this.editingAccountId) {

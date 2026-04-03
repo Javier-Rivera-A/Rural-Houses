@@ -24,14 +24,14 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     @Transactional
-    public BankAccount addToUser(String userId, String numberAccount, String bank, String accountType) {
+    public BankAccount addToUser(String userId, BankAccountRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + userId));
         BankAccount account = new BankAccount();
-        account.setNumberAccount(numberAccount);
-        account.setBank(bank);
-        account.setAccountType(accountType);
-        account.setMount(0.0);
+        account.setNumberAccount(request.getNumberAccount());
+        account.setBank(request.getBank());
+        account.setAccountType(request.getAccountType());
+        account.setMount(request.getMount() != null ? request.getMount() : 0.0);
         account.setUser(user);
 
         return bankAccountRepository.save(account);
@@ -73,6 +73,9 @@ public class BankAccountServiceImpl implements BankAccountService {
         account.setNumberAccount(request.getNumberAccount());
         account.setBank(request.getBank());
         account.setAccountType(request.getAccountType());
+        if (request.getMount() != null) {
+            account.setMount(request.getMount());
+        }
 
         return bankAccountRepository.save(account);
     }

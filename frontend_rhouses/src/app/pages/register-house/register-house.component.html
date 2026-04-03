@@ -113,7 +113,7 @@
           Pulsa "Añadir" para agregar habitaciones
         </div>
 
-        <div *ngFor="let bedroom of form.bedrooms; let i = index"
+        <div *ngFor="let bedroom of form.bedrooms; let i = index; trackBy: trackByIndex"
              class="border border-gray-200 rounded-xl p-5 space-y-4 animate-fade-in">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">Habitación {{ i + 1 }}</h3>

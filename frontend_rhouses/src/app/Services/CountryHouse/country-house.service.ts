@@ -79,7 +79,6 @@ export class CountryHouseService {
 
   constructor(private http: HttpClient) {}
 
-  // Obtiene headers con JWT si existe en sessionStorage
   private getAuthHeaders(): HttpHeaders {
     const raw = sessionStorage.getItem('rhouses_user');
     let token = '';
@@ -96,6 +95,8 @@ export class CountryHouseService {
       ? new HttpHeaders({ 'Authorization': `Bearer ${token}` })
       : new HttpHeaders();
   }
+
+  // ── Búsquedas públicas ────────────────────────────────────────────────────
 
   findAll(): Observable<any> {
     return this.http.get(`${this.apiUrl}`);
@@ -117,6 +118,15 @@ export class CountryHouseService {
     return this.http.get(`${this.apiUrl}/${code}/availability?checkIn=${checkIn}&nights=${nights}`);
   }
 
+  // ── Operaciones del propietario ───────────────────────────────────────────
+
+  findByOwner(ownerId: string): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/owner/${ownerId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
   register(ownerId: string, payload: RegisterHousePayload): Observable<any> {
     return this.http.post(
       `${this.apiUrl}?ownerId=${ownerId}`,
@@ -136,6 +146,15 @@ export class CountryHouseService {
   deactivate(ownerId: string, houseId: string): Observable<any> {
     return this.http.delete(
       `${this.apiUrl}/${houseId}?ownerId=${ownerId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /** PUT /api/houses/{houseId}/reactivate?ownerId={id} */
+  reactivate(ownerId: string, houseId: string): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/${houseId}/reactivate?ownerId=${ownerId}`,
+      {},
       { headers: this.getAuthHeaders() }
     );
   }

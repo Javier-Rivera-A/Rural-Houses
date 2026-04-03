@@ -58,6 +58,18 @@ public class CountryHouseController {
         return ResponseEntity.ok(ApiResponse.ok("Casa rural desactivada", null));
     }
 
+    /**
+    * PUT /api/houses/{houseId}/reactivate?ownerId={id}
+    * El propietario reactiva una casa rural desactivada.
+    */
+    @PutMapping("/{houseId}/reactivate")
+    public ResponseEntity<ApiResponse<Void>> reactivate(
+            @RequestParam String ownerId,
+            @PathVariable String houseId) {
+        countryHouseService.reactivate(ownerId, houseId);
+        return ResponseEntity.ok(ApiResponse.ok("Casa rural reactivada", null));
+    }
+
     // ─── Paquetes de alquiler ──────────────────────────────────────────────────
 
     /**
@@ -134,6 +146,16 @@ public class CountryHouseController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> getAll() {
         return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findAll()));
+    }
+
+    /**
+     * GET /api/houses/owner/{ownerId}
+     * Lista todas las casas de un propietario (activas e inactivas).
+     */
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> getByOwner(
+            @PathVariable String ownerId) {
+        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findByOwner(ownerId)));
     }
 
     // ─── Disponibilidad ───────────────────────────────────────────────────────

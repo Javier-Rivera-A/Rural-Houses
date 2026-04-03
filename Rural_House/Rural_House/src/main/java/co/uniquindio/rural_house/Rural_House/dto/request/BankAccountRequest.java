@@ -16,4 +16,6 @@ public class BankAccountRequest {
 
     @NotBlank(message = "El tipo de cuenta es obligatorio")
     private String accountType;
+
+    private Double mount;
 }
