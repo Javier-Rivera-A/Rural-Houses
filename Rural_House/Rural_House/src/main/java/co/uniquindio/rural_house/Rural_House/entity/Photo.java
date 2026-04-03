@@ -18,8 +18,6 @@ public class Photo {
     @Column(nullable = false)
     private String url;
 
-    @Column(nullable = false)
-    private String fileName;
 
     private String description;
 
