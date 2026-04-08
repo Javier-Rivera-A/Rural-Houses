@@ -74,6 +74,7 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         // UML: photo: ArrayList<Photo>
         if (request.getPhoto() != null) {
             for (PhotoRequest pr : request.getPhoto()) {
+                validatePhoto(pr);
                 Photo photo = new Photo();
                 photo.setUrl(pr.getUrl());
                 photo.setDescription(pr.getDescription());
@@ -98,6 +99,44 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         house.setGaragePlaces(request.getGaragePlaces());
         Population population = findOrCreatePopulation(request.getPopulationName());
         house.setPopulation(population);
+
+        // Actualizar Habitaciones
+        house.getBedrooms().clear();
+        for (BedroomRequest br : request.getBedrooms()) {
+            Bedroom bedroom = new Bedroom();
+            bedroom.setBedroomCode(br.getBedroomCode());
+            bedroom.setBathroom(br.getBathroom() != null ? br.getBathroom() : false);
+            bedroom.setNumberBeds(br.getNumberBeds());
+            bedroom.setTypesOfBeds(br.getTypesOfBeds() != null ? br.getTypesOfBeds() : new ArrayList<>());
+            bedroom.setCountryHouse(house);
+            house.getBedrooms().add(bedroom);
+        }
+
+        // Actualizar Cocinas
+        house.getDiningRooms().clear();
+        if (request.getDiningRooms() != null) {
+            for (KitchenRequest kr : request.getDiningRooms()) {
+                Kitchen kitchen = new Kitchen();
+                kitchen.setIdCocina(kr.getIdCocina() != null ? kr.getIdCocina() : UUID.randomUUID().toString());
+                kitchen.setDishWasher(kr.getDishWasher() != null ? kr.getDishWasher() : false);
+                kitchen.setWashingMachine(kr.getWashingMachine() != null ? kr.getWashingMachine() : false);
+                kitchen.setCountryHouse(house);
+                house.getDiningRooms().add(kitchen);
+            }
+        }
+
+        // Actualizar Fotos
+        house.getPhoto().clear();
+        if (request.getPhoto() != null) {
+            for (PhotoRequest pr : request.getPhoto()) {
+                validatePhoto(pr);
+                Photo photo = new Photo();
+                photo.setUrl(pr.getUrl());
+                photo.setDescription(pr.getDescription());
+                photo.setCountryHouse(house);
+                house.getPhoto().add(photo);
+            }
+        }
 
         return toResponse(countryHouseRepository.save(house));
     }
@@ -312,6 +351,37 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         }
     }
 
+    private void validatePhoto(PhotoRequest request) {
+        String url = request.getUrl();
+        if (url == null || url.isBlank()) {
+            throw new BusinessException("La URL de la imagen es obligatoria");
+        }
+        
+        if (url.length() > 7000000) {
+            throw new BusinessException("El tamaño de la imagen excede el límite permitido (aprox. 5MB)");
+        }
+
+        String lowerUrl = url.toLowerCase();
+        boolean isWebLink = lowerUrl.startsWith("http://") || lowerUrl.startsWith("https://");
+        boolean isBase64 = lowerUrl.startsWith("data:image/");
+        
+        if (!isWebLink && !isBase64) {
+            throw new BusinessException("La imagen debe ser una URL web válida (http/https) o una cadena Base64 (data:image/...)");
+        }
+        
+        if (isWebLink) {
+            boolean hasValidExtension = lowerUrl.contains(".jpg") || lowerUrl.contains(".jpeg") || 
+            lowerUrl.contains(".png") || lowerUrl.contains(".webp") || lowerUrl.contains(".gif") || 
+            lowerUrl.contains("unsplash") || lowerUrl.contains("image");
+            
+            if (!hasValidExtension) {
+                // Warning rather than exception, as some modern APIs don't expose extension
+                // But to strictly cover the validation requirement:
+                throw new BusinessException("La URL provista no parece ser un formato de imagen soportado (.jpg, .png, .webp)");
+            }
+        }
+    }
+
     // ─── Mapeo entidad → DTO response ─────────────────────────────────────────
 
     private CountryHouseResponse toResponse(CountryHouse h) {
@@ -373,10 +443,7 @@ public class CountryHouseServiceImpl implements CountryHouseService {
     @Transactional
     public PhotoResponse addPhoto(String ownerId, String houseId, PhotoRequest request) {
         verifyOwnership(ownerId, houseId);
-
-        if (request.getUrl() == null || request.getUrl().isBlank()) {
-            throw new BusinessException("La URL de la imagen es obligatoria");
-        }
+        validatePhoto(request);
 
         CountryHouse house = getEntityById(houseId);
 
