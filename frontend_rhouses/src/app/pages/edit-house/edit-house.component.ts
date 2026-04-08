@@ -261,7 +261,7 @@ export class EditHouseComponent implements OnInit {
     const e: Record<string, string> = {};
     if (!this.form.code.trim())           e['code']           = 'El código es obligatorio';
     if (!this.form.populationName.trim()) e['populationName'] = 'La población es obligatoria';
-    if ((this.form.privateBathrooms + this.form.publicBathrooms) < 2)
+    if ((Number(this.form.privateBathrooms) + Number(this.form.publicBathrooms)) < 2)
       e['bathrooms'] = 'La casa debe tener al menos 2 baños en total';
     this.errors = e;
     return Object.keys(e).length === 0;
@@ -313,9 +313,9 @@ export class EditHouseComponent implements OnInit {
     const payload: RegisterHousePayload = {
       code:             this.form.code.trim(),
       description:      this.form.description.trim(),
-      privateBathrooms: this.form.privateBathrooms,
-      publicBathrooms:  this.form.publicBathrooms,
-      garagePlaces:     this.form.garagePlaces,
+      privateBathrooms: Number(this.form.privateBathrooms),
+      publicBathrooms:  Number(this.form.publicBathrooms),
+      garagePlaces:     Number(this.form.garagePlaces),
       populationName:   this.form.populationName.trim(),
       bedrooms: this.form.bedrooms.map(b => ({
         bedroomCode:  Number(b.bedroomCode),
