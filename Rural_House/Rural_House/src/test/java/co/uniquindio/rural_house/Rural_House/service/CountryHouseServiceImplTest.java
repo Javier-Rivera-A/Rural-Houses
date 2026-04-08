@@ -1,0 +1,120 @@
+package co.uniquindio.rural_house.Rural_House.service;
+
+import co.uniquindio.rural_house.Rural_House.dto.request.PhotoRequest;
+import co.uniquindio.rural_house.Rural_House.entity.CountryHouse;
+import co.uniquindio.rural_house.Rural_House.entity.Owner;
+import co.uniquindio.rural_house.Rural_House.exception.BusinessException;
+import co.uniquindio.rural_house.Rural_House.repository.*;
+import co.uniquindio.rural_house.Rural_House.service.impl.CountryHouseServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class CountryHouseServiceImplTest {
+
+    @Mock
+    private CountryHouseRepository countryHouseRepository;
+
+    @Mock
+    private RentalPackageRepository rentalPackageRepository;
+
+    @Mock
+    private PopulationRepository populationRepository;
+
+    @Mock
+    private RentalRepository rentalRepository;
+
+    @Mock
+    private OwnerService ownerService;
+
+    @InjectMocks
+    private CountryHouseServiceImpl countryHouseService;
+
+    private CountryHouse dummyHouse;
+
+    @BeforeEach
+    void setUp() {
+        Owner owner = new Owner();
+        owner.setId("owner-123");
+
+        dummyHouse = new CountryHouse();
+        dummyHouse.setId("house-123");
+        dummyHouse.setOwner(owner);
+    }
+
+    @Test
+    void addPhoto_withNullUrl_shouldThrowException() {
+        // Simulamos que la casa existe y pertenece a owner-123
+        when(countryHouseRepository.findById("house-123")).thenReturn(Optional.of(dummyHouse));
+
+        PhotoRequest request = new PhotoRequest();
+        request.setUrl(null); // URL nula (vacía)
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            countryHouseService.addPhoto("owner-123", "house-123", request);
+        });
+
+        // Verificamos que arrojó nuestro mensaje programado
+        assertTrue(exception.getMessage().contains("obligatoria"));
+    }
+
+    @Test
+    void addPhoto_withInvalidFormat_shouldThrowException() {
+        when(countryHouseRepository.findById("house-123")).thenReturn(Optional.of(dummyHouse));
+
+        PhotoRequest request = new PhotoRequest();
+        request.setUrl("texto-basura-sin-formato");
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            countryHouseService.addPhoto("owner-123", "house-123", request);
+        });
+
+        assertTrue(exception.getMessage().contains("La imagen debe ser una URL web válida"));
+    }
+
+    @Test
+    void addPhoto_withWebUrlButNoImageExtension_shouldThrowException() {
+        when(countryHouseRepository.findById("house-123")).thenReturn(Optional.of(dummyHouse));
+
+        PhotoRequest request = new PhotoRequest();
+        request.setUrl("https://www.google.com/search?algo-falso"); // No termina en formato de imagen (.jpg, .png...)
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            countryHouseService.addPhoto("owner-123", "house-123", request);
+        });
+
+        assertTrue(exception.getMessage().contains("no parece ser un formato de imagen soportado"));
+    }
+
+    @Test
+    void addPhoto_withSizeExceedingLimit_shouldThrowException() {
+        when(countryHouseRepository.findById("house-123")).thenReturn(Optional.of(dummyHouse));
+
+        PhotoRequest request = new PhotoRequest();
+        
+        // Creamos una cadena de texto gigante (más de 7 millones de caracteres)
+        StringBuilder sb = new StringBuilder();
+        sb.append("data:image/png;base64,");
+        for (int i = 0; i < 7000005; i++) {
+            sb.append("A");
+        }
+        request.setUrl(sb.toString());
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            countryHouseService.addPhoto("owner-123", "house-123", request);
+        });
+
+        assertTrue(exception.getMessage().contains("excede el límite permitido"));
+    }
+}
