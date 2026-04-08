@@ -44,4 +44,9 @@ public interface CountryHouseService {
 
     //Fotos
     PhotoResponse addPhoto(String ownerId, String houseId, PhotoRequest request);
+
+    //Sugerencias
+    List<CountryHouseResponse> suggestAlternatives(String houseCode, LocalDate checkIn, int nights);
+
+    List<RentalPackageResponse> getRentalPackagesByHouse(String houseId);
 }

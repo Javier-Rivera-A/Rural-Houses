@@ -382,6 +382,67 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         }
     }
 
+    private boolean isHouseAvailable(CountryHouse house, LocalDate checkIn, int nights) {
+        LocalDate checkOut = checkIn.plusDays(nights);
+
+        List<Rental> overlapping = rentalRepository.findOverlappingRentals(house.getId(), checkIn, checkOut);
+
+        for (int i = 0; i < nights; i++) {
+            LocalDate date = checkIn.plusDays(i);
+
+            // Debe existir al menos un paquete para esa fecha
+            List<RentalPackage> packages = rentalPackageRepository.findPackagesForDate(house.getId(), date);
+            if (packages.isEmpty()) {
+                return false;
+            }
+
+            // La casa completa no debe estar reservada para esa fecha
+            boolean houseReserved = overlapping.stream()
+                    .anyMatch(r -> !r.getCheckInDate().isAfter(date)
+                            && !r.getCheckOutDate().isBefore(date)
+                            && r.getRentalPlaceId().isEmpty());
+
+            if (houseReserved) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private int similarityScore(CountryHouse original, CountryHouse candidate) {
+        int score = 0;
+
+        int originalBedrooms = original.getBedrooms() != null ? original.getBedrooms().size() : 0;
+        int candidateBedrooms = candidate.getBedrooms() != null ? candidate.getBedrooms().size() : 0;
+        int bedroomsDiff = Math.abs(originalBedrooms - candidateBedrooms);
+
+        int originalBathrooms = (original.getPrivateBathrooms() != null ? original.getPrivateBathrooms() : 0)
+                + (original.getPublicBathrooms() != null ? original.getPublicBathrooms() : 0);
+
+        int candidateBathrooms = (candidate.getPrivateBathrooms() != null ? candidate.getPrivateBathrooms() : 0)
+                + (candidate.getPublicBathrooms() != null ? candidate.getPublicBathrooms() : 0);
+
+        int bathroomsDiff = Math.abs(originalBathrooms - candidateBathrooms);
+
+        int originalGarage = original.getGaragePlaces() != null ? original.getGaragePlaces() : 0;
+        int candidateGarage = candidate.getGaragePlaces() != null ? candidate.getGaragePlaces() : 0;
+        int garageDiff = Math.abs(originalGarage - candidateGarage);
+
+        int originalKitchens = original.getDiningRooms() != null ? original.getDiningRooms().size() : 0;
+        int candidateKitchens = candidate.getDiningRooms() != null ? candidate.getDiningRooms().size() : 0;
+        int kitchensDiff = Math.abs(originalKitchens - candidateKitchens);
+
+        // Más peso a habitaciones y baños
+        score += Math.max(0, 10 - bedroomsDiff * 3);
+        score += Math.max(0, 8 - bathroomsDiff * 2);
+        score += Math.max(0, 4 - garageDiff);
+        score += Math.max(0, 3 - kitchensDiff);
+
+        return score;
+    }
+    
+
     // ─── Mapeo entidad → DTO response ─────────────────────────────────────────
 
     private CountryHouseResponse toResponse(CountryHouse h) {
@@ -465,5 +526,40 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         response.setDescription(savedPhoto.getDescription());
 
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CountryHouseResponse> suggestAlternatives(String houseCode, LocalDate checkIn, int nights) {
+        CountryHouse originalHouse = getEntityByCode(houseCode);
+
+        // Si la casa original sí está disponible, no sugerimos alternativas
+        if (isHouseAvailable(originalHouse, checkIn, nights)) {
+            return Collections.emptyList();
+        }
+
+        List<CountryHouse> candidates = countryHouseRepository
+                .findActiveByPopulationName(originalHouse.getPopulation().getName())
+                .stream()
+                .filter(house -> !house.getId().equals(originalHouse.getId()))
+                .filter(house -> isHouseAvailable(house, checkIn, nights))
+                .sorted(Comparator.comparingInt((CountryHouse house) -> similarityScore(originalHouse, house)).reversed())
+                .limit(5)
+                .toList();
+
+        return candidates.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RentalPackageResponse> getRentalPackagesByHouse(String houseId) {
+        CountryHouse house = getEntityById(houseId);
+
+        return rentalPackageRepository.findByCountryHouse_Id(house.getId())
+                .stream()
+                .map(this::toPackageResponse)
+                .collect(Collectors.toList());
     }
 }

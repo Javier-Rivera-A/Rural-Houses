@@ -184,4 +184,28 @@ public class CountryHouseController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Imagen agregada correctamente", response));
     }
+
+    @GetMapping("/{code}/suggestions")
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> suggestAlternatives(
+            @PathVariable String code,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
+            @RequestParam int nights) {
+
+        List<CountryHouseResponse> response = countryHouseService.suggestAlternatives(code, checkIn, nights);
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Sugerencias obtenidas correctamente", response)
+        );
+    }
+
+    @GetMapping("/{houseId}/packages")
+    public ResponseEntity<ApiResponse<List<RentalPackageResponse>>> getPackagesByHouse(
+            @PathVariable String houseId) {
+
+        List<RentalPackageResponse> response = countryHouseService.getRentalPackagesByHouse(houseId);
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Paquetes obtenidos correctamente", response)
+        );
+    }
 }
