@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import co.uniquindio.rural_house.Rural_House.dto.response.CountryHouseResponse;
@@ -187,5 +188,70 @@ public class CountryHouseServiceImplTest {
 
         // Verificar
         assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void findByPopulation_shouldReturnMappedList_whenResultsFound() {
+        // Preparar
+        CountryHouse mockHouse = new CountryHouse();
+        mockHouse.setId("house-pop-1");
+        mockHouse.setCode("CH-POP-1");
+        Population pop = new Population();
+        pop.setName("Bogota");
+        mockHouse.setPopulation(pop);
+        Owner ownerMock = new Owner();
+        ownerMock.setId("owner-test");
+        ownerMock.setUserName("pedro");
+        mockHouse.setOwner(ownerMock);
+
+        when(countryHouseRepository.findActiveByPopulationName("Bogota"))
+                .thenReturn(List.of(mockHouse));
+
+        // Ejecutar
+        List<CountryHouseResponse> results = countryHouseService.findByPopulation("Bogota");
+
+        // Verificar
+        assertTrue(results.size() == 1);
+        assertTrue(results.get(0).getId().equals("house-pop-1"));
+        assertTrue(results.get(0).getPopulationName().equals("Bogota"));
+    }
+
+    @Test
+    void findByPopulation_shouldReturnEmptyList_whenNoResultsFound() {
+        // Preparar
+        when(countryHouseRepository.findActiveByPopulationName("Medellin"))
+                .thenReturn(Collections.emptyList());
+
+        // Ejecutar
+        List<CountryHouseResponse> results = countryHouseService.findByPopulation("Medellin");
+
+        // Verificar
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void checkAvailability_shouldThrowException_whenDateInPast() {
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            countryHouseService.checkAvailability("CH-123", pastDate, 3);
+        });
+
+        assertTrue(exception.getMessage().contains("no puede ser en el pasado"));
+    }
+
+    @Test
+    void checkAvailability_shouldThrowException_whenNightsIsZeroOrLess() {
+        LocalDate validDate = LocalDate.now().plusDays(2);
+
+        BusinessException exception1 = assertThrows(BusinessException.class, () -> {
+            countryHouseService.checkAvailability("CH-123", validDate, 0);
+        });
+        assertTrue(exception1.getMessage().contains("mayor a 0"));
+
+        BusinessException exception2 = assertThrows(BusinessException.class, () -> {
+            countryHouseService.checkAvailability("CH-123", validDate, -2);
+        });
+        assertTrue(exception2.getMessage().contains("mayor a 0"));
     }
 }

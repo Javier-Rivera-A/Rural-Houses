@@ -249,6 +249,17 @@ public class CountryHouseServiceImpl implements CountryHouseService {
     @Override
     @Transactional(readOnly = true)
     public AvailabilityResponse checkAvailability(String houseCode, LocalDate checkIn, int nights) {
+        
+        if (checkIn == null) {
+            throw new BusinessException("La fecha de ingreso (checkIn) es obligatoria");
+        }
+        if (checkIn.isBefore(LocalDate.now())) {
+            throw new BusinessException("La fecha de ingreso no puede ser en el pasado");
+        }
+        if (nights <= 0) {
+            throw new BusinessException("El número de noches debe ser mayor a 0");
+        }
+
         CountryHouse house = getEntityByCode(houseCode);
         LocalDate checkOut = checkIn.plusDays(nights);
 

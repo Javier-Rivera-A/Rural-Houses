@@ -180,7 +180,24 @@ public class CountryHouseController {
 
     /**
      * GET /api/houses/{code}/availability?checkIn=YYYY-MM-DD&nights=N
-     * Consulta la disponibilidad de una casa rural para un período.
+     * Consulta la disponibilidad de una casa rural para un período específico (Rango de fechas).
+     * 
+     * @param code    Código único de la casa (PathVariable). Ej: "C-001"
+     * @param checkIn Fecha de ingreso (QueryParam) en formato ISO (YYYY-MM-DD). No puede ser en el pasado.
+     * @param nights  Número de noches (QueryParam). Debe ser mayor a 0.
+     * 
+     * @return ApiResponse con un AvailabilityResponse que contiene el estado global y por habitación para cada día.
+     * 
+     * Uso en el FrontEnd (Selector de fechas):
+     * Tras seleccionar la fecha de inicio en el calendario y calcular la cantidad de noches (o ingresar la fecha de salida y calcular las noches),
+     * realizar la petición GET enviando esos datos numéricos y de fecha estructurada.
+     * 
+     * Ejemplo Axios (Buscando 3 noches desde el 1 de Diciembre de 2026):
+     * axios.get('/api/houses/CHI-001/availability', { params: { checkIn: '2026-12-01', nights: 3 } })
+     * 
+     * Excepciones esperables para atrapar en Frontend:
+     * - 400 Bad Request: "La fecha de ingreso no puede ser en el pasado"
+     * - 400 Bad Request: "El número de noches debe ser mayor a 0"
      */
     @GetMapping("/{code}/availability")
     public ResponseEntity<ApiResponse<AvailabilityResponse>> checkAvailability(
