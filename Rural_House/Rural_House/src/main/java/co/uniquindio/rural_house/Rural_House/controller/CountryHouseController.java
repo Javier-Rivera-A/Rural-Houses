@@ -74,7 +74,17 @@ public class CountryHouseController {
 
     /**
      * POST /api/houses/{houseId}/packages?ownerId={id}
-     * El propietario añade un paquete de alquiler.
+     * El propietario añade un paquete de alquiler con rango de fechas, precios y tipo.
+     * 
+     * @param ownerId (QueryParam) ID del propietario.
+     * @param houseId (PathVariable) ID de la casa rural.
+     * @param request Carga del paquete (RentalPackageRequest) a crear enviada en JSON.
+     * 
+     * @return ApiResponse con detalles del paquete creado RentalPackageResponse.
+     * 
+     * Excepciones posibles para FrontEnd:
+     * - "La fecha de inicio no puede ser posterior a la de fin"
+     * - "El paquete se solapa con otro paquete existente (YYYY-MM-DD a YYYY-MM-DD)"
      */
     @PostMapping("/{houseId}/packages")
     public ResponseEntity<ApiResponse<RentalPackageResponse>> addPackage(
@@ -82,19 +92,25 @@ public class CountryHouseController {
             @PathVariable String houseId,
             @Valid @RequestBody RentalPackageRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(countryHouseService.addRentalPackage(ownerId, houseId, request)));
+                .body(ApiResponse.ok("Paquete de alquiler añadido", countryHouseService.addRentalPackage(ownerId, houseId, request)));
     }
 
     /**
      * PUT /api/houses/packages/{packageId}?ownerId={id}
      * El propietario modifica un paquete de alquiler.
+     * 
+     * Funciona idénticamente a la creación pero con el ID del paquete, y se validarán
+     * de la misma forma solapamientos o cruce de fechas erróneas.
+     * 
+     * @param ownerId (QueryParam) ID del propietario.
+     * @param packageId (PathVariable) ID del paquete a editar.
      */
     @PutMapping("/packages/{packageId}")
     public ResponseEntity<ApiResponse<RentalPackageResponse>> updatePackage(
             @RequestParam String ownerId,
             @PathVariable String packageId,
             @Valid @RequestBody RentalPackageRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.updateRentalPackage(ownerId, packageId, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Paquete de alquiler actualizado", countryHouseService.updateRentalPackage(ownerId, packageId, request)));
     }
 
     /**

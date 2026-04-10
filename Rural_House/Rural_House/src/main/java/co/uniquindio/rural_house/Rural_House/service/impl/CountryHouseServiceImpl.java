@@ -168,6 +168,9 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         if (request.getStartingDate().isAfter(request.getEndingDate())) {
             throw new BusinessException("La fecha de inicio no puede ser posterior a la de fin");
         }
+        
+        validatePackageNoOverlap(houseId, null, request.getStartingDate(), request.getEndingDate());
+
         CountryHouse house = getEntityById(houseId);
 
         RentalPackage pkg = new RentalPackage();
@@ -186,6 +189,13 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         RentalPackage pkg = rentalPackageRepository.findById(packageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Paquete no encontrado: " + packageId));
         verifyOwnership(ownerId, pkg.getCountryHouse().getId());
+        
+        if (request.getStartingDate().isAfter(request.getEndingDate())) {
+            throw new BusinessException("La fecha de inicio no puede ser posterior a la de fin");
+        }
+        
+        validatePackageNoOverlap(pkg.getCountryHouse().getId(), packageId, request.getStartingDate(), request.getEndingDate());
+
         pkg.setStartingDate(request.getStartingDate());
         pkg.setEndingDate(request.getEndingDate());
         pkg.setPriceNight(request.getPriceNight());
@@ -365,6 +375,18 @@ public class CountryHouseServiceImpl implements CountryHouseService {
                 throw new BusinessException(
                         "El código de habitación '" + bedroom.getBedroomCode() + "' está repetido"
                 );
+            }
+        }
+    }
+
+    private void validatePackageNoOverlap(String houseId, String packageIdToExclude, LocalDate newStart, LocalDate newEnd) {
+        List<RentalPackage> existingPackages = rentalPackageRepository.findByCountryHouse_Id(houseId);
+        for (RentalPackage p : existingPackages) {
+            if (packageIdToExclude != null && p.getId().equals(packageIdToExclude)) {
+                continue;
+            }
+            if (!newStart.isAfter(p.getEndingDate()) && !newEnd.isBefore(p.getStartingDate())) {
+                throw new BusinessException("El paquete se solapa con otro paquete existente (" + p.getStartingDate() + " a " + p.getEndingDate() + ")");
             }
         }
     }

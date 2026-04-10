@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.List;
 import co.uniquindio.rural_house.Rural_House.dto.response.CountryHouseResponse;
 import co.uniquindio.rural_house.Rural_House.entity.Population;
+import co.uniquindio.rural_house.Rural_House.dto.request.RentalPackageRequest;
+import co.uniquindio.rural_house.Rural_House.entity.RentalPackage;
+import co.uniquindio.rural_house.Rural_House.entity.enums.TypeRental;
 
 import java.util.Optional;
 
@@ -253,5 +256,40 @@ public class CountryHouseServiceImplTest {
             countryHouseService.checkAvailability("CH-123", validDate, -2);
         });
         assertTrue(exception2.getMessage().contains("mayor a 0"));
+    }
+
+    @Test
+    void addRentalPackage_shouldThrowException_whenPackageOverlaps() {
+        // Arrange
+        String houseId = "house-id";
+        String ownerId = "owner-id";
+        
+        CountryHouse mockHouse = new CountryHouse();
+        mockHouse.setId(houseId);
+        Owner mockOwner = new Owner();
+        mockOwner.setId(ownerId);
+        mockHouse.setOwner(mockOwner);
+
+        RentalPackage existingPkg = new RentalPackage();
+        existingPkg.setId("pkg-old");
+        existingPkg.setStartingDate(LocalDate.now().plusDays(5));
+        existingPkg.setEndingDate(LocalDate.now().plusDays(10));
+        
+        when(countryHouseRepository.findById(houseId)).thenReturn(Optional.of(mockHouse));
+        when(rentalPackageRepository.findByCountryHouse_Id(houseId))
+                .thenReturn(List.of(existingPkg));
+
+        RentalPackageRequest request = new RentalPackageRequest();
+        request.setStartingDate(LocalDate.now().plusDays(8)); // Overlaps
+        request.setEndingDate(LocalDate.now().plusDays(15));
+        request.setPriceNight(100.0f);
+        request.setTypeRental(co.uniquindio.rural_house.Rural_House.entity.enums.TypeRental.ENTIRE_HOUSE);
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            countryHouseService.addRentalPackage(ownerId, houseId, request);
+        });
+
+        assertTrue(exception.getMessage().contains("se solapa con otro paquete existente"));
     }
 }
