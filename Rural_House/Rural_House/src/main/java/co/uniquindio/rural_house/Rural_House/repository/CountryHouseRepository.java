@@ -27,6 +27,14 @@ public interface CountryHouseRepository extends JpaRepository<CountryHouse, Stri
     @Query("SELECT ch FROM CountryHouse ch WHERE ch.population.name = :name AND ch.stateCountryHouse = 'ACTIVE'")
     List<CountryHouse> findActiveByPopulationName(@Param("name") String name);
 
+    @Query("SELECT ch FROM CountryHouse ch WHERE ch.stateCountryHouse = 'ACTIVE' " +
+           "AND (:population IS NULL OR ch.population.name = :population) " +
+           "AND (:minBedrooms IS NULL OR SIZE(ch.bedrooms) >= :minBedrooms) " +
+           "AND (:minGaragePlaces IS NULL OR ch.garagePlaces >= :minGaragePlaces)")
+    List<CountryHouse> searchActiveByFilters(@Param("population") String population, 
+                                             @Param("minBedrooms") Integer minBedrooms, 
+                                             @Param("minGaragePlaces") Integer minGaragePlaces);
+
     @Query("SELECT ch FROM CountryHouse ch WHERE ch.stateCountryHouse = 'ACTIVE'")
     List<CountryHouse> findAllActive();
 }

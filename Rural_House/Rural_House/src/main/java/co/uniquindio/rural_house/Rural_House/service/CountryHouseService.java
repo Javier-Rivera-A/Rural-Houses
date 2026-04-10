@@ -29,6 +29,8 @@ public interface CountryHouseService {
 
     // Búsquedas públicas
     List<CountryHouseResponse> findByPopulation(String populationName);
+    
+    List<CountryHouseResponse> searchByFilters(String populationName, Integer minBedrooms, Integer minGaragePlaces);
     CountryHouseResponse findByCode(String code);
     CountryHouseResponse findById(String id);
     List<CountryHouseResponse> findAll();

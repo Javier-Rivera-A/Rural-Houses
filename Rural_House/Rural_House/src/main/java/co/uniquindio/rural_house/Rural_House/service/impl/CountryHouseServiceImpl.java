@@ -213,6 +213,13 @@ public class CountryHouseServiceImpl implements CountryHouseService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<CountryHouseResponse> searchByFilters(String populationName, Integer minBedrooms, Integer minGaragePlaces) {
+        return countryHouseRepository.searchActiveByFilters(populationName, minBedrooms, minGaragePlaces)
+                .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public CountryHouseResponse findByCode(String code) {
         return toResponse(getEntityByCode(code));
     }

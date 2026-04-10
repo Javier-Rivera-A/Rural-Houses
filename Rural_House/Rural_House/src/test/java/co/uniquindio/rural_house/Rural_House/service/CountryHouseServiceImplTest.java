@@ -13,6 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+import co.uniquindio.rural_house.Rural_House.dto.response.CountryHouseResponse;
+import co.uniquindio.rural_house.Rural_House.entity.Population;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -116,5 +121,71 @@ public class CountryHouseServiceImplTest {
         });
 
         assertTrue(exception.getMessage().contains("excede el límite permitido"));
+    }
+
+    @Test
+    void searchByFilters_withAllNullParams_shouldReturnMappedList() {
+        // Preparar
+        CountryHouse mockHouse = new CountryHouse();
+        mockHouse.setId("house-1");
+        mockHouse.setCode("CH-1");
+        Population pop = new Population();
+        pop.setName("Armenia");
+        mockHouse.setPopulation(pop);
+        Owner ownerMock = new Owner();
+        ownerMock.setId("owner-1");
+        ownerMock.setUserName("carlos");
+        mockHouse.setOwner(ownerMock);
+
+        when(countryHouseRepository.searchActiveByFilters(null, null, null))
+                .thenReturn(List.of(mockHouse));
+
+        // Ejecutar
+        List<CountryHouseResponse> results = countryHouseService.searchByFilters(null, null, null);
+
+        // Verificar
+        assertTrue(results.size() == 1);
+        assertTrue(results.get(0).getId().equals("house-1"));
+        assertTrue(results.get(0).getPopulationName().equals("Armenia"));
+        assertTrue(results.get(0).getOwnerUserName().equals("carlos"));
+    }
+
+    @Test
+    void searchByFilters_withSpecificFilters_shouldCallRepositoryWithFilters() {
+        // Preparar
+        CountryHouse mockHouse = new CountryHouse();
+        mockHouse.setId("house-2");
+        mockHouse.setCode("CH-2");
+        Population pop = new Population();
+        pop.setName("Salento");
+        mockHouse.setPopulation(pop);
+        Owner ownerMock = new Owner();
+        ownerMock.setId("owner-1");
+        ownerMock.setUserName("ana");
+        mockHouse.setOwner(ownerMock);
+
+        when(countryHouseRepository.searchActiveByFilters("Salento", 3, 2))
+                .thenReturn(List.of(mockHouse));
+
+        // Ejecutar
+        List<CountryHouseResponse> results = countryHouseService.searchByFilters("Salento", 3, 2);
+
+        // Verificar
+        assertTrue(results.size() == 1);
+        assertTrue(results.get(0).getId().equals("house-2"));
+        assertTrue(results.get(0).getPopulationName().equals("Salento"));
+    }
+
+    @Test
+    void searchByFilters_whenNoResults_shouldReturnEmptyList() {
+        // Preparar
+        when(countryHouseRepository.searchActiveByFilters("Filandia", 5, 3))
+                .thenReturn(Collections.emptyList());
+
+        // Ejecutar
+        List<CountryHouseResponse> results = countryHouseService.searchByFilters("Filandia", 5, 3);
+
+        // Verificar
+        assertTrue(results.isEmpty());
     }
 }

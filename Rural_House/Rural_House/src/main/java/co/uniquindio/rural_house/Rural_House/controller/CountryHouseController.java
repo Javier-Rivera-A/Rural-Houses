@@ -112,13 +112,31 @@ public class CountryHouseController {
     // ─── Búsquedas públicas ────────────────────────────────────────────────────
 
     /**
-     * GET /api/houses/search?population={nombre}
-     * Busca casas rurales por población.
+     * GET /api/houses/search?population={nombre}&minBedrooms={num}&minGaragePlaces={num}
+     * Busca casas rurales extendiendo la búsqueda básica, filtrando por población, número de habitaciones y plazas de garaje.
+     *
+     * @param population      (Opcional) Nombre de la población a buscar.
+     * @param minBedrooms     (Opcional) Cantidad mínima de habitaciones deseadas.
+     * @param minGaragePlaces (Opcional) Cantidad mínima de plazas de garaje deseadas.
+     * 
+     * @return ApiResponse con una lista de CountryHouseResponse con las casas que cumplen los criterios.
+     *
+     * Uso en el FrontEnd: 
+     * En el servicio de React/Angular/Vue, realizar una petición GET a la ruta '/api/houses/search', añadiendo
+     * los filtros como parámetros de consulta (query params). Se pueden omitir los que el usuario no seleccione.
+     * 
+     * Ejemplo con Axios: 
+     * axios.get('/api/houses/search', { params: { population: 'Armenia', minBedrooms: 3, minGaragePlaces: 1 } })
+     * 
+     * El objeto regresado es: 
+     * { "message": "OK", "data": [ { "id": "...", "code": "...", "privateBathrooms": 2, ... } ] }
      */
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> searchByPopulation(
-            @RequestParam String population) {
-        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findByPopulation(population)));
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> searchHouses(
+            @RequestParam(required = false) String population,
+            @RequestParam(required = false) Integer minBedrooms,
+            @RequestParam(required = false) Integer minGaragePlaces) {
+        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.searchByFilters(population, minBedrooms, minGaragePlaces)));
     }
 
     /**
