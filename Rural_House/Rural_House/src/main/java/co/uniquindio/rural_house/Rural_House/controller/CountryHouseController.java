@@ -125,7 +125,7 @@ public class CountryHouseController {
         return ResponseEntity.ok(ApiResponse.ok("Paquete eliminado", null));
     }
 
-    // ─── Búsquedas públicas ────────────────────────────────────────────────────
+    // ─── Búsquedas públicas 
 
     /**
      * GET /api/houses/search?population={nombre}&minBedrooms={num}&minGaragePlaces={num}
@@ -150,9 +150,19 @@ public class CountryHouseController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> searchHouses(
             @RequestParam(required = false) String population,
+            @RequestParam(required = false) String code,
             @RequestParam(required = false) Integer minBedrooms,
-            @RequestParam(required = false) Integer minGaragePlaces) {
-        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.searchByFilters(population, minBedrooms, minGaragePlaces)));
+            @RequestParam(required = false) Integer minBathrooms,
+            @RequestParam(required = false) Integer minKitchens,
+            @RequestParam(required = false) Integer minGaragePlaces,
+            @RequestParam(required = false) Boolean hasPrivateBathroom,
+            @RequestParam(required = false) Boolean hasDishwasher,
+            @RequestParam(required = false) Boolean hasWashingMachine,
+            @RequestParam(required = false) String bedType) {
+        return ResponseEntity.ok(ApiResponse.ok("Búsqueda combinada completada", 
+            countryHouseService.searchByFilters(
+                population, code, minBedrooms, minBathrooms, minKitchens, minGaragePlaces, 
+                hasPrivateBathroom, hasDishwasher, hasWashingMachine, bedType)));
     }
 
     /**

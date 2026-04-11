@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CountryHouseResponse } from '../../../../Services/CountryHouse/country-house.service';
+import { CountryHouseResponse, CountryHouseService } from '../../../../Services/CountryHouse/country-house.service';
 import { SearchParams } from '../hero-section/hero-section.component';
 
 @Component({
@@ -20,21 +20,21 @@ export class FilterSidebarComponent implements OnChanges {
   @Output() filtered = new EventEmitter<CountryHouseResponse[]>();
 
   filters = {
-    poblacion:            '',
-    codigoCasa:           '',
-    fechaEntrada:         '',
-    noches:               1,
-    casaCompleta:         false,
-    porHabitaciones:      false,
-    numPersonas:          0,
-    dormitorios:          0,
-    banos:                0,
-    cocinas:              0,
-    garajes:              0,
-    habitacionesConBano:  false,
-    lavavajillas:         false,
-    lavadora:             false,
-    tipoCamas:            'todas'
+    poblacion: '',
+    codigoCasa: '',
+    fechaEntrada: '',
+    noches: 1,
+    casaCompleta: false,
+    porHabitaciones: false,
+    numPersonas: 0,
+    dormitorios: 0,
+    banos: 0,
+    cocinas: 0,
+    garajes: 0,
+    habitacionesConBano: false,
+    lavavajillas: false,
+    lavadora: false,
+    tipoCamas: 'todas'
   };
 
   priceRange = [50, 500];
@@ -151,21 +151,21 @@ export class FilterSidebarComponent implements OnChanges {
 
   clearFilters(): void {
     this.filters = {
-      poblacion:            '',
-      codigoCasa:           '',
-      fechaEntrada:         '',
-      noches:               1,
-      casaCompleta:         false,
-      porHabitaciones:      false,
-      numPersonas:          0,
-      dormitorios:          0,
-      banos:                0,
-      cocinas:              0,
-      garajes:              0,
-      habitacionesConBano:  false,
-      lavavajillas:         false,
-      lavadora:             false,
-      tipoCamas:            'todas'
+      poblacion: '',
+      codigoCasa: '',
+      fechaEntrada: '',
+      noches: 1,
+      casaCompleta: false,
+      porHabitaciones: false,
+      numPersonas: 0,
+      dormitorios: 0,
+      banos: 0,
+      cocinas: 0,
+      garajes: 0,
+      habitacionesConBano: false,
+      lavavajillas: false,
+      lavadora: false,
+      tipoCamas: 'todas'
     };
     this.priceRange = [50, 500];
     this.filtered.emit([...this.houses]);

@@ -141,11 +141,13 @@ public class CountryHouseServiceImplTest {
         ownerMock.setUserName("carlos");
         mockHouse.setOwner(ownerMock);
 
-        when(countryHouseRepository.searchActiveByFilters(null, null, null))
+        when(countryHouseRepository.searchActiveByAdvancedFilters(
+            null, null, null, null, null, null, null, null, null, null))
                 .thenReturn(List.of(mockHouse));
 
         // Ejecutar
-        List<CountryHouseResponse> results = countryHouseService.searchByFilters(null, null, null);
+        List<CountryHouseResponse> results = countryHouseService.searchByFilters(
+            null, null, null, null, null, null, null, null, null, null);
 
         // Verificar
         assertTrue(results.size() == 1);
@@ -168,11 +170,13 @@ public class CountryHouseServiceImplTest {
         ownerMock.setUserName("ana");
         mockHouse.setOwner(ownerMock);
 
-        when(countryHouseRepository.searchActiveByFilters("Salento", 3, 2))
+        when(countryHouseRepository.searchActiveByAdvancedFilters(
+            "Salento", null, 3, null, null, 2, null, null, null, null))
                 .thenReturn(List.of(mockHouse));
 
         // Ejecutar
-        List<CountryHouseResponse> results = countryHouseService.searchByFilters("Salento", 3, 2);
+        List<CountryHouseResponse> results = countryHouseService.searchByFilters(
+            "Salento", null, 3, null, null, 2, null, null, null, null);
 
         // Verificar
         assertTrue(results.size() == 1);
@@ -182,12 +186,13 @@ public class CountryHouseServiceImplTest {
 
     @Test
     void searchByFilters_whenNoResults_shouldReturnEmptyList() {
-        // Preparar
-        when(countryHouseRepository.searchActiveByFilters("Filandia", 5, 3))
+        when(countryHouseRepository.searchActiveByAdvancedFilters(
+            "Filandia", null, 5, null, null, 3, null, null, null, null))
                 .thenReturn(Collections.emptyList());
 
         // Ejecutar
-        List<CountryHouseResponse> results = countryHouseService.searchByFilters("Filandia", 5, 3);
+        List<CountryHouseResponse> results = countryHouseService.searchByFilters(
+            "Filandia", null, 5, null, null, 3, null, null, null, null);
 
         // Verificar
         assertTrue(results.isEmpty());

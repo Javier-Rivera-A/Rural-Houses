@@ -223,8 +223,30 @@ public class CountryHouseServiceImpl implements CountryHouseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CountryHouseResponse> searchByFilters(String populationName, Integer minBedrooms, Integer minGaragePlaces) {
-        return countryHouseRepository.searchActiveByFilters(populationName, minBedrooms, minGaragePlaces)
+    public List<CountryHouseResponse> searchByFilters(
+        String populationName, 
+        String code,
+        Integer minBedrooms, 
+        Integer minBathrooms,
+        Integer minKitchens,
+        Integer minGaragePlaces,
+        Boolean hasPrivateBathroom,
+        Boolean hasDishwasher,
+        Boolean hasWashingMachine,
+        String bedTypeStr) {
+
+        TypeOfBed bedTypeEnum = null;
+        if (bedTypeStr != null && !bedTypeStr.isBlank() && !bedTypeStr.equalsIgnoreCase("todas")) {
+            if (bedTypeStr.equalsIgnoreCase("simples") || bedTypeStr.equalsIgnoreCase("simple")) {
+                bedTypeEnum = TypeOfBed.SIMPLE;
+            } else if (bedTypeStr.equalsIgnoreCase("dobles") || bedTypeStr.equalsIgnoreCase("double")) {
+                bedTypeEnum = TypeOfBed.DOUBLE;
+            }
+        }
+
+        return countryHouseRepository.searchActiveByAdvancedFilters(
+            populationName, code, minBedrooms, minBathrooms, minKitchens, minGaragePlaces, 
+            hasPrivateBathroom, hasDishwasher, hasWashingMachine, bedTypeEnum)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 

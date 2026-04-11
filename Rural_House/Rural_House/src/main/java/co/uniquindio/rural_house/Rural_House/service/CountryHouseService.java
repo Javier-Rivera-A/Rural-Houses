@@ -30,7 +30,17 @@ public interface CountryHouseService {
     // Búsquedas públicas
     List<CountryHouseResponse> findByPopulation(String populationName);
     
-    List<CountryHouseResponse> searchByFilters(String populationName, Integer minBedrooms, Integer minGaragePlaces);
+    List<CountryHouseResponse> searchByFilters(
+        String populationName, 
+        String code,
+        Integer minBedrooms, 
+        Integer minBathrooms,
+        Integer minKitchens,
+        Integer minGaragePlaces,
+        Boolean hasPrivateBathroom,
+        Boolean hasDishwasher,
+        Boolean hasWashingMachine,
+        String bedType);
     CountryHouseResponse findByCode(String code);
     CountryHouseResponse findById(String id);
     List<CountryHouseResponse> findAll();
