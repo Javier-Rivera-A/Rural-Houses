@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CountryHouseResponse {
@@ -165,5 +165,15 @@ export class CountryHouseService {
       payload,
       { headers: this.getAuthHeaders() }
     );
+  }
+  searchHouses(population?: string, minBedrooms?: number, minGaragePlaces?: number) {
+    let params = new HttpParams();
+
+    if (population) params = params.set('population', population);
+    if (minBedrooms) params = params.set('minBedrooms', minBedrooms.toString());
+    if (minGaragePlaces) params = params.set('minGaragePlaces', minGaragePlaces.toString());
+
+    // Reemplaza 'this.apiUrl' por la ruta base que uses en tu servicio
+    return this.http.get<any>(`${this.apiUrl}/search`, { params });
   }
 }

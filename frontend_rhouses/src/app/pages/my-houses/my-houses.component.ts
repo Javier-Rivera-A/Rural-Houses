@@ -57,6 +57,18 @@ export class MyHousesComponent implements OnInit {
   goToEdit(houseId: string):     void { this.router.navigate(['/edit-house', houseId]); }
   goToRegister():                void { this.router.navigate(['/register-house']); }
 
+  protected goToRentalPackages( houseId: string) {
+    const ownerId = this.authService.user()?.id;
+
+    if(!ownerId){
+      this.toastr.error('No se pudo identificar al propietario', 'Error');
+      return;
+    }
+    this.router.navigate(['/rental-packages', ownerId, houseId]);
+  }
+  protected getOwnerId() {
+    return this.authService.user()?.id;
+  }
   openDeactivateModal(house: CountryHouseResponse): void {
     this.houseToDeactivate  = house;
     this.showDeactivateModal = true;
@@ -123,4 +135,5 @@ export class MyHousesComponent implements OnInit {
   isActive(house: CountryHouseResponse): boolean {
     return house.stateCountryHouse === 'ACTIVE';
   }
+
 }

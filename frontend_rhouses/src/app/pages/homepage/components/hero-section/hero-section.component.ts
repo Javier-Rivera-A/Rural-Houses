@@ -30,6 +30,7 @@ export class HeroSectionComponent {
   };
 
   isLoading = false;
+  protected fechaEntrada: any;
 
   constructor(
     private countryHouseService: CountryHouseService,
@@ -62,5 +63,14 @@ export class HeroSectionComponent {
         this.isLoading = false;
       }
     });
+  }
+
+  openPicker(event: any) {
+    // Esto evita que el click se propague a otros elementos
+    event.stopPropagation();
+    // showPicker() es la forma oficial de abrir el calendario sin bucles
+    if ('showPicker' in event.target) {
+      event.target.showPicker();
+    }
   }
 }

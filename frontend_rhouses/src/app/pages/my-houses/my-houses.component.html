@@ -182,6 +182,18 @@
                 Editar
               </button>
 
+
+              <!-- PAquetes de alquiler (siempre disponible) -->
+              <button (click)="goToRentalPackages(house.id)"
+                      class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl
+                       text-white text-xs font-bold transition-all hover:opacity-90"
+                      style="background-color: #44aa69">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2">
+                </svg>
+                Paquetes de alquiler
+              </button>
+
               <!-- Desactivar (solo activas) -->
               <button *ngIf="isActive(house)"
                 (click)="openDeactivateModal(house)"
