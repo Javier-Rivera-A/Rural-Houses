@@ -223,22 +223,22 @@ input[type="checkbox"]:checked {
   animation: spin 1s linear infinite;
 }
 
-/* Estilos para los inputs date personalizados */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  position: absolute;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
+/* Estilos limpios para los inputs date */
+input[type="date"] {
   position: relative;
-  z-index: 1;
+  color: #333745; /* Aseguramos que el texto se vea */
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  background-color: transparent;
+  z-index: 10;
+}
+
+/* Evita que el foco forzado reactive el componente */
+input[type="date"]:focus-visible {
+  outline: 2px solid #AA4465;
+}
 /* Evita que el foco forzado reactive el componente */
 input[type="date"]:focus-visible {
   outline: 2px solid #AA4465; /* O tu color de acento */

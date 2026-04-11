@@ -57,7 +57,6 @@ import {
                 type="date"
                 name="startingDate"
                 [(ngModel)]="startingDate"
-                (click)="openPicker($event)"
                 class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#AA4465] focus:ring-2 focus:ring-[#AA4465]/20 outline-none transition-all text-[#333745] bg-white"
               />
             </div>
@@ -74,11 +73,11 @@ import {
                 type="date"
                 name="endingDate"
                 [(ngModel)]="endingDate"
-                (click)="openPicker($event)"
                 class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#AA4465] focus:ring-2 focus:ring-[#AA4465]/20 outline-none transition-all text-[#333745] bg-white"
               />
             </div>
             <p class="text-[10px] text-gray-400">Día / Mes / Año</p>
+
           </div>
 
 
@@ -175,12 +174,5 @@ export class PackageFormComponent implements OnInit {
   onCancel() {
     this.cancel.emit();
   }
-  openPicker(event: any) {
-    // Esto evita que el click se propague a otros elementos
-    event.stopPropagation();
-    // showPicker() es la forma oficial de abrir el calendario sin bucles
-    if ('showPicker' in event.target) {
-      event.target.showPicker();
-    }
-  }
+
 }
