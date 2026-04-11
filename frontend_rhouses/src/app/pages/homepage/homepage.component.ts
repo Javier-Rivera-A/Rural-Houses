@@ -25,6 +25,7 @@ import { CountryHouseResponse, CountryHouseService } from '../../Services/Countr
 export class HomepageComponent implements OnInit {
   isFilterOpen = false;
   isLoading    = true;
+  showingSuggestions = false; // <-- NUEVA VARIABLE: Para mostrar el aviso de sugerencias
 
   allHouses:      CountryHouseResponse[] = [];
   filteredHouses: CountryHouseResponse[] = [];
@@ -55,6 +56,7 @@ export class HomepageComponent implements OnInit {
     this.filteredHouses = event.houses;
     this.searchParams   = event.params;
     this.isLoading      = false;
+    this.showingSuggestions = false; // <-- Reseteamos la variable al buscar desde el Hero
   }
 
   onSearchLoading(): void {
@@ -64,5 +66,42 @@ export class HomepageComponent implements OnInit {
   // El sidebar filtra localmente sobre allHouses
   onFiltered(houses: CountryHouseResponse[]): void {
     this.filteredHouses = houses;
+    this.showingSuggestions = false;
+  }
+
+  // <-- NUEVO MÉTODO: Búsqueda al backend con los 3 parámetros exactos
+  onFilterApplied(filters: { population: string, minBedrooms: number, minGaragePlaces: number }): void {
+    // Verificamos que los labels donde se ingresa la info no estén vacíos
+    if (filters.population && filters.minBedrooms && filters.minGaragePlaces) {
+      this.isLoading = true;
+      this.showingSuggestions = false;
+
+      // Llamamos al nuevo método del servicio que conecta con  @GetMapping("/search")
+      this.countryHouseService.searchHouses(filters.population, filters.minBedrooms, filters.minGaragePlaces)
+        .subscribe({
+          next: (res) => {
+            const foundHouses = res?.data ?? [];
+
+            if (foundHouses.length > 0) {
+              // Se encontró la casa exacta, actualizamos el grid
+              this.filteredHouses = foundHouses;
+            } else {
+              // No se encontró, mostramos el aviso y cargamos sugerencias (todas las casas)
+              this.showingSuggestions = true;
+              this.filteredHouses = [...this.allHouses];
+            }
+            this.isLoading = false;
+          },
+          error: () => {
+            // Por precaución, si falla la petición, mostramos sugerencias
+            this.showingSuggestions = true;
+            this.filteredHouses = [...this.allHouses];
+            this.isLoading = false;
+          }
+        });
+    } else {
+      // Si falta alguno de los 3 datos, puedes imprimir esto para depurar
+      console.log("Se requieren los tres datos (población, cuartos y garaje) para la búsqueda en el servidor.");
+    }
   }
 }

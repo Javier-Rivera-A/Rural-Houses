@@ -18,7 +18,7 @@ export class FilterSidebarComponent implements OnChanges {
 
   @Output() close = new EventEmitter<void>();
   @Output() filtered = new EventEmitter<CountryHouseResponse[]>();
-
+  @Output() filterApplied = new EventEmitter<{ population: string, minBedrooms: number, minGaragePlaces: number }>();
   filters = {
     poblacion: '',
     codigoCasa: '',
@@ -40,6 +40,7 @@ export class FilterSidebarComponent implements OnChanges {
   priceRange = [50, 500];
   minPrice = 0;
   maxPrice = 1000;
+  protected fechaEntrada: any;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['houses']) {
@@ -147,6 +148,13 @@ export class FilterSidebarComponent implements OnChanges {
     }
 
     this.filtered.emit(result);
+
+    // NUEVO: Emisión de los datos específicos para la búsqueda en el backend
+    this.filterApplied.emit({
+      population: this.filters.poblacion?.trim() || '',
+      minBedrooms: this.filters.dormitorios || 0,
+      minGaragePlaces: this.filters.garajes || 0
+    });
   }
 
   clearFilters(): void {
@@ -169,5 +177,14 @@ export class FilterSidebarComponent implements OnChanges {
     };
     this.priceRange = [50, 500];
     this.filtered.emit([...this.houses]);
+  }
+
+  openPicker(event: any) {
+    // Esto evita que el click se propague a otros elementos
+    event.stopPropagation();
+    // showPicker() es la forma oficial de abrir el calendario sin bucles
+    if ('showPicker' in event.target) {
+      event.target.showPicker();
+    }
   }
 }
