@@ -33,27 +33,37 @@ public class RentalServiceImpl implements RentalService {
         LocalDate checkIn = request.getCheckInDate();
         LocalDate checkOut = checkIn.plusDays(request.getNumberNights());
 
-        boolean isRoomRental = request.getBedroomCodes() != null && !request.getBedroomCodes().isEmpty();
+        TypeRental requestedType = request.getTypeRental();
+        boolean isRoomRental = requestedType == TypeRental.ROOMS;
 
-        // Verificar paquetes de alquiler para el período
+        // Validar que si pide ROOMS, vengan las habitaciones
+        if (isRoomRental && (request.getBedroomCodes() == null || request.getBedroomCodes().isEmpty())) {
+            throw new BusinessException("Si desea rentar por habitaciones debe indicar los códigos de las habitaciones");
+        }
+
+        // Validar que si pide ENTIRE_HOUSE, no mande habitaciones
+        if (!isRoomRental && request.getBedroomCodes() != null && !request.getBedroomCodes().isEmpty()) {
+            throw new BusinessException("Si desea rentar la casa completa no debe indicar habitaciones específicas");
+        }
+
+        // Verificar paquetes disponibles para el período
         List<RentalPackage> packages = findPackagesForPeriod(house.getId(), checkIn, checkOut);
         if (packages.isEmpty()) {
             throw new BusinessException("No hay paquetes de alquiler disponibles para las fechas solicitadas");
         }
 
-        // Verificar tipo de alquiler compatible con el paquete
-        validateRentalType(packages, isRoomRental);
+        // Verificar que el paquete permita el tipo de renta solicitado
+        validateRentalType(packages, requestedType);
 
-        // Verificar disponibilidad — sin solapamientos
+        // Verificar disponibilidad sin solapamientos
         List<Rental> overlapping = rentalRepository.findOverlappingRentals(house.getId(), checkIn, checkOut);
         if (!overlapping.isEmpty()) {
             throw new BusinessException(
-                "Las fechas solicitadas no están disponibles. Consulte la disponibilidad antes de reservar.");
+                    "Las fechas solicitadas no están disponibles. Consulte la disponibilidad antes de reservar.");
         }
 
         // Calcular precio total
-        float totalPrice = calculatePrice(packages, request.getNumberNights(), isRoomRental,
-                request.getBedroomCodes() != null ? request.getBedroomCodes().size() : 0);
+        float totalPrice = calculatePrice(packages, request.getNumberNights(), isRoomRental);
 
         Customer customer = customerId != null
                 ? customerRepository.findById(customerId).orElse(null)
@@ -179,25 +189,32 @@ public class RentalServiceImpl implements RentalService {
         return result;
     }
 
-    private void validateRentalType(List<RentalPackage> packages, boolean isRoomRental) {
-        boolean allowsEntire = packages.stream().anyMatch(p ->
-                p.getTypeRental() == TypeRental.ENTIRE_HOUSE || p.getTypeRental() == TypeRental.BOTH);
-        boolean allowsRooms = packages.stream().anyMatch(p ->
-                p.getTypeRental() == TypeRental.ROOMS || p.getTypeRental() == TypeRental.BOTH);
-
-        if (!isRoomRental && !allowsEntire) {
-            throw new BusinessException("Los paquetes de estas fechas no permiten alquilar la casa entera");
-        }
-        if (isRoomRental && !allowsRooms) {
-            throw new BusinessException("Los paquetes de estas fechas no permiten alquilar por habitaciones");
+    private void validateRentalType(List<RentalPackage> packages, TypeRental requestedType) {
+        if (requestedType == TypeRental.ENTIRE_HOUSE) {
+            boolean allowed = packages.stream().anyMatch(p ->
+                    p.getTypeRental() == TypeRental.ENTIRE_HOUSE || p.getTypeRental() == TypeRental.BOTH);
+            if (!allowed) {
+                throw new BusinessException(
+                        "Los paquetes de estas fechas no permiten alquilar la casa completa. " +
+                                "Solo se puede alquilar por habitaciones.");
+            }
+        } else if (requestedType == TypeRental.ROOMS) {
+            boolean allowed = packages.stream().anyMatch(p ->
+                    p.getTypeRental() == TypeRental.ROOMS || p.getTypeRental() == TypeRental.BOTH);
+            if (!allowed) {
+                throw new BusinessException(
+                        "Los paquetes de estas fechas no permiten alquilar por habitaciones. " +
+                                "Solo se puede alquilar la casa completa.");
+            }
         }
     }
 
-    private float calculatePrice(List<RentalPackage> packages, int nights, boolean isRoomRental, int numberOfRooms) {
-        float pricePerNight = (float) packages.stream()
-                .mapToDouble(RentalPackage::getPriceNight).average().orElse(0);
-        // El precio de la casa entera NO es necesariamente precio/hab × nº hab (enunciado)
-        return isRoomRental ? pricePerNight * numberOfRooms * nights : pricePerNight * nights;
+    private float calculatePrice(List<RentalPackage> packages, int nights, boolean isRoomRental) {
+        float pricePerNight = packages.stream()
+                .findFirst()
+                .map(RentalPackage::getPriceNight)
+                .orElse(0f);
+        return pricePerNight * nights;
     }
 
     private String generateRentalCode() {
