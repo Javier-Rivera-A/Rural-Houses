@@ -37,6 +37,12 @@ export interface PhotoResponse {
   description: string;
 }
 
+
+export interface ApiResponse<T> {
+  message: String;
+  data: T;
+}
+
 export interface AvailabilityResponse {
   countryHouseCode: string;
   dailyAvailability: {
@@ -159,21 +165,37 @@ export class CountryHouseService {
     );
   }
 
-  addRentalPackage(ownerId: string, houseId: string, payload: any): Observable<any> {
-    return this.http.post(
+  addRentalPackage(ownerId: string, houseId: string, pkg: any): Observable<ApiResponse<any>> {
+    // El backend espera ownerId como @RequestParam (?ownerId=...)
+    // y houseId como @PathVariable (/{houseId}/packages)
+    return this.http.post<ApiResponse<any>>(
       `${this.apiUrl}/${houseId}/packages?ownerId=${ownerId}`,
-      payload,
-      { headers: this.getAuthHeaders() }
+      pkg
     );
   }
-  searchHouses(population?: string, minBedrooms?: number, minGaragePlaces?: number) {
-    let params = new HttpParams();
+  searchHouses(params: any): Observable<ApiResponse<CountryHouseResponse[]>> {
+    // 1. Filtramos los parámetros
+    // Eliminamos nulos, vacíos, false (para los booleanos que no se marcan)
+    // y mantenemos el 0 solo si es un número válido, aunque para filtros min... suele ser mejor ignorar el 0.
+    const queryParams = Object.keys(params)
+      .filter(key =>
+        params[key] !== null &&
+        params[key] !== undefined &&
+        params[key] !== '' &&
+        params[key] !== false &&
+        params[key] !== 0 // Omitimos ceros para que el backend use sus valores por defecto
+      )
+      .reduce((obj, key) => {
+        obj[key] = params[key];
+        return obj;
+      }, {} as any);
 
-    if (population) params = params.set('population', population);
-    if (minBedrooms) params = params.set('minBedrooms', minBedrooms.toString());
-    if (minGaragePlaces) params = params.set('minGaragePlaces', minGaragePlaces.toString());
+    // 2. Retornamos la petición con el tipo de dato correcto
+    return this.http.get<ApiResponse<CountryHouseResponse[]>>(`${this.apiUrl}/search`, {
+      params: queryParams
+    });
 
-    // Reemplaza 'this.apiUrl' por la ruta base que uses en tu servicio
-    return this.http.get<any>(`${this.apiUrl}/search`, { params });
   }
+
+
 }

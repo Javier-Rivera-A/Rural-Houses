@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CountryHouseResponse, CountryHouseService } from '../../../../Services/CountryHouse/country-house.service';
@@ -12,6 +12,9 @@ import { SearchParams } from '../hero-section/hero-section.component';
   styleUrls: ['./filter-sidebar.component.css']
 })
 export class FilterSidebarComponent implements OnChanges {
+
+  private countryHouseService = inject(CountryHouseService);
+
   @Input() isOpen = false;
   @Input() houses: CountryHouseResponse[] = [];
   @Input() searchParams: SearchParams = { poblacion: '', fecha: '', noches: 2, tipoAlquiler: 'ambas' };
@@ -37,9 +40,9 @@ export class FilterSidebarComponent implements OnChanges {
     tipoCamas: 'todas'
   };
 
-  priceRange = [50, 500];
+  priceRange = [10000, 2000000];
   minPrice = 0;
-  maxPrice = 1000;
+  maxPrice = 2000000;
   protected fechaEntrada: any;
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -59,103 +62,45 @@ export class FilterSidebarComponent implements OnChanges {
   }
 
   applyFilters(): void {
-    let result = [...this.houses];
+    // 1. Mapeamos tus filtros del objeto 'filters' a los nombres que espera el Backend
+    const params = {
+      population: this.filters.poblacion,
+      code: this.filters.codigoCasa,
+      minBedrooms: this.filters.dormitorios,
+      minBathrooms: this.filters.banos,
+      minKitchens: this.filters.cocinas,
+      minGaragePlaces: this.filters.garajes,
+      hasPrivateBathroom: this.filters.habitacionesConBano,
+      hasDishwasher: this.filters.lavavajillas,
+      hasWashingMachine: this.filters.lavadora,
+      bedType: this.filters.tipoCamas // El backend ya maneja 'todas', 'simples', 'dobles'
+    };
 
-    // Filtro por población
-    if (this.filters.poblacion?.trim()) {
-      result = result.filter(h =>
-        h.populationName?.toLowerCase().includes(this.filters.poblacion.toLowerCase())
-      );
-    }
+    // 2. Llamamos al backend
+    this.countryHouseService.searchHouses(params).subscribe({
+      next: (response) => {
+        if (response.data) {
+          // Emitimos los resultados reales que vienen del servidor
+          this.filtered.emit(response.data);
 
-    // Filtro por código de casa
-    if (this.filters.codigoCasa?.trim()) {
-      result = result.filter(h =>
-        h.code?.toLowerCase().includes(this.filters.codigoCasa.toLowerCase())
-      );
-    }
+          // Opcional: Notificamos que se aplicaron (según tu código original)
+          this.filterApplied.emit({
+            population: this.filters.poblacion,
+            minBedrooms: this.filters.dormitorios,
+            minGaragePlaces: this.filters.garajes
+          });
 
-    // Filtro por tipo de alquiler
-    if (this.filters.casaCompleta && !this.filters.porHabitaciones) {
-      // Solo casas que permitan alquiler completo — filtramos por tener pocas habitaciones
-      // (lógica aproximada, ya que el tipo de alquiler viene del paquete, no de la casa)
-      result = result.filter(h => (h.bedrooms?.length ?? 0) > 0);
-    }
-
-    // Filtro por número mínimo de personas (aproximado con camas)
-    if (this.filters.numPersonas > 0) {
-      result = result.filter(h => {
-        const totalCamas = h.bedrooms?.reduce((acc, b) => acc + (b.numberBeds ?? 0), 0) ?? 0;
-        return totalCamas >= this.filters.numPersonas;
-      });
-    }
-
-    // Filtro por número mínimo de dormitorios
-    if (this.filters.dormitorios > 0) {
-      result = result.filter(h =>
-        (h.bedrooms?.length ?? 0) >= this.filters.dormitorios
-      );
-    }
-
-    // Filtro por número mínimo de baños
-    if (this.filters.banos > 0) {
-      result = result.filter(h =>
-        ((h.privateBathrooms ?? 0) + (h.publicBathrooms ?? 0)) >= this.filters.banos
-      );
-    }
-
-    // Filtro por número mínimo de cocinas
-    if (this.filters.cocinas > 0) {
-      result = result.filter(h =>
-        (h.diningRooms?.length ?? 0) >= this.filters.cocinas
-      );
-    }
-
-    // Filtro por garajes mínimos
-    if (this.filters.garajes > 0) {
-      result = result.filter(h =>
-        (h.garagePlaces ?? 0) >= this.filters.garajes
-      );
-    }
-
-    // Filtro habitaciones con baño privado
-    if (this.filters.habitacionesConBano) {
-      result = result.filter(h =>
-        h.bedrooms?.some(b => b.bathroom)
-      );
-    }
-
-    // Filtro lavavajillas
-    if (this.filters.lavavajillas) {
-      result = result.filter(h =>
-        h.diningRooms?.some(k => k.dishWasher)
-      );
-    }
-
-    // Filtro lavadora
-    if (this.filters.lavadora) {
-      result = result.filter(h =>
-        h.diningRooms?.some(k => k.washingMachine)
-      );
-    }
-
-    // Filtro por tipo de camas
-    if (this.filters.tipoCamas !== 'todas') {
-      const tipo = this.filters.tipoCamas === 'dobles' ? 'DOUBLE' : 'SIMPLE';
-      result = result.filter(h =>
-        h.bedrooms?.some(b => b.typesOfBeds?.includes(tipo))
-      );
-    }
-
-    this.filtered.emit(result);
-
-    // NUEVO: Emisión de los datos específicos para la búsqueda en el backend
-    this.filterApplied.emit({
-      population: this.filters.poblacion?.trim() || '',
-      minBedrooms: this.filters.dormitorios || 0,
-      minGaragePlaces: this.filters.garajes || 0
+          // Cerramos el sidebar si es necesario
+          this.onClose();
+        }
+      },
+      error: (err) => {
+        console.error('Error filtrando casas:', err);
+        alert('Hubo un error al realizar la búsqueda.');
+      }
     });
   }
+
 
   clearFilters(): void {
     this.filters = {
@@ -175,16 +120,12 @@ export class FilterSidebarComponent implements OnChanges {
       lavadora: false,
       tipoCamas: 'todas'
     };
-    this.priceRange = [50, 500];
+
+
+    this.priceRange = [10000, 2000000 ];
     this.filtered.emit([...this.houses]);
+    this.applyFilters(); // Recarga la lista completa desde el backend
   }
 
-  openPicker(event: any) {
-    // Esto evita que el click se propague a otros elementos
-    event.stopPropagation();
-    // showPicker() es la forma oficial de abrir el calendario sin bucles
-    if ('showPicker' in event.target) {
-      event.target.showPicker();
-    }
-  }
+
 }

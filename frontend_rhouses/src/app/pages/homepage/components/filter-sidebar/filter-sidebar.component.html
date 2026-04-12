@@ -241,13 +241,13 @@
               class="text-sm font-semibold px-2 py-1 rounded"
               style="color: var(--rhouses-accent); background-color: var(--rhouses-background-light)"
             >
-              {{priceRange[0]}}€
+              ${{priceRange[0]}}
             </span>
             <span
               class="text-sm font-semibold px-2 py-1 rounded"
               style="color: var(--rhouses-accent); background-color: var(--rhouses-background-light)"
             >
-              {{priceRange[1]}}€
+              ${{priceRange[1]}}
             </span>
           </div>
 
@@ -278,8 +278,8 @@
           </div>
         </div>
         <div class="flex items-center justify-between text-sm text-gray-600">
-          <span>0€</span>
-          <span>1000€</span>
+          <span>${{minPrice}}</span>
+          <span>${{maxPrice}}</span>
         </div>
       </div>
     </div>

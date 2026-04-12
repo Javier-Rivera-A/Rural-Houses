@@ -6,7 +6,11 @@ import { FilterSidebarComponent } from './components/filter-sidebar/filter-sideb
 import { FilterTriggerComponent } from './components/filter-trigger/filter-trigger.component';
 import { HouseGridComponent }     from './components/house-grid/house-grid.component';
 import { FooterComponent }        from './components/footer/footer.component';
-import { CountryHouseResponse, CountryHouseService } from '../../Services/CountryHouse/country-house.service';
+import {
+  ApiResponse,
+  CountryHouseResponse,
+  CountryHouseService
+} from '../../Services/CountryHouse/country-house.service';
 
 @Component({
   selector: 'app-homepage',
@@ -69,39 +73,35 @@ export class HomepageComponent implements OnInit {
     this.showingSuggestions = false;
   }
 
-  // <-- NUEVO MÉTODO: Búsqueda al backend con los 3 parámetros exactos
-  onFilterApplied(filters: { population: string, minBedrooms: number, minGaragePlaces: number }): void {
-    // Verificamos que los labels donde se ingresa la info no estén vacíos
-    if (filters.population && filters.minBedrooms && filters.minGaragePlaces) {
-      this.isLoading = true;
-      this.showingSuggestions = false;
+  onFilterApplied(filters: any): void {
+    // 1. Iniciamos carga y quitamos sugerencias anteriores
+    this.isLoading = true;
+    this.showingSuggestions = false;
 
-      // Llamamos al nuevo método del servicio que conecta con  @GetMapping("/search")
-      this.countryHouseService.searchHouses(filters.population, filters.minBedrooms, filters.minGaragePlaces)
-        .subscribe({
-          next: (res) => {
-            const foundHouses = res?.data ?? [];
+    // 2. Llamamos al servicio pasando el objeto 'filters' completo
+    // Nota: Ahora pasamos 'filters' como un solo argumento
+    this.countryHouseService.searchHouses(filters).subscribe({
+      next: (res: ApiResponse<CountryHouseResponse[]>) => {
+        const foundHouses = res?.data ?? [];
 
-            if (foundHouses.length > 0) {
-              // Se encontró la casa exacta, actualizamos el grid
-              this.filteredHouses = foundHouses;
-            } else {
-              // No se encontró, mostramos el aviso y cargamos sugerencias (todas las casas)
-              this.showingSuggestions = true;
-              this.filteredHouses = [...this.allHouses];
-            }
-            this.isLoading = false;
-          },
-          error: () => {
-            // Por precaución, si falla la petición, mostramos sugerencias
-            this.showingSuggestions = true;
-            this.filteredHouses = [...this.allHouses];
-            this.isLoading = false;
-          }
-        });
-    } else {
-      // Si falta alguno de los 3 datos, puedes imprimir esto para depurar
-      console.log("Se requieren los tres datos (población, cuartos y garaje) para la búsqueda en el servidor.");
-    }
+        if (foundHouses.length > 0) {
+          // Se encontraron casas que coinciden con los filtros
+          this.filteredHouses = foundHouses;
+          this.showingSuggestions = false;
+        } else {
+          // No hay resultados exactos: mostramos todas como sugerencia
+          this.showingSuggestions = true;
+          this.filteredHouses = [...this.allHouses];
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error en búsqueda avanzada:', err);
+        // En caso de error, volvemos al estado inicial
+        this.showingSuggestions = true;
+        this.filteredHouses = [...this.allHouses];
+        this.isLoading = false;
+      }
+    });
   }
 }

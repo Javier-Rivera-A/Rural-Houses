@@ -152,7 +152,6 @@ export class PackageFormComponent implements OnInit {
       priceNight: Number(this.priceNight),
       startingDate: this.startingDate, // Formato YYYY-MM-DD ya viene del input date
       endingDate: this.endingDate,
-      // Aunque el backend no los pida en el body, los enviamos si los necesitas para el estado local
       description: this.description,
       status: this.status
     };
