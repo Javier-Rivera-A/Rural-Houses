@@ -4,10 +4,20 @@ import { Router } from '@angular/router';
 import { CountryHouseResponse, CountryHouseService, AvailabilityResponse } from '../../../../Services/CountryHouse/country-house.service';
 import { SearchParams } from '../hero-section/hero-section.component';
 
+export interface RentalPackageInfo {
+  id: string;
+  startingDate: string;
+  endingDate: string;
+  priceNight: number;
+  typeRental: string;
+}
+
 interface HouseWithAvailability extends CountryHouseResponse {
   availabilityLoaded: boolean;
   entireHouseAvailable: boolean | null;
   checkingAvailability: boolean;
+  packages: RentalPackageInfo[] | undefined;
+  loadingPackages: boolean;
 }
 
 @Component({
@@ -23,8 +33,8 @@ export class HouseGridComponent implements OnChanges {
 
   enrichedHouses: HouseWithAvailability[] = [];
 
-  private router          = inject(Router);
-  private countryHouseService = inject(CountryHouseService);
+  private router               = inject(Router);
+  private countryHouseService  = inject(CountryHouseService);
 
   get empty(): boolean {
     return !this.loading && this.enrichedHouses.length === 0;
@@ -36,12 +46,33 @@ export class HouseGridComponent implements OnChanges {
         ...h,
         availabilityLoaded: false,
         entireHouseAvailable: null,
-        checkingAvailability: false
+        checkingAvailability: false,
+        packages: undefined,
+        loadingPackages: true
       }));
-      if (this.searchParams.fecha && this.searchParams.noches > 0) {
-        this.enrichedHouses.forEach(h => this.loadAvailability(h));
-      }
+
+      // Cargar paquetes y disponibilidad para cada casa
+      this.enrichedHouses.forEach(h => {
+        this.loadPackages(h);
+        if (this.searchParams.fecha && this.searchParams.noches > 0) {
+          this.loadAvailability(h);
+        }
+      });
     }
+  }
+
+  loadPackages(house: HouseWithAvailability): void {
+    house.loadingPackages = true;
+    this.countryHouseService.getPackagesByHouse(house.id).subscribe({
+      next: (res) => {
+        house.packages = res?.data ?? [];
+        house.loadingPackages = false;
+      },
+      error: () => {
+        house.packages = [];
+        house.loadingPackages = false;
+      }
+    });
   }
 
   loadAvailability(house: HouseWithAvailability): void {
@@ -81,6 +112,16 @@ export class HouseGridComponent implements OnChanges {
     return house.photo?.[0]?.url?.trim()
       ? house.photo[0].url
       : 'https://images.unsplash.com/photo-1572345901383-be2fcd1625f3?w=800&q=80';
+  }
+
+  formatPackageDate(date: string): string {
+    if (!date) return '';
+    try {
+      const d = new Date(date + 'T00:00:00');
+      return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch {
+      return date;
+    }
   }
 
   trackByHouseId(_: number, house: CountryHouseResponse): string {

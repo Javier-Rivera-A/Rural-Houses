@@ -1,231 +1,242 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { SidebarComponent } from './Components/sidebar.component';
-import { PackageCardComponent } from './Components/package-card.component';
-import { PackageFormComponent } from './Components/package-form.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../../Services/Auth/Auth.service';
+import { CountryHouseService, CountryHouseResponse, RentalPackageResponse } from '../../Services/CountryHouse/country-house.service';
+import { NavbarComponent } from '../homepage/components/navbar/navbar.component';
 import { AvailabilityCalendarComponent } from './Components/availability-calendar.component';
-import {AuthService} from '../../Services/Auth/Auth.service';
-// Importamos el modelo y los íconos
-import { RentalPackage } from './rental-package.model';
-import { LucideAngularModule, Plus, Package as PackageIcon, LayoutGrid, Settings } from 'lucide-angular';
+
+interface PackageForm {
+  startingDate: string;
+  endingDate:   string;
+  priceNight:   number | null;
+  typeRental:   'ENTIRE_HOUSE' | 'ROOMS' | 'BOTH';
+}
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-rental-package',
   standalone: true,
-  imports: [
-    CommonModule,
-    SidebarComponent,
-    PackageCardComponent,
-    PackageFormComponent,
-    AvailabilityCalendarComponent,
-    LucideAngularModule
-  ],
-  template: `
-    <div class="min-h-screen bg-[#E1E5F2]/50 flex font-sans">
-      <app-sidebar
-        [currentView]="currentView"
-        [userName]="ownerName"
-        [userEmail]="ownerEmail"
-        (navigate)="handleNavigate($event)">
-      </app-sidebar>
-
-      <main class="flex-1 ml-64 p-8">
-        <div class="max-w-6xl mx-auto">
-
-          <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div>
-              <h1 class="text-3xl font-bold text-[#333745]">
-                @if (currentView === 'dashboard') { Resumen de los paquetes de rentas }
-                @if (currentView === 'packages') { Gestión de Paquetes }
-                @if (currentView === 'calendar') { Calendario de Disponibilidad }
-                @if (currentView === 'form') { {{ editingPackage ? 'Editar Paquete' : 'Nuevo Paquete' }} }
-              </h1>
-              <p class="text-gray-500 mt-2 font-medium">
-                Bienvenido al panel de creacion de paquetes de alquiler de rhouses.
-              </p>
-            </div>
-
-            @if ((currentView === 'dashboard' || currentView === 'packages') && packages.length > 0) {
-              <button
-                (click)="handleNavigate('form')"
-                class="bg-[#333745] text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-[#232630] transition-colors shadow-sm"
-              >
-                <lucide-icon name="plus" [size]="20"></lucide-icon>
-                Nuevo Paquete
-              </button>
-            }
-          </header>
-
-          <ng-template #emptyState>
-            <div class="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-              <div class="w-24 h-24 bg-[#E1E5F2] rounded-full flex items-center justify-center mb-6 border-4 border-white shadow-sm">
-                <lucide-icon name="package" class="text-[#AA4465]" [size]="40"></lucide-icon>
-              </div>
-              <h2 class="text-2xl font-bold text-[#333745] mb-3">No hay paquetes creados</h2>
-              <p class="text-gray-500 max-w-md mx-auto mb-8 text-lg">
-                Comienza a gestionar tu negocio creando tu primer paquete de alquiler para tus clientes.
-              </p>
-              <button
-                (click)="handleNavigate('form')"
-                class="bg-[#AA4465] text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 hover:bg-[#8c3552] transition-colors shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-200"
-              >
-                <lucide-icon name="plus" [size]="24"></lucide-icon>
-                Crear Primer Paquete
-              </button>
-            </div>
-          </ng-template>
-
-          @switch (currentView) {
-
-            @case ('dashboard') {
-              <div class="space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-2xl bg-[#E1E5F2] flex items-center justify-center text-[#AA4465]">
-                      <lucide-icon name="package" [size]="32"></lucide-icon>
-                    </div>
-                    <div>
-                      <p class="text-gray-500 font-medium">Total Paquetes</p>
-                      <p class="text-4xl font-bold text-[#333745]">{{ packages.length }}</p>
-                    </div>
-                  </div>
-                  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-2xl bg-[#E1E5F2] flex items-center justify-center text-[#2CA58D]">
-                      <lucide-icon name="layout-grid" [size]="32"></lucide-icon>
-                    </div>
-                    <div>
-                      <p class="text-gray-500 font-medium">Paquetes Activos</p>
-                      <p class="text-4xl font-bold text-[#333745]">{{ activePackagesCount }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                @if (packages.length === 0) {
-                  <ng-container *ngTemplateOutlet="emptyState"></ng-container>
-                } @else {
-                  <div>
-                    <h3 class="text-xl font-bold text-[#333745] mb-6 flex items-center gap-2">
-                      <lucide-icon name="package" class="text-[#AA4465]" [size]="24"></lucide-icon>
-                      Agregados Recientemente
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-                      @for (pkg of packages.slice(0, 3); track pkg.id) {
-                        <app-package-card
-                          [pkg]="pkg"
-                          (edit)="handleEdit($event)"
-                          (delete)="handleDelete($event)">
-                        </app-package-card>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-
-            @case ('packages') {
-              <div>
-                @if (packages.length === 0) {
-                  <ng-container *ngTemplateOutlet="emptyState"></ng-container>
-                } @else {
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-                    @for (pkg of packages; track pkg.id) {
-                      <app-package-card
-                        [pkg]="pkg"
-                        (edit)="handleEdit($event)"
-                        (delete)="handleDelete($event)">
-                      </app-package-card>
-                    }
-                  </div>
-                }
-              </div>
-            }
-
-            @case ('form') {
-              <app-package-form
-                [initialData]="editingPackage"
-                (save)="handleSave($event)"
-                (cancel)="handleNavigate('packages')">
-              </app-package-form>
-            }
-
-            @case ('calendar') {
-              <app-availability-calendar></app-availability-calendar>
-            }
-
-          }
-        </div>
-      </main>
-    </div>
-  `
+  imports: [CommonModule, FormsModule, NavbarComponent, AvailabilityCalendarComponent],
+  templateUrl: './rental-package.component.html',
 })
-export class RentalPackageComponent implements OnInit{
-
-  private route = inject(ActivatedRoute);
+export class RentalPackageComponent implements OnInit {
+  private route       = inject(ActivatedRoute);
+  private router      = inject(Router);
   private authService = inject(AuthService);
+  private houseSvc    = inject(CountryHouseService);
+  private toastr      = inject(ToastrService);
 
-  // Variables para guardar los IDs
   ownerId: string | null = null;
-  houseId: string | null = null;
-  currentView = 'paquetes de renta';
-  packages: RentalPackage[] = [];
-  editingPackage: RentalPackage | null = null;
-  ownerName: string = 'Cargando...';
-  ownerEmail: string = '';
+
+  houses:          CountryHouseResponse[] = [];
+  isLoadingHouses  = true;
+
+  selectedHouseId: string = '';
+  selectedHouse:   CountryHouseResponse | null = null;
+
+  packages:     RentalPackageResponse[] = [];
+  isLoadingPkgs = false;
+
+  showForm  = false;
+  editingId: string | null = null;
+  isSaving  = false;
+
+  today = new Date().toISOString().split('T')[0];
+
+  form: PackageForm = {
+    startingDate: '',
+    endingDate:   '',
+    priceNight:   null,
+    typeRental:   'ENTIRE_HOUSE'
+  };
+
+  rentalTypeOptions = [
+    { value: 'ENTIRE_HOUSE', label: 'Casa completa',    desc: 'Se alquila todo' },
+    { value: 'ROOMS',        label: 'Por habitaciones', desc: 'Solo cuartos'    },
+    { value: 'BOTH',         label: 'Ambas',            desc: 'Ambas opciones'  }
+  ];
 
   ngOnInit(): void {
     this.ownerId = this.route.snapshot.paramMap.get('ownerid');
-    this.houseId = this.route.snapshot.paramMap.get('houseid');
+    if (!this.authService.isOwner() || !this.ownerId) {
+      this.toastr.warning('Acceso no autorizado', 'Error');
+      this.router.navigate(['/']);
+      return;
+    }
+    this.loadHouses();
+  }
 
-    const user = this.authService.user();
+  loadHouses(): void {
+    this.isLoadingHouses = true;
+    this.houseSvc.findByOwner(this.ownerId!).subscribe({
+      next: (res) => {
+        this.houses = (res?.data ?? []).filter(h => h.stateCountryHouse === 'ACTIVE');
+        this.isLoadingHouses = false;
+        if (this.houses.length === 1) {
+          this.onHouseChange(this.houses[0].id);
+        }
+      },
+      error: () => {
+        this.toastr.error('No se pudieron cargar tus casas', 'Error');
+        this.isLoadingHouses = false;
+      }
+    });
+  }
 
+  onHouseChange(houseId: string): void {
+    this.selectedHouseId = houseId;
+    this.selectedHouse   = this.houses.find(h => h.id === houseId) ?? null;
+    this.packages        = [];
+    this.showForm        = false;
+    this.editingId       = null;
+    if (houseId) this.loadPackages();
+  }
 
-    if(user){
-      this.ownerName = user.userName;
-      this.ownerEmail = user.email;
-    }else{
-      this.ownerName = 'Usuario Desconocido';
-      this.ownerEmail = 'sin-email@rhouses.com';
+  loadPackages(): void {
+    this.isLoadingPkgs = true;
+    this.houseSvc.getPackagesByHouse(this.selectedHouseId).subscribe({
+      next: (res) => {
+        this.packages      = res?.data ?? [];
+        this.isLoadingPkgs = false;
+      },
+      error: (err) => {
+        this.toastr.error(err?.error?.message ?? 'No se pudieron cargar los paquetes', 'Error');
+        this.isLoadingPkgs = false;
+      }
+    });
+  }
+
+  openForm(): void {
+    this.editingId = null;
+    this.form = { startingDate: '', endingDate: '', priceNight: null, typeRental: 'ENTIRE_HOUSE' };
+    this.showForm = true;
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+  }
+
+  editPackage(pkg: RentalPackageResponse): void {
+    this.editingId = pkg.id;
+    this.form = {
+      startingDate: (pkg.startingDate ?? '').split('T')[0],
+      endingDate:   (pkg.endingDate   ?? '').split('T')[0],
+      priceNight:   pkg.priceNight,
+      typeRental:   pkg.typeRental as any
+    };
+    this.showForm = true;
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+  }
+
+  cancelForm(): void {
+    this.showForm  = false;
+    this.editingId = null;
+  }
+
+  savePackage(): void {
+    if (!this.selectedHouseId) {
+      this.toastr.warning('Selecciona una casa primero', 'Sin casa seleccionada');
+      return;
+    }
+    if (!this.form.startingDate || !this.form.endingDate || this.form.priceNight === null || this.form.priceNight <= 0) {
+      this.toastr.warning('Completa todos los campos (precio mayor a 0)', 'Campos requeridos');
+      return;
+    }
+    if (new Date(this.form.startingDate) >= new Date(this.form.endingDate)) {
+      this.toastr.warning('La fecha de inicio debe ser anterior a la fecha de fin', 'Fechas inválidas');
+      return;
     }
 
+    this.isSaving = true;
+    const payload = {
+      startingDate: this.form.startingDate,
+      endingDate:   this.form.endingDate,
+      priceNight:   Number(this.form.priceNight),
+      typeRental:   this.form.typeRental
+    };
 
-    console.log('ID del Dueño:', this.ownerId);
-    console.log('ID de la Casa:', this.houseId);
-  }
-
-  // Getter para calcular los paquetes activos fácilmente en el HTML
-  get activePackagesCount(): number {
-    return this.packages.filter(p => p.status === 'Activo').length;
-  }
-
-  // Métodos de navegación y lógica
-  handleNavigate(view: string) {
-    this.currentView = view;
-    if (view !== 'form') {
-      this.editingPackage = null;
-    }
-  }
-
-  handleEdit(pkg: RentalPackage) {
-    this.editingPackage = pkg;
-    this.currentView = 'form';
-  }
-
-  handleDelete(id: string) {
-    if (confirm('¿Estás seguro de que deseas eliminar este paquete?')) {
-      this.packages = this.packages.filter(p => p.id !== id);
-    }
-  }
-
-  handleSave(pkg: RentalPackage) {
-    if (this.editingPackage) {
-      // Actualizar existente
-      this.packages = this.packages.map(p => p.id === pkg.id ? pkg : p);
+    if (this.editingId) {
+      this.houseSvc.updateRentalPackage(this.ownerId!, this.editingId, payload).subscribe({
+        next: (res) => {
+          const idx = this.packages.findIndex(p => p.id === this.editingId);
+          if (idx !== -1 && res?.data) this.packages[idx] = res.data;
+          this.toastr.success('Paquete actualizado', '¡Éxito!');
+          this.isSaving = false;
+          this.cancelForm();
+        },
+        error: (err) => {
+          this.toastr.error(err?.error?.message ?? 'Error al actualizar', 'Error');
+          this.isSaving = false;
+        }
+      });
     } else {
-      // Crear nuevo
-      this.packages = [...this.packages, pkg];
+      this.houseSvc.addRentalPackage(this.ownerId!, this.selectedHouseId, payload).subscribe({
+        next: (res) => {
+          if (res?.data) this.packages = [res.data, ...this.packages];
+          this.toastr.success('Paquete creado', '¡Éxito!');
+          this.isSaving = false;
+          this.cancelForm();
+        },
+        error: (err) => {
+          this.toastr.error(err?.error?.message ?? 'Error al crear el paquete', 'Error');
+          this.isSaving = false;
+        }
+      });
     }
-    this.currentView = 'packages';
-    this.editingPackage = null;
+  }
+
+  deletePackage(id: string): void {
+    if (!confirm('¿Eliminar este paquete de alquiler?')) return;
+    this.houseSvc.deleteRentalPackage(this.ownerId!, id).subscribe({
+      next: () => {
+        this.packages = this.packages.filter(p => p.id !== id);
+        this.toastr.success('Paquete eliminado', '¡Listo!');
+      },
+      error: (err) => {
+        this.toastr.error(err?.error?.message ?? 'Error al eliminar', 'Error');
+      }
+    });
+  }
+
+  goBack(): void { this.router.navigate(['/']); }
+
+  formatDate(date: string): string {
+    if (!date) return '';
+    try {
+      return new Date(date.split('T')[0] + 'T00:00:00').toLocaleDateString('es-CO', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+    } catch { return date; }
+  }
+
+  getDurationDays(start: string, end: string): number {
+    try {
+      const s = new Date(start.split('T')[0] + 'T00:00:00').getTime();
+      const e = new Date(end.split('T')[0]   + 'T00:00:00').getTime();
+      return Math.max(0, Math.round((e - s) / (1000 * 60 * 60 * 24)));
+    } catch { return 0; }
+  }
+
+  getRentalTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      ENTIRE_HOUSE: '🏠 Casa completa',
+      ROOMS:        '🛏️ Por habitaciones',
+      BOTH:         '✨ Ambas opciones'
+    };
+    return map[type] ?? type;
+  }
+
+  getRentalTypeClass(type: string): string {
+    const map: Record<string, string> = {
+      ENTIRE_HOUSE: 'bg-blue-50 text-blue-700',
+      ROOMS:        'bg-purple-50 text-purple-700',
+      BOTH:         'bg-green-50 text-green-700'
+    };
+    return map[type] ?? 'bg-gray-100 text-gray-600';
+  }
+
+  getFirstPhoto(house: CountryHouseResponse): string {
+    return house.photo?.[0]?.url?.trim()
+      ? house.photo[0].url
+      : 'https://images.unsplash.com/photo-1572345901383-be2fcd1625f3?w=800&q=80';
   }
 }

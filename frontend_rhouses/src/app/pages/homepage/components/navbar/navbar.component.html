@@ -50,14 +50,11 @@
           {{ authService.isOwner() ? '🏡 Propietario' : '👤 Cliente' }}
         </span>
 
-        <!-- Botón avatar con nombre -->
-        <button
+        <!-- Perfil de usuario — display informativo con dropdown -->
+        <div
           id="user-menu-btn"
           (click)="toggleDropdown()"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 hover:shadow-md transition-all"
-          [ngClass]="authService.isOwner()
-            ? 'border-[#AA4465]/30 hover:border-[#AA4465]'
-            : 'border-[var(--rhouses-accent)]/30 hover:border-[var(--rhouses-accent)]'"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl cursor-pointer select-none transition-colors hover:bg-gray-50"
         >
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner"
@@ -76,7 +73,7 @@
           >
             <path d="m6 9 6 6 6-6"/>
           </svg>
-        </button>
+        </div>
 
         <!-- Dropdown menú -->
         <div
