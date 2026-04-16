@@ -46,10 +46,25 @@ export class HeroSectionComponent {
     this.isLoading = true;
     this.searchLoading.emit();
 
-    this.countryHouseService.findByPopulation(this.searchData.poblacion.trim()).subscribe({
+    // 1. Preparamos el objeto con el filtro de población para el nuevo endpoint
+    const apiParams = {
+      population: this.searchData.poblacion.trim()
+    };
+
+    // 2. Usamos el método searchHouses pasándole el parámetro
+    this.countryHouseService.searchHouses(apiParams).subscribe({
       next: (res) => {
         const houses: CountryHouseResponse[] = res?.data ?? [];
-        this.searchResults.emit({ houses, params: { ...this.searchData } });
+
+        // 3. Emitimos la lista de casas y adjuntamos todos los parámetros del front
+        this.searchResults.emit({
+          houses,
+          params: {
+            ...this.searchData,
+            fecha: this.fechaEntrada // Incluimos la fecha seleccionada en el HTML
+          }
+        });
+
         this.isLoading = false;
 
         if (houses.length === 0) {
@@ -66,9 +81,7 @@ export class HeroSectionComponent {
   }
 
   openPicker(event: any) {
-    // Esto evita que el click se propague a otros elementos
     event.stopPropagation();
-    // showPicker() es la forma oficial de abrir el calendario sin bucles
     if ('showPicker' in event.target) {
       event.target.showPicker();
     }
