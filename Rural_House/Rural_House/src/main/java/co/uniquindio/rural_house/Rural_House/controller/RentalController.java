@@ -100,4 +100,16 @@ public class RentalController {
     public ResponseEntity<ApiResponse<List<RentalResponse>>> getExpiredRentals(@RequestParam String ownerId) {
         return ResponseEntity.ok(ApiResponse.ok(rentalService.getExpiredPendingRentals(ownerId)));
     }
+
+    @DeleteMapping("/{rentalId}")
+    public ResponseEntity<ApiResponse<RentalResponse>> cancelRentalByCustomer(
+            @PathVariable String rentalId,
+            @RequestParam String customerId) {
+
+        RentalResponse response = rentalService.cancelRentalByCustomer(customerId, rentalId);
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Reserva cancelada correctamente. Las fechas quedaron liberadas.", response)
+        );
+    }
 }

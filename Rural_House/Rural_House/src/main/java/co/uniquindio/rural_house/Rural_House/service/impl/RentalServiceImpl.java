@@ -243,4 +243,26 @@ public class RentalServiceImpl implements RentalService {
         if (r.getCustomer() != null) res.setCustomerUserName(r.getCustomer().getUserName());
         return res;
     }
+
+
+    @Override
+    @Transactional
+    public RentalResponse cancelRentalByCustomer(String customerId, String rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada: " + rentalId));
+
+        if (rental.getCustomer() == null || !rental.getCustomer().getId().equals(customerId)) {
+            throw new UnauthorizedException("No tienes permiso para cancelar esta reserva");
+        }
+
+        if (rental.getState() != RentalState.PENDING) {
+            throw new BusinessException("Solo se pueden cancelar reservas en estado pendiente");
+        }
+
+        rental.setState(RentalState.CANCELLED);
+
+        Rental saved = rentalRepository.save(rental);
+
+        return toResponse(saved);
+    }
 }
