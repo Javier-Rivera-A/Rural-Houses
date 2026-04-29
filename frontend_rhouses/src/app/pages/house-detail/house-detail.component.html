@@ -231,9 +231,11 @@
         <div class="bg-white rounded-2xl shadow-md p-6">
           <p class="text-sm text-gray-500 mb-1">¿Te interesa esta casa?</p>
           <h3 class="text-lg font-black mb-4" style="color: var(--rhouses-secondary-dark)">Consulta disponibilidad</h3>
-          <button class="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition-all shadow-md"
-                  style="background-color: var(--rhouses-accent)" (click)="goBack()">
-            Volver al listado
+          <button *ngIf="!authService.isOwner()"
+            (click)="goToMakeRental()"
+            class="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition-all shadow-md"
+            style="background-color: var(--rhouses-accent)">
+            Reservar esta casa
           </button>
         </div>
 

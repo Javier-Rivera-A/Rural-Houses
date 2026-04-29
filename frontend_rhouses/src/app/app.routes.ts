@@ -8,6 +8,8 @@ import { HouseDetailComponent }    from './pages/house-detail/house-detail.compo
 import { MyHousesComponent }       from './pages/my-houses/my-houses.component';
 import { EditHouseComponent }      from './pages/edit-house/edit-house.component';
 import { RentalPackageComponent }  from './pages/rental-package/rental-package.component';
+import { MakeRentalComponent } from './pages/make-rental/make-rental.component';
+import { MyRentalsComponent } from './pages/my-rentals/my-retals.component';
 
 export const routes: Routes = [
   { path: '',                                              component: HomepageComponent      },
@@ -19,5 +21,7 @@ export const routes: Routes = [
   { path: 'my-houses',                                     component: MyHousesComponent      },
   { path: 'edit-house/:id',                                component: EditHouseComponent     },
   { path: 'rental-packages/:ownerid',             component: RentalPackageComponent },
+  { path: 'make-rental/:id', component: MakeRentalComponent },
+  { path: 'my-rentals',      component: MyRentalsComponent  },
   { path: '**',                                            redirectTo: '', pathMatch: 'full'  }
 ];

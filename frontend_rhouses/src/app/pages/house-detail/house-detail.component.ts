@@ -271,4 +271,8 @@ export class HouseDetailComponent implements OnInit {
     };
     return map[type] ?? 'bg-gray-100 text-gray-600';
   }
+
+  goToMakeRental(): void {
+  this.router.navigate(['/make-rental', this.houseId]);
+}
 }

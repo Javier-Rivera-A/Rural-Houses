@@ -139,6 +139,19 @@
               </button>
             </div>
           </div>
+
+          <button *ngIf="!authService.isOwner()"
+            (click)="goToMyRentals()"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors text-left"
+            style="color: var(--rhouses-secondary-dark)">
+            <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+              <!-- ícono calendario -->
+            </div>
+            <div>
+              <p class="font-semibold">Mis reservas</p>
+              <p class="text-xs text-gray-400">Ver y gestionar tus reservas</p>
+            </div>
+          </button>
         </div>
 
       </div>

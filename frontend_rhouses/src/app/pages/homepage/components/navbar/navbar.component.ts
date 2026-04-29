@@ -40,4 +40,9 @@ export class NavbarComponent {
       this.dropdownOpen = false;
     }
   }
+
+  goToMyRentals(): void {
+    this.dropdownOpen = false;
+    this.router.navigate(['/my-rentals']);
+  }
 }
