@@ -3,32 +3,30 @@
 
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
         <h1 class="text-3xl font-black" style="color: var(--rhouses-secondary-dark)">Mis reservas</h1>
         <p class="text-gray-500 mt-1">Consulta y gestiona todas tus reservas</p>
       </div>
       <a routerLink="/"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-bold text-sm hover:bg-white transition-all self-start"
-        style="border-color: var(--rhouses-secondary-dark); color: var(--rhouses-secondary-dark)">
+         class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-bold text-sm hover:bg-white transition-all self-start"
+         style="border-color: var(--rhouses-secondary-dark); color: var(--rhouses-secondary-dark)">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
         Explorar casas
       </a>
     </div>
 
-    <!-- Tabs -->
     <div class="flex gap-1 bg-white rounded-xl p-1 shadow-md mb-8 w-fit">
       <button (click)="activeTab = 'list'"
-        [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
+              [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
           (activeTab === 'list' ? 'bg-[var(--rhouses-accent)] text-white shadow' : 'text-gray-500 hover:text-gray-700')">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
         Mis reservas
       </button>
       <button (click)="activeTab = 'search'"
-        [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
+              [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
           (activeTab === 'search' ? 'bg-[var(--rhouses-accent)] text-white shadow' : 'text-gray-500 hover:text-gray-700')">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -36,10 +34,8 @@
       </button>
     </div>
 
-    <!-- ══════════════════════ TAB: MIS RESERVAS ══════════════════════ -->
     <ng-container *ngIf="activeTab === 'list'">
 
-      <!-- Cargando -->
       <div *ngIf="isLoading" class="flex items-center justify-center py-24">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2" class="animate-spin"
@@ -48,7 +44,6 @@
         </svg>
       </div>
 
-      <!-- Stats strip -->
       <div *ngIf="!isLoading && rentals.length > 0" class="flex items-center gap-4 mb-6">
         <div class="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-100">
           <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
@@ -65,7 +60,6 @@
         </div>
       </div>
 
-      <!-- Empty state -->
       <div *ngIf="!isLoading && rentals.length === 0"
            class="bg-white rounded-2xl shadow-md p-14 text-center">
         <div class="w-20 h-20 rounded-2xl mx-auto mb-5 flex items-center justify-center"
@@ -82,13 +76,12 @@
           Explora nuestras casas rurales y haz tu primera reserva.
         </p>
         <a routerLink="/"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 shadow-md"
-          style="background-color: var(--rhouses-accent)">
+           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 shadow-md"
+           style="background-color: var(--rhouses-accent)">
           Explorar casas
         </a>
       </div>
 
-      <!-- Lista de reservas -->
       <div *ngIf="!isLoading && rentals.length > 0" class="space-y-4">
         <div *ngFor="let rental of rentals"
              class="bg-white rounded-2xl shadow-md overflow-hidden border-2 transition-all hover:shadow-lg"
@@ -98,23 +91,22 @@
                'border-gray-200':   rental.state === 'CANCELLED' || rental.state === 'EXPIRED'
              }">
 
-          <!-- Header de la tarjeta -->
           <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100">
             <div class="flex items-center gap-3">
               <div>
                 <p class="font-mono font-black text-sm" style="color: var(--rhouses-secondary-dark)">
                   {{ rental.rentalCode }}
                 </p>
-                <p class="text-xs text-gray-400">Creada el {{ formatDate(rental.rentalDayMade) }}</p>
+                <p class="text-xs text-gray-400">Creada el {{ rental.uiDayMade }}</p>
               </div>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border"
-                  [ngClass]="getStateBadge(rental.state).class">
-              {{ getStateBadge(rental.state).icon }} {{ getStateBadge(rental.state).label }}
+
+            <span *ngIf="rental.uiBadge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border"
+                  [class]="rental.uiBadge.class">
+              {{ rental.uiBadge.icon }} {{ rental.uiBadge.label }}
             </span>
           </div>
 
-          <!-- Cuerpo -->
           <div class="px-6 py-5">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
               <div>
@@ -123,11 +115,11 @@
               </div>
               <div>
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Check-in</p>
-                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ formatDate(rental.checkInDate) }}</p>
+                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ rental.uiCheckIn }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Check-out</p>
-                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ formatDate(rental.checkOutDate) }}</p>
+                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ rental.uiCheckOut }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Total</p>
@@ -135,7 +127,6 @@
               </div>
             </div>
 
-            <!-- Alerta de pago pendiente -->
             <div *ngIf="rental.state === 'PENDING'"
                  class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 flex gap-2">
               <span class="shrink-0">⚠️</span>
@@ -145,7 +136,6 @@
               </span>
             </div>
 
-            <!-- Footer acciones -->
             <div class="flex items-center justify-between pt-4 border-t border-gray-100">
               <p class="text-xs text-gray-400">
                 {{ rental.numberNights }} noche{{ rental.numberNights !== 1 ? 's' : '' }}
@@ -154,10 +144,10 @@
                 </span>
               </p>
 
-              <button *ngIf="canCancel(rental)"
-                (click)="openCancelModal(rental)"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all hover:bg-red-50 hover:border-red-400 hover:text-red-600"
-                style="border-color: #e5e7eb; color: #6b7280">
+              <button *ngIf="rental.uiCanCancel"
+                      (click)="openCancelModal(rental)"
+                      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all hover:bg-red-50 hover:border-red-400 hover:text-red-600"
+                      style="border-color: #e5e7eb; color: #6b7280">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
@@ -180,7 +170,6 @@
 
     </ng-container>
 
-    <!-- ══════════════════════ TAB: BUSCAR POR CÓDIGO ══════════════════════ -->
     <ng-container *ngIf="activeTab === 'search'">
       <div class="bg-white rounded-2xl shadow-md p-8">
         <h2 class="text-lg font-black mb-2" style="color: var(--rhouses-secondary-dark)">
@@ -190,7 +179,6 @@
           Ingresa el código de reserva que recibiste al confirmar tu reserva (ej: RES-1234567890-42).
         </p>
 
-        <!-- Buscador -->
         <div class="flex gap-3 mb-6">
           <input type="text" [(ngModel)]="searchCode"
                  placeholder="RES-XXXXXXXXXXXXXX-XXX"
@@ -198,8 +186,8 @@
                  class="flex-1 px-4 py-3 border border-gray-200 rounded-xl outline-none text-sm font-mono
                         focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465] transition-all"/>
           <button (click)="searchByCode()" [disabled]="isSearching || !searchCode.trim()"
-            class="flex items-center gap-2 px-5 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50"
-            style="background-color: var(--rhouses-accent)">
+                  class="flex items-center gap-2 px-5 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50"
+                  style="background-color: var(--rhouses-accent)">
             <svg *ngIf="!isSearching" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -212,12 +200,10 @@
           </button>
         </div>
 
-        <!-- Error búsqueda -->
         <div *ngIf="searchError" class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 mb-4">
           ❌ {{ searchError }}
         </div>
 
-        <!-- Resultado búsqueda -->
         <div *ngIf="searchResult" class="animate-fade-in border-2 rounded-2xl overflow-hidden"
              [ngClass]="{
                'border-yellow-200': searchResult.state === 'PENDING',
@@ -226,7 +212,6 @@
                'border-gray-200':   searchResult.state === 'EXPIRED'
              }">
 
-          <!-- Header resultado -->
           <div class="px-6 py-4 flex items-center justify-between"
                [ngClass]="{
                  'bg-yellow-50': searchResult.state === 'PENDING',
@@ -240,13 +225,13 @@
                 {{ searchResult.rentalCode }}
               </p>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black border-2"
-                  [ngClass]="getStateBadge(searchResult.state).class">
-              {{ getStateBadge(searchResult.state).icon }} {{ getStateBadge(searchResult.state).label }}
+
+            <span *ngIf="searchResult.uiBadge" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black border-2"
+                  [class]="searchResult.uiBadge.class">
+              {{ searchResult.uiBadge.icon }} {{ searchResult.uiBadge.label }}
             </span>
           </div>
 
-          <!-- Detalles resultado -->
           <div class="px-6 py-5 space-y-4">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
@@ -255,11 +240,11 @@
               </div>
               <div>
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Entrada</p>
-                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ formatDate(searchResult.checkInDate) }}</p>
+                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ searchResult.uiCheckIn }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Salida</p>
-                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ formatDate(searchResult.checkOutDate) }}</p>
+                <p class="font-bold text-sm" style="color: var(--rhouses-secondary-dark)">{{ searchResult.uiCheckOut }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Total</p>
@@ -271,9 +256,9 @@
               <p class="text-xs text-gray-400">
                 {{ searchResult.numberNights }} noche{{ searchResult.numberNights !== 1 ? 's' : '' }}
               </p>
-              <button *ngIf="canCancel(searchResult)"
-                (click)="openCancelModal(searchResult)"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 border-red-200 text-red-500 hover:bg-red-50 transition-all">
+              <button *ngIf="searchResult.uiCanCancel"
+                      (click)="openCancelModal(searchResult)"
+                      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 border-red-200 text-red-500 hover:bg-red-50 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
@@ -297,14 +282,10 @@
 
   </div>
 
-  <!-- ══════════════════════════════════
-       MODAL CONFIRMAR CANCELACIÓN
-  ══════════════════════════════════ -->
   <div *ngIf="cancelTarget"
        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-slide-up">
 
-      <!-- Icono de advertencia -->
       <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center bg-red-50">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="1.5" class="text-red-500">
@@ -323,18 +304,17 @@
         Las fechas serán liberadas y el propietario será notificado. Esta acción no se puede deshacer.
       </p>
 
-      <!-- Info pago -->
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 text-xs text-amber-700 text-center">
         ⚠️ Si ya realizaste el pago del anticipo, contacta directamente con el propietario para gestionar el reembolso.
       </div>
 
       <div class="flex gap-3">
         <button (click)="closeCancelModal()"
-          class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 transition-all">
+                class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 transition-all">
           Mantener reserva
         </button>
         <button (click)="confirmCancel()" [disabled]="isCancelling"
-          class="flex-1 py-3 bg-red-500 rounded-xl font-bold text-sm text-white hover:bg-red-600 transition-all disabled:opacity-50">
+                class="flex-1 py-3 bg-red-500 rounded-xl font-bold text-sm text-white hover:bg-red-600 transition-all disabled:opacity-50">
           {{ isCancelling ? 'Cancelando...' : 'Sí, cancelar' }}
         </button>
       </div>

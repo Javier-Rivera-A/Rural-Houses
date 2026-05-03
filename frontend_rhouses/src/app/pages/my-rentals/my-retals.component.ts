@@ -7,6 +7,14 @@ import { AuthService } from '../../Services/Auth/Auth.service';
 import { NavbarComponent } from '../homepage/components/navbar/navbar.component';
 import { RentalService, RentalResponse } from '../../Services/Rental/rental.service';
 
+// 1. Interfaz extendida para la vista (View Model)
+export interface RentalVM extends RentalResponse {
+  uiDayMade?: string;
+  uiCheckIn?: string;
+  uiCheckOut?: string;
+  uiBadge?: { label: string; class: string; icon: string };
+  uiCanCancel?: boolean;
+}
 
 @Component({
   selector: 'app-my-rentals',
@@ -21,21 +29,30 @@ export class MyRentalsComponent implements OnInit {
   private toastr    = inject(ToastrService);
   authService       = inject(AuthService);
 
-  rentals:   RentalResponse[] = [];
-  isLoading  = true;
+  // Ahora usamos nuestra interfaz extendida
+  rentals: RentalVM[] = [];
+  isLoading = true;
 
-  // Search by code
   searchCode = '';
-  searchResult: RentalResponse | null = null;
+  searchResult: RentalVM | null = null;
   searchError  = '';
   isSearching  = false;
 
-  // Cancel confirm
-  cancelTarget: RentalResponse | null = null;
+  cancelTarget: RentalVM | null = null;
   isCancelling  = false;
 
-  // Tabs
   activeTab: 'list' | 'search' = 'list';
+
+  pendingCount: number = 0;
+  confirmedCount: number = 0;
+
+  private readonly stateMap: Record<string, { label: string; class: string; icon: string }> = {
+    PENDING:   { label: 'Pendiente',  class: 'bg-yellow-100 text-yellow-800 border-yellow-300',  icon: '⏳' },
+    CONFIRMED: { label: 'Confirmada', class: 'bg-green-100  text-green-800  border-green-300',   icon: '✅' },
+    CANCELLED: { label: 'Cancelada',  class: 'bg-red-100    text-red-800    border-red-300',     icon: '❌' },
+    EXPIRED:   { label: 'Vencida',    class: 'bg-gray-100   text-gray-600   border-gray-300',    icon: '💤' }
+  };
+  private readonly defaultBadge = { label: 'Desconocido', class: 'bg-gray-100 text-gray-600 border-gray-300', icon: '•' };
 
   ngOnInit(): void {
     const user = this.authService.user();
@@ -51,7 +68,10 @@ export class MyRentalsComponent implements OnInit {
     this.isLoading = true;
     this.rentalSvc.findByCustomer(customerId).subscribe({
       next: (res) => {
-        this.rentals   = res?.data ?? [];
+        const rawRentals = res?.data ?? [];
+        // 2. Mapeamos TODA la info visual una sola vez al cargar
+        this.rentals = rawRentals.map(r => this.mapRentalToVM(r));
+        this.updateCounters();
         this.isLoading = false;
       },
       error: () => {
@@ -61,6 +81,11 @@ export class MyRentalsComponent implements OnInit {
     });
   }
 
+  private updateCounters(): void {
+    this.pendingCount = this.rentals.filter(r => r.state === 'PENDING').length;
+    this.confirmedCount = this.rentals.filter(r => r.state === 'CONFIRMED').length;
+  }
+
   searchByCode(): void {
     if (!this.searchCode.trim()) return;
     this.isSearching  = true;
@@ -68,7 +93,9 @@ export class MyRentalsComponent implements OnInit {
     this.searchError  = '';
     this.rentalSvc.findByCode(this.searchCode.trim()).subscribe({
       next: (res) => {
-        this.searchResult = res?.data ?? null;
+        const raw = res?.data ?? null;
+        // Mapeamos también el resultado de búsqueda
+        this.searchResult = raw ? this.mapRentalToVM(raw) : null;
         this.isSearching  = false;
         if (!this.searchResult) this.searchError = 'No se encontró ninguna reserva con ese código.';
       },
@@ -79,54 +106,60 @@ export class MyRentalsComponent implements OnInit {
     });
   }
 
-  openCancelModal(rental: RentalResponse): void { this.cancelTarget = rental; }
+  openCancelModal(rental: RentalVM): void { this.cancelTarget = rental; }
   closeCancelModal(): void { this.cancelTarget = null; }
 
   confirmCancel(): void {
     if (!this.cancelTarget) return;
-    const customerId = this.authService.user()?.id;
-    if (!customerId) return;
+    const user = this.authService.user();
+    if (!user) return;
 
     this.isCancelling = true;
-    this.rentalSvc.cancelByCustomer(this.cancelTarget.id, customerId).subscribe({
+    this.rentalSvc.cancelByCustomer(this.cancelTarget.id, user.id).subscribe({
       next: (res) => {
         const updated = res?.data;
-        // Update in list
-        const idx = this.rentals.findIndex(r => r.id === this.cancelTarget!.id);
-        if (idx !== -1 && updated) this.rentals[idx] = updated;
-        // Update search result if same
-        if (this.searchResult?.id === this.cancelTarget!.id && updated) this.searchResult = updated;
-        this.toastr.success('Reserva cancelada. Las fechas han sido liberadas.', '¡Cancelada!');
+        if (updated) {
+          const vmUpdated = this.mapRentalToVM(updated);
+          const idx = this.rentals.findIndex(r => r.id === vmUpdated.id);
+          if (idx !== -1) {
+            this.rentals[idx] = vmUpdated;
+            this.updateCounters();
+          }
+          if (this.searchResult?.id === vmUpdated.id) {
+            this.searchResult = vmUpdated;
+          }
+        }
+        this.toastr.success('Reserva cancelada correctamente', '¡Cancelada!');
         this.isCancelling = false;
         this.cancelTarget = null;
       },
       error: (err) => {
-        this.toastr.error(err?.error?.message ?? 'No se pudo cancelar la reserva', 'Error');
+        this.toastr.error(err?.error?.message ?? 'No se pudo cancelar', 'Error');
         this.isCancelling = false;
         this.cancelTarget = null;
       }
     });
   }
 
-  // Helpers
-  formatDate(d: string): string {
+  // 3. Centralizamos el formateo aquí
+  private mapRentalToVM(rental: RentalResponse): RentalVM {
+    return {
+      ...rental,
+      uiDayMade: this.formatDate(rental.rentalDayMade),
+      uiCheckIn: this.formatDate(rental.checkInDate),
+      uiCheckOut: this.formatDate(rental.checkOutDate),
+      uiBadge: this.stateMap[rental.state] ?? this.defaultBadge,
+      uiCanCancel: rental.state === 'PENDING'
+    };
+  }
+
+  private formatDate(d: string): string {
     if (!d) return '';
-    try { return new Date(d.split('T')[0] + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' }); }
+    try {
+      return new Date(d.split('T')[0] + 'T00:00:00').toLocaleDateString('es-CO', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+    }
     catch { return d; }
   }
-
-  getStateBadge(state: string): { label: string; class: string; icon: string } {
-    const map: Record<string, { label: string; class: string; icon: string }> = {
-      PENDING:   { label: 'Pendiente',  class: 'bg-yellow-100 text-yellow-800 border-yellow-300',  icon: '⏳' },
-      CONFIRMED: { label: 'Confirmada', class: 'bg-green-100  text-green-800  border-green-300',   icon: '✅' },
-      CANCELLED: { label: 'Cancelada',  class: 'bg-red-100    text-red-800    border-red-300',     icon: '❌' },
-      EXPIRED:   { label: 'Vencida',    class: 'bg-gray-100   text-gray-600   border-gray-300',    icon: '💤' }
-    };
-    return map[state] ?? { label: state, class: 'bg-gray-100 text-gray-600 border-gray-300', icon: '•' };
-  }
-
-  canCancel(rental: RentalResponse): boolean { return rental.state === 'PENDING'; }
-
-  get pendingCount(): number   { return this.rentals.filter(r => r.state === 'PENDING').length; }
-  get confirmedCount(): number { return this.rentals.filter(r => r.state === 'CONFIRMED').length; }
 }
