@@ -19,4 +19,7 @@ public interface RentalService {
     void registerPayment(String ownerId, String rentalId, Float amount);
     void cancelRental(String ownerId, String rentalId);
     List<RentalResponse> getExpiredPendingRentals(String ownerId);
+
+    //Metodo que pidio santiago
+    List<RentalResponse> findByOwner(String ownerId);
 }

@@ -112,4 +112,15 @@ public class RentalController {
                 ApiResponse.ok("Reserva cancelada correctamente. Las fechas quedaron liberadas.", response)
         );
     }
+
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<ApiResponse<List<RentalResponse>>> getByOwner(
+            @PathVariable String ownerId) {
+
+        List<RentalResponse> response = rentalService.findByOwner(ownerId);
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Reservas del propietario obtenidas correctamente", response)
+        );
+    }
 }
