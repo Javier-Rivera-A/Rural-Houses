@@ -65,4 +65,39 @@ export class HomepageComponent implements OnInit {
   onFiltered(houses: CountryHouseResponse[]): void {
     this.filteredHouses = houses;
   }
+<<<<<<< Updated upstream
 }
+=======
+ 
+  onFilterApplied(filters: any): void {
+    this.isLoading = true;
+    this.showingSuggestions = false;
+ 
+    this.countryHouseService.searchHouses(filters).subscribe({
+      next: (res: ApiResponse<CountryHouseResponse[]>) => {
+        const foundHouses = res?.data ?? [];
+        if (foundHouses.length > 0) {
+          this.filteredHouses = foundHouses;
+          this.showingSuggestions = false;
+        } else {
+          this.showingSuggestions = true;
+          this.filteredHouses = [...this.allHouses];
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.showingSuggestions = true;
+        this.filteredHouses = [...this.allHouses];
+        this.isLoading = false;
+      }
+    });
+  }
+ 
+  // Owner quick actions
+  goToMyHouses()      { this.router.navigate(['/my-houses']); }
+  goToRegisterHouse() { this.router.navigate(['/register-house']); }
+  goToSettings()      { this.router.navigate(['/settings']); }
+  goToRentalPackages() { const ownerId = this.authService.user()?.id; this.router.navigate(['/rental-packages', ownerId]);}
+  goToOwnerReservations() { this.router.navigate(['/owner-reservations']); }
+}
+>>>>>>> Stashed changes

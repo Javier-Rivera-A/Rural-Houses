@@ -5,7 +5,10 @@ export interface LoggedUser {
   id: string;
   userName: string;
   accountType: 'customer' | 'owner';
+  fullName?: string;
   email?: string;
+  phone?: string;
+  avatarUrl?: string;
   token?: string; // JWT token para propietarios
 }
 
@@ -22,7 +25,8 @@ export class AuthService {
   readonly isOwner     = computed(() => this._user()?.accountType === 'owner');
   readonly userInitial = computed(() => {
     const u = this._user();
-    return u ? u.userName.charAt(0).toUpperCase() : '';
+    const displayName = u?.fullName?.trim() || u?.userName || '';
+    return displayName ? displayName.charAt(0).toUpperCase() : '';
   });
 
   // Token JWT del propietario (para llamadas autenticadas)
@@ -37,6 +41,15 @@ export class AuthService {
     if (user.token) {
       sessionStorage.setItem('rhouses_token', user.token);
     }
+  }
+
+  updateUserProfile(profile: Partial<LoggedUser>): void {
+    const current = this._user();
+    if (!current) return;
+    const updated = { ...current, ...profile };
+    this._user.set(updated);
+    sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
+    if (updated.token) sessionStorage.setItem('rhouses_token', updated.token);
   }
 
   logout(): void {
