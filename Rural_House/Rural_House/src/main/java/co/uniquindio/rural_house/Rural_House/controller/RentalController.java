@@ -67,6 +67,19 @@ public class RentalController {
     }
 
     /**
+     * POST /api/rentals/{rentalId}/pay?customerId={id}&amount={importe}
+     * El cliente realiza un pago transfiriendo desde su cuenta bancaria.
+     */
+    @PostMapping("/{rentalId}/pay")
+    public ResponseEntity<ApiResponse<Void>> payRental(
+            @PathVariable String rentalId,
+            @RequestParam String customerId,
+            @RequestParam Float amount) {
+        rentalService.payRental(customerId, rentalId, amount);
+        return ResponseEntity.ok(ApiResponse.ok("Pago realizado y transferido correctamente", null));
+    }
+
+    /**
      * POST /api/rentals/{rentalId}/payment?ownerId={id}&amount={importe}
      * El propietario registra un pago recibido para una reserva.
      * El sistema revisa y avisa de reservas con plazo de pago vencido.
@@ -99,28 +112,5 @@ public class RentalController {
     @GetMapping("/expired")
     public ResponseEntity<ApiResponse<List<RentalResponse>>> getExpiredRentals(@RequestParam String ownerId) {
         return ResponseEntity.ok(ApiResponse.ok(rentalService.getExpiredPendingRentals(ownerId)));
-    }
-
-    @DeleteMapping("/{rentalId}")
-    public ResponseEntity<ApiResponse<RentalResponse>> cancelRentalByCustomer(
-            @PathVariable String rentalId,
-            @RequestParam String customerId) {
-
-        RentalResponse response = rentalService.cancelRentalByCustomer(customerId, rentalId);
-
-        return ResponseEntity.ok(
-                ApiResponse.ok("Reserva cancelada correctamente. Las fechas quedaron liberadas.", response)
-        );
-    }
-
-    @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<ApiResponse<List<RentalResponse>>> getByOwner(
-            @PathVariable String ownerId) {
-
-        List<RentalResponse> response = rentalService.findByOwner(ownerId);
-
-        return ResponseEntity.ok(
-                ApiResponse.ok("Reservas del propietario obtenidas correctamente", response)
-        );
     }
 }

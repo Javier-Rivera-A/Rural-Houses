@@ -13,13 +13,11 @@ public interface RentalService {
     List<RentalResponse> findByCustomer(String customerId);
     List<RentalResponse> findByCountryHouse(String houseId);
 
-    RentalResponse cancelRentalByCustomer(String customerId, String rentalId);
+    // Operaciones del cliente
+    void payRental(String customerId, String rentalId, Float amount);
 
     // Operaciones del propietario
     void registerPayment(String ownerId, String rentalId, Float amount);
     void cancelRental(String ownerId, String rentalId);
     List<RentalResponse> getExpiredPendingRentals(String ownerId);
-
-    //Metodo que pidio santiago
-    List<RentalResponse> findByOwner(String ownerId);
 }
