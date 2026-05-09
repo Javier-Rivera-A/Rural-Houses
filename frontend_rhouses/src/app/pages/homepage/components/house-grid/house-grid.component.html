@@ -57,11 +57,11 @@
             </svg>
             Verificando
           </span>
-          <span *ngIf="house.availabilityLoaded && house.entireHouseAvailable === true"
+          <span *ngIf="house.availabilityLoaded && house.entireHouseAvailable === true && !house.hasReservationOverlap"
                 class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
             ✓ Disponible
           </span>
-          <span *ngIf="house.availabilityLoaded && house.entireHouseAvailable === false"
+          <span *ngIf="house.availabilityLoaded && (house.entireHouseAvailable === false || house.hasReservationOverlap)"
                 class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full">
             Reservada
           </span>

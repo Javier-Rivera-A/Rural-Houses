@@ -230,9 +230,59 @@
 
         <div class="bg-white rounded-2xl shadow-md p-6">
           <p class="text-sm text-gray-500 mb-1">¿Te interesa esta casa?</p>
+<<<<<<< HEAD
           <h3 class="text-lg font-black mb-4" style="color: var(--rhouses-secondary-dark)">Consulta disponibilidad</h3>
           <button *ngIf="!authService.isOwner()"
             (click)="goToMakeRental()"
+=======
+<<<<<<< Updated upstream
+          <h3 class="text-lg font-black mb-4" style="color: var(--rhouses-secondary-dark)">
+            Consulta disponibilidad
+=======
+          <h3 class="text-lg font-black mb-4" style="color: var(--rhouses-secondary-dark)">Consulta disponibilidad</h3>
+          <button *ngIf="authService.isLoggedIn() && !authService.isOwner()"
+            (click)="goToMakeRental()"
+            class="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition-all shadow-md"
+            style="background-color: var(--rhouses-accent)">
+            Reservar esta casa
+          </button>
+          <p *ngIf="!authService.isLoggedIn()" class="text-xs text-gray-500 leading-relaxed">
+            Inicia sesión como cliente para realizar reservas. Desde esta vista puedes consultar la disponibilidad y paquetes.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         SECCIÓN PAQUETES DE ALQUILER
+    ════════════════════════════════════════════ -->
+    <div class="border-t border-gray-200 pt-10">
+
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">Paquetes de alquiler</h2>
+          <p class="text-sm text-gray-400 mt-0.5">Fechas disponibles y precios para esta casa</p>
+        </div>
+        <button *ngIf="authService.isOwner() && !showPackageForm" (click)="openPkgForm()"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md"
+          style="background-color: var(--rhouses-accent)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          Nuevo paquete
+        </button>
+      </div>
+
+      <!-- Formulario inline paquete -->
+      <div *ngIf="authService.isOwner() && showPackageForm"
+           class="bg-white rounded-2xl shadow-md p-8 mb-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-base font-black" style="color: var(--rhouses-secondary-dark)">
+            {{ editingPkgId ? 'Editar paquete' : 'Nuevo paquete' }}
+>>>>>>> Stashed changes
+          </h3>
+          <button
+>>>>>>> devVal
             class="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition-all shadow-md"
             style="background-color: var(--rhouses-accent)">
             Reservar esta casa
@@ -240,6 +290,118 @@
         </div>
 
       </div>
+<<<<<<< Updated upstream
+=======
+
+      <!-- Loading paquetes -->
+      <div *ngIf="isLoadingPkgs" class="flex justify-center py-10">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" class="animate-spin" style="color: var(--rhouses-accent)">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+      </div>
+
+      <ng-container *ngIf="!isLoadingPkgs">
+
+        <!-- Calendario -->
+        <div class="mb-6">
+          <app-availability-calendar
+            [packages]="packages"
+            [reservations]="reservations">
+          </app-availability-calendar>
+        </div>
+
+        <!-- Empty state paquetes -->
+        <div *ngIf="packages.length === 0 && !showPackageForm"
+             class="bg-white rounded-2xl shadow-md p-10 text-center">
+          <p class="text-gray-400 text-sm mb-4">Esta casa no tiene paquetes de alquiler aún.</p>
+          <button *ngIf="authService.isOwner()" (click)="openPkgForm()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md"
+            style="background-color: var(--rhouses-accent)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Crear primer paquete
+          </button>
+        </div>
+
+        <!-- Tarjetas de paquetes -->
+        <div *ngIf="packages.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngFor="let pkg of packages"
+               class="bg-white rounded-2xl shadow-md p-6 border-2 border-transparent hover:border-[#AA4465]/20 transition-all">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full mb-2"
+                      [ngClass]="getRentalTypeClass(pkg.typeRental)">
+                  {{ getRentalTypeLabel(pkg.typeRental) }}
+                </span>
+                <p class="text-2xl font-black" style="color: #AA4465">
+                  $ {{ pkg.priceNight }}
+                  <span class="text-sm font-normal text-gray-400">/noche</span>
+                </p>
+              </div>
+              <!-- Acciones solo para propietario -->
+              <div *ngIf="authService.isOwner()" class="flex gap-1">
+                <button (click)="editPackage(pkg)"
+                  class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-[#AA4465]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </button>
+                <button (click)="deletePackage(pkg.id)"
+                  class="p-2 rounded-lg hover:bg-red-50 transition-colors text-gray-400 hover:text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3 space-y-2 text-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-500">Inicio</span>
+                <span class="font-bold" style="color: var(--rhouses-secondary-dark)">{{ formatDate(pkg.startingDate) }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-500">Fin</span>
+                <span class="font-bold" style="color: var(--rhouses-secondary-dark)">{{ formatDate(pkg.endingDate) }}</span>
+              </div>
+              <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                <span class="text-gray-500">Duración</span>
+                <span class="font-bold" style="color: #2CA58D">{{ getDurationDays(pkg.startingDate, pkg.endingDate) }} noches</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal desactivar -->
+<div *ngIf="showDeactivateModal"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center bg-red-50">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="1.5" class="text-red-500">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+      </svg>
+    </div>
+    <h3 class="text-xl font-black text-center mb-2" style="color: var(--rhouses-secondary-dark)">¿Desactivar esta casa?</h3>
+    <p class="text-center text-gray-500 text-sm mb-5">La casa dejará de aparecer en búsquedas y no podrá recibir nuevas reservas.</p>
+    <div class="flex gap-3">
+      <button (click)="showDeactivateModal = false"
+        class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50">
+        Cancelar
+      </button>
+      <button (click)="confirmDeactivate()" [disabled]="isProcessing"
+        class="flex-1 py-3 bg-red-500 rounded-xl font-bold text-sm text-white hover:bg-red-600 disabled:opacity-50">
+        {{ isProcessing ? 'Procesando...' : 'Sí, desactivar' }}
+      </button>
+>>>>>>> Stashed changes
     </div>
 
     <!-- ════════════════════════════════════════════

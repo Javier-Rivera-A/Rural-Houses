@@ -13,6 +13,7 @@
         <div class="absolute top-0 right-0 w-96 h-96 rounded-full" style="background: radial-gradient(circle, #AA4465, transparent); transform: translate(30%, -30%)"></div>
         <div class="absolute bottom-0 left-0 w-72 h-72 rounded-full" style="background: radial-gradient(circle, #2CA58D, transparent); transform: translate(-30%, 30%)"></div>
       </div>
+<<<<<<< HEAD
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
@@ -27,6 +28,54 @@
         </div>
       </div>
     </div>
+=======
+<<<<<<< Updated upstream
+
+      <div class="flex gap-8 relative">
+        <!-- Sidebar colapsable -->
+        <div
+          [ngClass]="{
+            'w-80 opacity-100': isFilterOpen,
+            'w-0 opacity-0 overflow-hidden': !isFilterOpen
+          }"
+          class="transition-all duration-300 ease-in-out flex-shrink-0"
+        >
+          <app-filter-sidebar
+            [isOpen]="isFilterOpen"
+            [houses]="allHouses"
+            [searchParams]="searchParams"
+            (close)="closeFilter()"
+            (filtered)="onFiltered($event)">
+          </app-filter-sidebar>
+        </div>
+
+        <!-- Grid -->
+        <div class="flex-1 transition-all duration-300 ease-in-out min-w-0">
+          <app-house-grid
+            [houses]="filteredHouses"
+            [loading]="isLoading"
+            [searchParams]="searchParams">
+          </app-house-grid>
+        </div>
+      </div>
+    </div>
+  </main>
+=======
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <p class="text-sm font-bold tracking-widest uppercase mb-2" style="color: #AA4465">Panel de propietario</p>
+            <h1 class="text-3xl md:text-4xl font-black text-white mb-3">
+              Hola, {{ authService.user()?.fullName || authService.user()?.userName }} 👋
+            </h1>
+            <p class="text-gray-300 text-lg max-w-xl">
+              Gestiona tus propiedades, paquetes de alquiler y reservas desde aquí.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+>>>>>>> devVal
 
     <!-- Quick Actions Grid -->
     <main class="flex-grow">
@@ -34,7 +83,11 @@
 
         <h2 class="text-xl font-black mb-6" style="color: var(--rhouses-secondary-dark)">Accesos rápidos</h2>
 
+<<<<<<< HEAD
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+=======
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+>>>>>>> devVal
 
           <!-- Mis casas -->
           <button (click)="goToMyHouses()"
@@ -123,6 +176,32 @@
             </div>
           </button>
 
+<<<<<<< HEAD
+=======
+          <!-- Reservas -->
+          <button (click)="goToOwnerReservations()"
+            class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#f59e0b]/25">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+                 style="background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(245,158,11,0.04))">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5" style="color: #b45309">
+                <rect width="18" height="18" x="3" y="4" rx="2"/>
+                <line x1="8" x2="16" y1="10" y2="10"/>
+                <line x1="8" x2="16" y1="14" y2="14"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Reservas</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">Revisa pagos, confirma reservas y gestiona pendientes vencidas.</p>
+            <div class="flex items-center gap-1 mt-4 text-sm font-bold" style="color: #b45309">
+              Gestionar reservas
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </div>
+          </button>
+
+>>>>>>> devVal
         </div>
 
         <!-- Sección informativa propietario -->
@@ -223,6 +302,10 @@
     </main>
 
   </ng-container>
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> devVal
 
   <app-footer></app-footer>
 </div>

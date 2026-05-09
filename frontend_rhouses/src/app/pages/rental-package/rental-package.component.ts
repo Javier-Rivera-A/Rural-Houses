@@ -1,5 +1,9 @@
 import { CommonModule } from '@angular/common';
+<<<<<<< HEAD
 import { Component, OnInit, inject } from '@angular/core';
+=======
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+>>>>>>> devVal
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -7,6 +11,13 @@ import { AuthService } from '../../Services/Auth/Auth.service';
 import { CountryHouseService, CountryHouseResponse, RentalPackageResponse } from '../../Services/CountryHouse/country-house.service';
 import { NavbarComponent } from '../homepage/components/navbar/navbar.component';
 import { AvailabilityCalendarComponent } from './Components/availability-calendar.component';
+<<<<<<< HEAD
+=======
+import { ReservationOverlay } from './Components/availability-calendar.component';
+import { RentalService, RentalResponse } from '../../Services/Rental/rental.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+>>>>>>> devVal
 
 interface PackageForm {
   startingDate: string;
@@ -26,7 +37,13 @@ export class RentalPackageComponent implements OnInit {
   private router      = inject(Router);
   private authService = inject(AuthService);
   private houseSvc    = inject(CountryHouseService);
+<<<<<<< HEAD
   private toastr      = inject(ToastrService);
+=======
+  private rentalSvc   = inject(RentalService);
+  private toastr      = inject(ToastrService);
+  private destroyRef  = inject(DestroyRef);
+>>>>>>> devVal
 
   ownerId: string | null = null;
 
@@ -37,7 +54,13 @@ export class RentalPackageComponent implements OnInit {
   selectedHouse:   CountryHouseResponse | null = null;
 
   packages:     RentalPackageResponse[] = [];
+<<<<<<< HEAD
   isLoadingPkgs = false;
+=======
+  reservations: ReservationOverlay[] = [];
+  isLoadingPkgs = false;
+  private houseReservationsSub?: Subscription;
+>>>>>>> devVal
 
   showForm  = false;
   editingId: string | null = null;
@@ -89,9 +112,17 @@ export class RentalPackageComponent implements OnInit {
     this.selectedHouseId = houseId;
     this.selectedHouse   = this.houses.find(h => h.id === houseId) ?? null;
     this.packages        = [];
+<<<<<<< HEAD
     this.showForm        = false;
     this.editingId       = null;
     if (houseId) this.loadPackages();
+=======
+    this.reservations    = [];
+    this.showForm        = false;
+    this.editingId       = null;
+    if (houseId) this.loadPackages();
+    if (this.selectedHouse?.code) this.loadOwnerReservations(this.selectedHouse.code);
+>>>>>>> devVal
   }
 
   loadPackages(): void {
@@ -108,6 +139,23 @@ export class RentalPackageComponent implements OnInit {
     });
   }
 
+<<<<<<< HEAD
+=======
+  private loadOwnerReservations(houseCode: string): void {
+    this.houseReservationsSub?.unsubscribe();
+    this.houseReservationsSub = this.rentalSvc.observeActiveRentalsByHouse(houseCode)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((rentals) => {
+        this.reservations = rentals.map((r) => this.toOverlay(r));
+      });
+
+    this.rentalSvc.findByOwner(this.ownerId!).subscribe({
+      next: () => {},
+      error: () => {}
+    });
+  }
+
+>>>>>>> devVal
   openForm(): void {
     this.editingId = null;
     this.form = { startingDate: '', endingDate: '', priceNight: null, typeRental: 'ENTIRE_HOUSE' };
@@ -239,4 +287,17 @@ export class RentalPackageComponent implements OnInit {
       ? house.photo[0].url
       : 'https://images.unsplash.com/photo-1572345901383-be2fcd1625f3?w=800&q=80';
   }
+<<<<<<< HEAD
+=======
+
+  private toOverlay(rental: RentalResponse): ReservationOverlay {
+    return {
+      id: rental.id,
+      rentalCode: rental.rentalCode,
+      checkInDate: rental.checkInDate,
+      checkOutDate: rental.checkOutDate,
+      state: rental.state
+    };
+  }
+>>>>>>> devVal
 }

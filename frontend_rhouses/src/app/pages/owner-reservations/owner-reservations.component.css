@@ -1,0 +1,20 @@
+.tab-btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  border-color: #d1d5db;
+}
+
+.tab-active {
+  border-color: #aa4465;
+  color: #aa4465;
+  background: rgba(170, 68, 101, 0.08);
+}

@@ -104,7 +104,10 @@ export class LoginComponent {
           id:          userId,
           userName:    this.formData.username,
           accountType: this.formData.accountType,
+          fullName:    data?.fullName,
           email:       data?.email,
+          phone:       data?.phone,
+          avatarUrl:   data?.avatarUrl,
           token:       token
         });
 
