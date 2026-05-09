@@ -10,4 +10,9 @@ public interface OwnerService {
     Owner login(LoginRequest request);
     Owner findById(String id);
     Owner findByUserName(String userName);
+    void updateUserName(String id, String newUserName);
+    void updateEmail(String id, String newEmail);
+    void updatePassword(String id, String newPassword);
+    void updatePhone(String id, String newPhone);
+    void updateAccessWord(String id, String newAccessWord);
 }

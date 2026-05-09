@@ -49,4 +49,31 @@ public class CustomerController {
         Customer customer = customerService.findById(id);
         return ResponseEntity.ok(ApiResponse.ok("Cliente encontrado", customer.getId()));
     }
+
+    //Metodos de actualizacion
+
+    @PutMapping("/{id}/username")
+    public ResponseEntity<ApiResponse<String>> updateUserName(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdateUserNameRequest request) {
+        customerService.updateUserName(id, request.getUserName());
+        return ResponseEntity.ok(ApiResponse.ok("Nombre de usuario actualizado correctamente", id));
+    }
+
+    @PutMapping("/{id}/email")
+    public ResponseEntity<ApiResponse<String>> updateEmail(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdateEmailRequest request) {
+        customerService.updateEmail(id, request.getEmail());
+        return ResponseEntity.ok(ApiResponse.ok("Email actualizado correctamente", id));
+    }
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<ApiResponse<String>> updatePassword(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdatePasswordRequest request) {
+        customerService.updatePassword(id, request.getPassword());
+        return ResponseEntity.ok(ApiResponse.ok("Contraseña actualizada correctamente", id));
+    }
+
+    @PutMapping("/{id}/phone")
+    public ResponseEntity<ApiResponse<String>> updatePhone(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdatePhoneRequest request) {
+        customerService.updatePhone(id, request.getPhone());
+        return ResponseEntity.ok(ApiResponse.ok("Teléfono actualizado correctamente", id));
+    }
 }
+

@@ -76,4 +76,51 @@ public class OwnerServiceImpl implements OwnerService {
         return ownerRepository.findByUserName(userName)
                 .orElseThrow(() -> new ResourceNotFoundException("Propietario no encontrado: " + userName));
     }
+
+    @Override
+    @Transactional
+    public void updateUserName(String id, String newUserName) {
+        Owner owner = findById(id);
+        if (!owner.getUserName().equals(newUserName) && userRepository.existsByUserName(newUserName)) {
+            throw new BusinessException("El nombre de usuario '" + newUserName + "' ya está en uso. Elige otro.");
+        }
+        owner.setUserName(newUserName);
+        ownerRepository.save(owner);
+    }
+
+    @Override
+    @Transactional
+    public void updateEmail(String id, String newEmail) {
+        Owner owner = findById(id);
+        if (!owner.getEmail().equals(newEmail) && userRepository.existsByEmail(newEmail)) {
+            throw new BusinessException("El email '" + newEmail + "' ya está registrado en el sistema.");
+        }
+        owner.setEmail(newEmail);
+        ownerRepository.save(owner);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(String id, String newPassword) {
+        Owner owner = findById(id);
+        owner.setPassword(passwordEncoder.encode(newPassword));
+        ownerRepository.save(owner);
+    }
+
+    @Override
+    @Transactional
+    public void updatePhone(String id, String newPhone) {
+        Owner owner = findById(id);
+        owner.setPhone(newPhone);
+        ownerRepository.save(owner);
+    }
+
+    @Override
+    @Transactional
+    public void updateAccessWord(String id, String newAccessWord) {
+        Owner owner = findById(id);
+        owner.setAccessWord(newAccessWord);
+        ownerRepository.save(owner);
+    }
 }
+
