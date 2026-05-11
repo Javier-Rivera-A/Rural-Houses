@@ -1,7 +1,7 @@
 package co.uniquindio.rural_house.Rural_House.controller;
 
 
-import co.uniquindio.rural_house.Rural_House.dto.request.RentalRequest;
+import co.uniquindio.rural_house.Rural_House.dto.request.*;
 import co.uniquindio.rural_house.Rural_House.dto.response.ApiResponse;
 import co.uniquindio.rural_house.Rural_House.dto.response.RentalResponse;
 import co.uniquindio.rural_house.Rural_House.service.RentalService;
@@ -74,8 +74,8 @@ public class RentalController {
     public ResponseEntity<ApiResponse<Void>> payRental(
             @PathVariable String rentalId,
             @RequestParam String customerId,
-            @RequestParam Float amount) {
-        rentalService.payRental(customerId, rentalId, amount);
+            @Valid @RequestBody PayRentalRequest request) {
+        rentalService.payRental(customerId, rentalId, request);
         return ResponseEntity.ok(ApiResponse.ok("Pago realizado y transferido correctamente", null));
     }
 

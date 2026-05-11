@@ -82,12 +82,7 @@ export class HomepageComponent implements OnInit {
     this.filteredHouses = houses;
     this.showingSuggestions = false;
   }
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-}
-=======
->>>>>>> devVal
+
  
   onFilterApplied(filters: any): void {
     this.isLoading = true;
@@ -113,15 +108,10 @@ export class HomepageComponent implements OnInit {
     });
   }
  
-  // Owner quick actions
+ // Owner quick actions
   goToMyHouses()      { this.router.navigate(['/my-houses']); }
   goToRegisterHouse() { this.router.navigate(['/register-house']); }
   goToSettings()      { this.router.navigate(['/settings']); }
   goToRentalPackages() { const ownerId = this.authService.user()?.id; this.router.navigate(['/rental-packages', ownerId]);}
-<<<<<<< HEAD
-}
-=======
   goToOwnerReservations() { this.router.navigate(['/owner-reservations']); }
 }
->>>>>>> Stashed changes
->>>>>>> devVal

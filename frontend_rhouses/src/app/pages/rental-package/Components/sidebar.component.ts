@@ -62,7 +62,6 @@ export class SidebarComponent {
   @Input() userName: string = 'Usuario';
   @Input() userEmail: string = 'correo@ejemplo.com';
 
-  // Definimos nuestra lista de navegación
   navItems = [
     { id: 'dashboard', label: 'Resumen', iconName: 'home' },
     { id: 'packages', label: 'Paquetes', iconName: 'package' },
@@ -73,7 +72,6 @@ export class SidebarComponent {
     return this.currentView === itemId || (this.currentView === 'form' && itemId === 'packages');
   }
 
-  // Función para emitir el evento al componente padre (equivalente a onClick)
   onNavigateClick(id: string) {
     this.navigate.emit(id);
   }

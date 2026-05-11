@@ -8,8 +8,6 @@ interface CalendarDay {
   isCurrentMonth: boolean;
   isToday: boolean;
   packages: RentalPackageResponse[];
-<<<<<<< HEAD
-=======
   reservations: ReservationOverlay[];
 }
 
@@ -19,7 +17,6 @@ export interface ReservationOverlay {
   checkInDate: string;
   checkOutDate: string;
   state: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
->>>>>>> devVal
 }
 
 @Component({
@@ -41,8 +38,6 @@ export interface ReservationOverlay {
       color: white;
       font-weight: 600;
     }
-<<<<<<< HEAD
-=======
     .rental-pill {
       display: block;
       font-size: 9px;
@@ -55,7 +50,6 @@ export interface ReservationOverlay {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
->>>>>>> devVal
   `],
   template: `
     <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
@@ -108,15 +102,12 @@ export interface ReservationOverlay {
         <div class="flex items-center gap-1.5">
           <span class="w-3 h-3 rounded-sm" style="background:#2CA58D"></span> Ambas opciones
         </div>
-<<<<<<< HEAD
-=======
         <div class="flex items-center gap-1.5">
           <span class="w-3 h-3 rounded-sm" style="background:#f59e0b"></span> Reserva pendiente
         </div>
         <div class="flex items-center gap-1.5">
           <span class="w-3 h-3 rounded-sm" style="background:#166534"></span> Reserva confirmada
         </div>
->>>>>>> devVal
       </div>
 
       <!-- Días de la semana -->
@@ -160,8 +151,6 @@ export interface ReservationOverlay {
             </span>
           </div>
 
-<<<<<<< HEAD
-=======
           <!-- Overlay de reservas -->
           <div *ngIf="cell.isCurrentMonth && cell.reservations.length > 0" class="flex flex-col gap-0.5 mt-1">
             <span *ngFor="let reservation of cell.reservations.slice(0, 1)"
@@ -179,7 +168,6 @@ export interface ReservationOverlay {
             </span>
           </div>
 
->>>>>>> devVal
           <!-- Sin paquetes -->
           <div *ngIf="cell.isCurrentMonth && cell.packages.length === 0"
                class="flex items-end justify-center" style="height:48px">
@@ -224,10 +212,7 @@ export interface ReservationOverlay {
 export class AvailabilityCalendarComponent implements OnInit, OnChanges {
 
   @Input() packages: RentalPackageResponse[] = [];
-<<<<<<< HEAD
-=======
   @Input() reservations: ReservationOverlay[] = [];
->>>>>>> devVal
 
   weekDays    = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   calendarDays: CalendarDay[] = [];
@@ -261,13 +246,9 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void  { this.buildCalendar(); }
-<<<<<<< HEAD
-  ngOnChanges(c: SimpleChanges): void { if (c['packages']) this.buildCalendar(); }
-=======
   ngOnChanges(c: SimpleChanges): void {
     if (c['packages'] || c['reservations']) this.buildCalendar();
   }
->>>>>>> devVal
 
   prevMonth(): void {
     if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
@@ -306,9 +287,6 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
         return date >= s && date <= e;
       });
 
-<<<<<<< HEAD
-      return { date, dayNumber: date.getDate(), isCurrentMonth, isToday, packages: pkgsForDay };
-=======
       const reservationsForDay = this.reservations.filter((reservation) => {
         if (reservation.state !== 'PENDING' && reservation.state !== 'CONFIRMED') return false;
         const start = this.parseDate(reservation.checkInDate);
@@ -324,7 +302,6 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
         packages: pkgsForDay,
         reservations: reservationsForDay
       };
->>>>>>> devVal
     });
   }
 
@@ -332,13 +309,10 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
     return this.parseDate(pkg.startingDate).toDateString() === date.toDateString();
   }
 
-<<<<<<< HEAD
-=======
   isReservationStartDay(date: Date, reservation: ReservationOverlay): boolean {
     return this.parseDate(reservation.checkInDate).toDateString() === date.toDateString();
   }
 
->>>>>>> devVal
   parseDate(dateStr: string): Date {
     return new Date(dateStr.split('T')[0] + 'T00:00:00');
   }
@@ -367,12 +341,9 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
     };
     return map[type] ?? '#E06C3B18';
   }
-<<<<<<< HEAD
-=======
 
   getReservationColor(state: ReservationOverlay['state']): string {
     if (state === 'PENDING') return '#f59e0b';
     return '#166534';
   }
->>>>>>> devVal
 }

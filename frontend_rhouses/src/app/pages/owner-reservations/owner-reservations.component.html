@@ -5,8 +5,31 @@
 
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-black" style="color: var(--rhouses-secondary-dark)">Reservas </h1>
+      <h1 class="text-3xl font-black" style="color: var(--rhouses-secondary-dark)">Reservas</h1>
       <p class="text-gray-500 mt-1">Gestiona los pagos y estados de reservas de tus propiedades.</p>
+    </div>
+
+    <!-- Alerta de reservas vencidas sin atender -->
+    <div *ngIf="!isLoading && expiredPendingCount > 0"
+         class="mb-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl flex items-start gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+           fill="none" stroke="#b45309" stroke-width="2" class="shrink-0 mt-0.5">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+      </svg>
+      <div class="flex-1">
+        <p class="font-black text-sm text-amber-800">
+          {{ expiredPendingCount }} reserva{{ expiredPendingCount !== 1 ? 's' : '' }} con pago vencido (+3 días)
+        </p>
+        <p class="text-xs text-amber-700 mt-0.5">
+          Estas reservas superaron el plazo de 3 días para el pago del anticipo.
+          Debes decidir si cancelarlas o mantenerlas pendientes.
+        </p>
+      </div>
+      <button (click)="selectedTab = 'PENDING'"
+              class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-200 text-amber-800 hover:bg-amber-300 transition-colors">
+        Ver pendientes
+      </button>
     </div>
 
     <!-- Contadores -->
@@ -15,6 +38,10 @@
         <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
         <span class="text-sm font-bold" style="color: var(--rhouses-secondary-dark)">
           {{ pendingCount }} pendiente{{ pendingCount !== 1 ? 's' : '' }}
+        </span>
+        <span *ngIf="expiredPendingCount > 0"
+              class="ml-1 px-1.5 py-0.5 rounded-full text-xs font-black bg-amber-400 text-white">
+          {{ expiredPendingCount }} vencida{{ expiredPendingCount !== 1 ? 's' : '' }}
         </span>
       </div>
       <div *ngIf="confirmedCount > 0" class="flex items-center gap-2 bg-white rounded-xl px-4 py-2.5 shadow-sm border border-gray-100">
@@ -31,16 +58,20 @@
         Todas
       </button>
       <button (click)="selectedTab='PENDING'"   class="tab-btn" [class.tab-active]="selectedTab==='PENDING'">
-         Pendientes
+        Pendientes
+        <span *ngIf="expiredPendingCount > 0"
+              class="ml-1.5 px-1.5 py-0.5 rounded-full text-xs font-black bg-amber-400 text-white">
+          {{ expiredPendingCount }}
+        </span>
       </button>
       <button (click)="selectedTab='CONFIRMED'" class="tab-btn" [class.tab-active]="selectedTab==='CONFIRMED'">
-         Confirmadas
+        Confirmadas
       </button>
       <button (click)="selectedTab='EXPIRED'"   class="tab-btn" [class.tab-active]="selectedTab==='EXPIRED'">
-         Vencidas
+        Vencidas
       </button>
       <button (click)="selectedTab='CANCELLED'" class="tab-btn" [class.tab-active]="selectedTab==='CANCELLED'">
-         Canceladas
+        Canceladas
       </button>
     </div>
 
@@ -69,34 +100,45 @@
       <article *ngFor="let rental of filteredRentals"
                class="bg-white rounded-2xl shadow-md overflow-hidden border-2 transition-all"
                [ngClass]="{
-                 'border-yellow-200': rental.state === 'PENDING',
+                 'border-amber-300': rental.state === 'PENDING' && isOverdue(rental),
+                 'border-yellow-200': rental.state === 'PENDING' && !isOverdue(rental),
                  'border-green-200':  rental.state === 'CONFIRMED',
                  'border-red-100':    rental.state === 'CANCELLED',
                  'border-gray-100':   rental.state === 'EXPIRED'
                }">
 
         <!-- Cabecera -->
-        <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100"
+             [ngClass]="{ 'bg-amber-50': rental.state === 'PENDING' && isOverdue(rental) }">
           <div>
-            <p class="font-mono font-black text-sm" style="color: var(--rhouses-secondary-dark)">
-              {{ rental.rentalCode }}
-            </p>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <div class="flex items-center gap-2 mb-0.5">
+              <p class="font-mono font-black text-sm" style="color: var(--rhouses-secondary-dark)">
+                {{ rental.rentalCode }}
+              </p>
+              <!-- Badge de vencida -->
+              <span *ngIf="rental.state === 'PENDING' && isOverdue(rental)"
+                    class="px-2 py-0.5 rounded-full text-xs font-black bg-amber-200 text-amber-800">
+                ⏰ {{ daysSinceCreation(rental) }}d sin pago
+              </span>
+            </div>
+            <p class="text-xs text-gray-400">
               {{ rental.countryHouseCode }} ·
               {{ formatDate(rental.checkInDate) }} → {{ formatDate(rental.checkOutDate) }}
             </p>
           </div>
           <span class="px-3 py-1.5 rounded-full text-xs font-black border"
                 [ngClass]="{
-                  'bg-yellow-50 text-yellow-800 border-yellow-200': rental.state === 'PENDING',
+                  'bg-amber-50 text-amber-800 border-amber-300': rental.state === 'PENDING' && isOverdue(rental),
+                  'bg-yellow-50 text-yellow-800 border-yellow-200': rental.state === 'PENDING' && !isOverdue(rental),
                   'bg-green-50 text-green-800 border-green-200':    rental.state === 'CONFIRMED',
                   'bg-red-50 text-red-700 border-red-200':          rental.state === 'CANCELLED',
                   'bg-gray-50 text-gray-600 border-gray-200':       rental.state === 'EXPIRED'
                 }">
-            <span *ngIf="rental.state === 'PENDING'"> Pendiente de pago</span>
-            <span *ngIf="rental.state === 'CONFIRMED'"> Pago confirmado</span>
-            <span *ngIf="rental.state === 'CANCELLED'"> Cancelada</span>
-            <span *ngIf="rental.state === 'EXPIRED'"> Vencida</span>
+            <span *ngIf="rental.state === 'PENDING' && !isOverdue(rental)">⏳ Pendiente de pago</span>
+            <span *ngIf="rental.state === 'PENDING' && isOverdue(rental)">⚠️ Pago vencido</span>
+            <span *ngIf="rental.state === 'CONFIRMED'">✅ Pago confirmado</span>
+            <span *ngIf="rental.state === 'CANCELLED'">❌ Cancelada</span>
+            <span *ngIf="rental.state === 'EXPIRED'">💤 Vencida</span>
           </span>
         </div>
 
@@ -125,8 +167,8 @@
             </div>
           </div>
 
-          <!-- Bloque de acción para PENDING -->
-          <div *ngIf="rental.state === 'PENDING'"
+          <!-- ══ ESCENARIO 1: Pago en plazo (≤3 días) ══ -->
+          <div *ngIf="rental.state === 'PENDING' && !isOverdue(rental)"
                class="mt-2 p-4 rounded-xl border-2"
                style="background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.3)">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -143,7 +185,7 @@
                 </p>
               </div>
               <div class="flex flex-wrap gap-2 shrink-0">
-                <!-- Confirmar pago -->
+                <!-- Confirmar pago → Escenario 1 -->
                 <button (click)="openConfirmModal(rental)"
                         [disabled]="isProcessing(rental.id)"
                         class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50"
@@ -158,22 +200,58 @@
                   </svg>
                   {{ isProcessing(rental.id) ? 'Procesando...' : 'Confirmar pago recibido' }}
                 </button>
-
-                <!-- Cancelar reserva -->
+                <!-- Cancelar directa -->
                 <button (click)="openCancelModal(rental)"
                         [disabled]="isProcessing(rental.id)"
                         class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border-2 border-red-200 text-red-600 hover:bg-red-50 transition-all disabled:opacity-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-                  </svg>
                   Cancelar
                 </button>
+              </div>
+            </div>
+          </div>
 
-                <!-- Marcar vencida -->
-                <button *ngIf="canMarkExpired(rental)" (click)="markExpired(rental)"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-gray-300 text-gray-500 hover:bg-gray-50 transition-all">
-                  💤 Marcar vencida
+          <!-- ══ ESCENARIO 2: Pago vencido (+3 días) ══ -->
+          <div *ngIf="rental.state === 'PENDING' && isOverdue(rental)"
+               class="mt-2 p-4 rounded-xl border-2 border-amber-300"
+               style="background: rgba(251,191,36,0.06)">
+            <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div class="flex-1">
+                <p class="text-sm font-black text-amber-800 mb-1">
+                  ⏰ Plazo de pago vencido — {{ daysSinceCreation(rental) }} días sin pago
+                </p>
+                <p class="text-xs text-amber-700 mb-2">
+                  Han transcurrido más de 3 días desde que se realizó esta reserva sin recibir el anticipo
+                  <strong class="font-mono">($ {{ rental.totalPrice * 0.2 | number:'1.0-0' }})</strong>.
+                  Debes decidir qué hacer con ella.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                  <span>📅 Reservada el {{ formatDate(rental.rentalDayMade) }}</span>
+                  <span>·</span>
+                  <span>🏠 Check-in: {{ formatDate(rental.checkInDate) }}</span>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 shrink-0">
+                <!-- Botón principal: abrir modal de decisión (Escenario 2) -->
+                <button (click)="openExpiredModal(rental)"
+                        [disabled]="isProcessing(rental.id) || isProcessingExpired"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50"
+                        style="background: linear-gradient(135deg, #b45309, #92400e)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 8v4"/><path d="M12 16h.01"/>
+                  </svg>
+                  Gestionar reserva vencida
+                </button>
+                <!-- Aún puede confirmar si recibió el pago tarde -->
+                <button (click)="openConfirmModal(rental)"
+                        [disabled]="isProcessing(rental.id)"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border border-green-300 text-green-700 hover:bg-green-50 transition-all disabled:opacity-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
+                  </svg>
+                  Recibí el pago tarde — confirmar
                 </button>
               </div>
             </div>
@@ -192,7 +270,7 @@
               <div>
                 <p class="text-sm font-black text-green-800">Pago confirmado — Reserva activa</p>
                 <p class="text-xs text-green-600 mt-0.5">
-                  El cliente ha sido notificado con la confirmación de su reserva.
+                  El cliente puede ver la confirmación de su reserva en "Mis reservas".
                 </p>
               </div>
             </div>
@@ -202,7 +280,7 @@
           <div *ngIf="rental.state === 'CANCELLED'"
                class="mt-2 p-4 rounded-xl bg-red-50 border border-red-100">
             <p class="text-sm font-semibold text-red-600">
-               Reserva cancelada — El cliente fue notificado.
+              ❌ Reserva cancelada — El cliente fue notificado.
             </p>
           </div>
 
@@ -211,9 +289,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════
-       MODAL: Confirmar pago recibido
-  ══════════════════════════════ -->
+  <!-- ══════════════════════════════════════
+       MODAL ESCENARIO 1: Confirmar pago recibido
+  ══════════════════════════════════════ -->
   <div *ngIf="confirmTarget"
        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in">
@@ -231,13 +309,14 @@
         Reserva: <strong class="font-mono">{{ confirmTarget.rentalCode }}</strong>
       </p>
       <p class="text-center text-gray-500 text-sm mb-6">
-        Monto del anticipo:
+        Anticipo:
         <strong class="font-black" style="color: #166534">
           $ {{ confirmTarget.totalPrice * 0.2 | number:'1.0-0' }}
         </strong>
       </p>
       <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-xs text-blue-700">
-        ℹ Al confirmar, la reserva pasará a estado <strong>Confirmada</strong> y el cliente recibirá una notificación por correo.
+        ℹ️ Al confirmar, la reserva pasará a estado <strong>Confirmada</strong> y
+        el cliente podrá visualizarlo en su sección "Mis reservas".
       </div>
       <div class="flex gap-3">
         <button (click)="closeConfirmModal()"
@@ -247,15 +326,117 @@
         <button (click)="confirmPayment()"
                 class="flex-1 py-3 rounded-xl font-bold text-sm text-white hover:opacity-90"
                 style="background-color: #166534">
-           Sí, confirmar pago
+          ✅ Sí, confirmar pago
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════
-       MODAL: Cancelar reserva
-  ══════════════════════════════ -->
+  <!-- ══════════════════════════════════════
+       MODAL ESCENARIO 2: Reserva vencida (+3 días)
+       El propietario decide cancelar o mantener
+  ══════════════════════════════════════ -->
+  <div *ngIf="expiredTarget"
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+
+      <!-- Header degradado de alerta -->
+      <div class="px-6 py-5 text-white"
+           style="background: linear-gradient(135deg, #92400e, #b45309)">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                 fill="none" stroke="white" stroke-width="2">
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-bold tracking-widest uppercase opacity-70">Plazo de pago vencido</p>
+            <p class="font-black text-lg font-mono">{{ expiredTarget.rentalCode }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Resumen -->
+        <div class="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Cliente</span>
+            <span class="font-bold" style="color: var(--rhouses-secondary-dark)">
+              {{ expiredTarget.customerUserName ?? 'Reserva anónima' }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Check-in</span>
+            <span class="font-bold" style="color: var(--rhouses-secondary-dark)">
+              {{ formatDate(expiredTarget.checkInDate) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Total reserva</span>
+            <span class="font-black" style="color: #AA4465">$ {{ expiredTarget.totalPrice | number:'1.0-0' }}</span>
+          </div>
+          <div class="flex justify-between border-t border-gray-200 pt-2">
+            <span class="text-gray-500">Días sin pago</span>
+            <span class="font-black text-amber-700">{{ daysSinceCreation(expiredTarget) }} días</span>
+          </div>
+        </div>
+
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Esta reserva lleva <strong class="text-amber-700">{{ daysSinceCreation(expiredTarget) }} días</strong>
+          pendiente de pago del anticipo. Según las condiciones, tienes derecho a cancelarla,
+          pero también puedes mantenerla si tienes un acuerdo con el cliente.
+        </p>
+
+        <!-- Opción A: Cancelar -->
+        <button (click)="cancelExpiredRental()"
+                [disabled]="isProcessingExpired"
+                class="w-full flex items-start gap-3 p-4 rounded-xl border-2 border-red-200 hover:bg-red-50 transition-all text-left disabled:opacity-50">
+          <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                 fill="none" stroke="#dc2626" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-black text-sm text-red-700">Cancelar la reserva</p>
+            <p class="text-xs text-red-500 mt-0.5">
+              Las fechas quedarán libres para nuevas reservas. El cliente será notificado.
+            </p>
+          </div>
+        </button>
+
+        <!-- Opción B: Mantener -->
+        <button (click)="keepExpiredRental()"
+                [disabled]="isProcessingExpired"
+                class="w-full flex items-start gap-3 p-4 rounded-xl border-2 border-blue-200 hover:bg-blue-50 transition-all text-left disabled:opacity-50">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                 fill="none" stroke="#1d4ed8" stroke-width="2">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              <path d="M12 8v4"/><path d="M12 16h.01"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-black text-sm text-blue-700">Mantener la reserva pendiente</p>
+            <p class="text-xs text-blue-500 mt-0.5">
+              Si tienes un acuerdo con el cliente, puedes confirmar el pago cuando lo recibas.
+            </p>
+          </div>
+        </button>
+
+        <button (click)="closeExpiredModal()"
+                class="w-full py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">
+          Decidir más tarde
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       MODAL: Cancelar reserva (acción directa)
+  ══════════════════════════════════════ -->
   <div *ngIf="cancelTarget"
        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in">
@@ -272,10 +453,10 @@
       <p class="text-center text-gray-500 text-sm mb-6">
         Reserva <strong class="font-mono">{{ cancelTarget.rentalCode }}</strong>
         de <strong>{{ cancelTarget.customerUserName ?? 'cliente' }}</strong>.
-        Las fechas quedarán liberadas.
+        Las fechas quedarán libres.
       </p>
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 text-xs text-amber-700">
-         El cliente recibirá una notificación de cancelación. Si ya realizó el anticipo, gestiona el reembolso directamente con él.
+        ⚠️ Si el cliente ya realizó el anticipo, gestiona el reembolso directamente con él.
       </div>
       <div class="flex gap-3">
         <button (click)="closeCancelModal()"

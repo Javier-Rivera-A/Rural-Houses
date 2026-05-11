@@ -6,18 +6,10 @@ import { NavbarComponent } from '../homepage/components/navbar/navbar.component'
 import { AuthService } from '../../Services/Auth/Auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { HouseDetailService, HouseDetailResponse } from '../../Services/HouseDetails/house-detail.service';
-<<<<<<< HEAD
 import { CountryHouseService, RentalPackageResponse } from '../../Services/CountryHouse/country-house.service';
-import { AvailabilityCalendarComponent } from '../rental-package/Components/availability-calendar.component';
-=======
-<<<<<<< Updated upstream
-=======
-import { CountryHouseService, RentalPackageResponse } from '../../Services/CountryHouse/country-house.service';
-import { AvailabilityCalendarComponent } from '../rental-package/Components/availability-calendar.component';
-import { ReservationOverlay } from '../rental-package/Components/availability-calendar.component';
+import { AvailabilityCalendarComponent, ReservationOverlay} from '../rental-package/Components/availability-calendar.component';
 import { RentalService, RentalResponse } from '../../Services/Rental/rental.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
->>>>>>> devVal
 
 interface PackageForm {
   startingDate: string;
@@ -25,10 +17,6 @@ interface PackageForm {
   priceNight:   number | null;
   typeRental:   'ENTIRE_HOUSE' | 'ROOMS' | 'BOTH';
 }
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> devVal
 
 @Component({
   selector: 'app-house-detail',
@@ -38,40 +26,19 @@ interface PackageForm {
 })
 export class HouseDetailComponent implements OnInit {
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-  private route   = inject(ActivatedRoute);
-  private router  = inject(Router);
-  private houseSvc = inject(HouseDetailService); // ✅ SOLO ESTE
-  authService      = inject(AuthService);
-  private toastr   = inject(ToastrService);
-=======
->>>>>>> devVal
   private route      = inject(ActivatedRoute);
   private router     = inject(Router);
   private houseSvc   = inject(HouseDetailService);
   private countrySvc = inject(CountryHouseService);
-<<<<<<< HEAD
-  authService        = inject(AuthService);
-  private toastr     = inject(ToastrService);
-=======
   private rentalSvc  = inject(RentalService);
   authService        = inject(AuthService);
   private toastr     = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
->>>>>>> Stashed changes
->>>>>>> devVal
 
   house: HouseDetailResponse | null = null;
   isLoading     = true;
   selectedPhoto = 0;
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> devVal
   showDeactivateModal = false;
   isProcessing = false;
 
@@ -79,10 +46,7 @@ export class HouseDetailComponent implements OnInit {
 
   // ── Paquetes ────────────────────────────────────────────────
   packages:     RentalPackageResponse[] = [];
-<<<<<<< HEAD
-=======
   reservations: ReservationOverlay[] = [];
->>>>>>> devVal
   isLoadingPkgs = false;
 
   showPackageForm = false;
@@ -104,10 +68,6 @@ export class HouseDetailComponent implements OnInit {
     { value: 'BOTH',         label: 'Ambas',            desc: 'Ambas opciones'  }
   ];
 
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> devVal
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.router.navigate(['/']); return; }
@@ -117,15 +77,8 @@ export class HouseDetailComponent implements OnInit {
       next: (res) => {
         this.house    = res?.data ?? null;
         this.isLoading = false;
-<<<<<<< HEAD
-        this.loadPackages();
-=======
-<<<<<<< Updated upstream
-=======
         this.loadPackages();
         this.loadReservations();
->>>>>>> Stashed changes
->>>>>>> devVal
       },
       error: () => {
         this.toastr.error('No se pudo cargar la casa rural', 'Error');
@@ -135,11 +88,6 @@ export class HouseDetailComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> devVal
   loadPackages(): void {
     this.isLoadingPkgs = true;
     this.countrySvc.getPackagesByHouse(this.houseId).subscribe({
@@ -153,8 +101,6 @@ export class HouseDetailComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
-=======
   loadReservations(): void {
     if (!this.house?.code) {
       this.reservations = [];
@@ -170,14 +116,13 @@ export class HouseDetailComponent implements OnInit {
     const user = this.authService.user();
     if (!user) return;
 
-    const hydrate$ = this.authService.isOwner()
-      ? this.rentalSvc.findByOwner(user.id)
-      : this.rentalSvc.findByCustomer(user.id);
-
-    hydrate$.subscribe({ next: () => {}, error: () => {} });
+    if (this.authService.isOwner()) {
+      this.rentalSvc.findByOwner(this.houseId).subscribe({ next: () => {}, error: () => {} });
+    } else {
+      this.rentalSvc.findByCustomer(user.id).subscribe({ next: () => {}, error: () => {} });
+    }
   }
 
->>>>>>> devVal
   // ── Formulario paquetes ──────────────────────────────────────
   openPkgForm(): void {
     this.editingPkgId = null;
@@ -269,10 +214,6 @@ export class HouseDetailComponent implements OnInit {
   }
 
   // ── Casa ────────────────────────────────────────────────────
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> devVal
   get totalBathrooms(): number {
     if (!this.house) return 0;
     return (this.house.privateBathrooms ?? 0) + (this.house.publicBathrooms ?? 0);
@@ -288,6 +229,10 @@ export class HouseDetailComponent implements OnInit {
   goBack(): void { this.router.navigate(['/']); }
   goToEdit(): void { this.router.navigate(['/edit-house', this.houseId]); }
   openDeactivateModal(): void { this.showDeactivateModal = true; }
+
+  goToMakeRental(): void {
+    this.router.navigate(['/make-rental', this.houseId]);
+  }
 
   confirmDeactivate(): void {
     const ownerId = this.authService.user()?.id;
@@ -324,11 +269,6 @@ export class HouseDetailComponent implements OnInit {
       }
     });
   }
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> devVal
 
   // ── Helpers paquetes ────────────────────────────────────────
   formatDate(date: string): string {
@@ -364,12 +304,6 @@ export class HouseDetailComponent implements OnInit {
     return map[type] ?? 'bg-gray-100 text-gray-600';
   }
 
-  goToMakeRental(): void {
-  this.router.navigate(['/make-rental', this.houseId]);
-}
-<<<<<<< HEAD
-=======
-
   private toOverlay(rental: RentalResponse): ReservationOverlay {
     return {
       id: rental.id,
@@ -379,6 +313,4 @@ export class HouseDetailComponent implements OnInit {
       state: rental.state
     };
   }
->>>>>>> Stashed changes
->>>>>>> devVal
 }

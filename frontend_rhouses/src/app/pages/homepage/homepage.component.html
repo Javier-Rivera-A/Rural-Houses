@@ -3,238 +3,338 @@
   <app-navbar></app-navbar>
 
   <!-- ══════════════════════════════════════════
-       VISTA PROPIETARIO: Dashboard de acceso rápido
+       VISTA PROPIETARIO: SOLO DASHBOARD
   ══════════════════════════════════════════ -->
-  <ng-container *ngIf="authService.isOwner()">
+  <ng-container *ngIf="authService.isOwner(); else clientView">
 
-    <!-- Hero del propietario -->
-    <div class="relative overflow-hidden" style="background: linear-gradient(135deg, #333745 0%, #1a1d26 60%, #2a1520 100%)">
+    <!-- Hero propietario -->
+    <div class="relative overflow-hidden"
+         style="background: linear-gradient(135deg, #333745 0%, #1a1d26 60%, #2a1520 100%)">
+
+      <!-- Decoración -->
       <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-0 right-0 w-96 h-96 rounded-full" style="background: radial-gradient(circle, #AA4465, transparent); transform: translate(30%, -30%)"></div>
-        <div class="absolute bottom-0 left-0 w-72 h-72 rounded-full" style="background: radial-gradient(circle, #2CA58D, transparent); transform: translate(-30%, 30%)"></div>
-      </div>
-<<<<<<< HEAD
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <p class="text-sm font-bold tracking-widest uppercase mb-2" style="color: #AA4465">Panel de propietario</p>
-            <h1 class="text-3xl md:text-4xl font-black text-white mb-3">
-              Hola, {{ authService.user()?.userName }} 👋
-            </h1>
-            <p class="text-gray-300 text-lg max-w-xl">
-              Gestiona tus propiedades, paquetes de alquiler y reservas desde aquí.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-=======
-<<<<<<< Updated upstream
-
-      <div class="flex gap-8 relative">
-        <!-- Sidebar colapsable -->
         <div
-          [ngClass]="{
-            'w-80 opacity-100': isFilterOpen,
-            'w-0 opacity-0 overflow-hidden': !isFilterOpen
-          }"
-          class="transition-all duration-300 ease-in-out flex-shrink-0"
-        >
-          <app-filter-sidebar
-            [isOpen]="isFilterOpen"
-            [houses]="allHouses"
-            [searchParams]="searchParams"
-            (close)="closeFilter()"
-            (filtered)="onFiltered($event)">
-          </app-filter-sidebar>
+          class="absolute top-0 right-0 w-96 h-96 rounded-full"
+          style="background: radial-gradient(circle, #AA4465, transparent); transform: translate(30%, -30%)">
         </div>
 
-        <!-- Grid -->
-        <div class="flex-1 transition-all duration-300 ease-in-out min-w-0">
-          <app-house-grid
-            [houses]="filteredHouses"
-            [loading]="isLoading"
-            [searchParams]="searchParams">
-          </app-house-grid>
+        <div
+          class="absolute bottom-0 left-0 w-72 h-72 rounded-full"
+          style="background: radial-gradient(circle, #2CA58D, transparent); transform: translate(-30%, 30%)">
         </div>
       </div>
-    </div>
-  </main>
-=======
+
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+
           <div>
-            <p class="text-sm font-bold tracking-widest uppercase mb-2" style="color: #AA4465">Panel de propietario</p>
+            <p class="text-sm font-bold tracking-widest uppercase mb-2"
+               style="color: #AA4465">
+              Panel de propietario
+            </p>
+
             <h1 class="text-3xl md:text-4xl font-black text-white mb-3">
-              Hola, {{ authService.user()?.fullName || authService.user()?.userName }} 👋
+              Hola,
+              {{ authService.user()?.fullName || authService.user()?.userName }}
+              👋
             </h1>
+
             <p class="text-gray-300 text-lg max-w-xl">
-              Gestiona tus propiedades, paquetes de alquiler y reservas desde aquí.
+              Gestiona tus propiedades, reservas y paquetes desde un solo lugar.
             </p>
           </div>
+
         </div>
       </div>
     </div>
->>>>>>> devVal
 
-    <!-- Quick Actions Grid -->
+    <!-- MAIN OWNER -->
     <main class="flex-grow">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <h2 class="text-xl font-black mb-6" style="color: var(--rhouses-secondary-dark)">Accesos rápidos</h2>
+        <!-- Título -->
+        <div class="mb-8">
+          <h2 class="text-2xl font-black"
+              style="color: var(--rhouses-secondary-dark)">
+            Accesos rápidos
+          </h2>
 
-<<<<<<< HEAD
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-=======
+          <p class="text-gray-500 mt-1">
+            Administra toda tu actividad como propietario.
+          </p>
+        </div>
+
+        <!-- GRID -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
->>>>>>> devVal
 
-          <!-- Mis casas -->
-          <button (click)="goToMyHouses()"
+          <!-- MIS CASAS -->
+          <button
+            (click)="goToMyHouses()"
             class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#AA4465]/20">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
-                 style="background: linear-gradient(135deg, rgba(170,68,101,0.15), rgba(170,68,101,0.05))">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.5" style="color: #AA4465">
+
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style="background: linear-gradient(135deg, rgba(170,68,101,0.15), rgba(170,68,101,0.05))">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="28"
+                   height="28"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="1.5"
+                   style="color: #AA4465">
+
                 <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
                 <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+
               </svg>
             </div>
-            <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Mis casas rurales</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Ver, editar, activar y desactivar tus propiedades publicadas.</p>
-            <div class="flex items-center gap-1 mt-4 text-sm font-bold" style="color: #AA4465">
+
+            <h3 class="text-lg font-black mb-1"
+                style="color: var(--rhouses-secondary-dark)">
+              Mis casas rurales
+            </h3>
+
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Ver, editar y administrar tus propiedades publicadas.
+            </p>
+
+            <div class="flex items-center gap-1 mt-4 text-sm font-bold"
+                 style="color: #AA4465">
+
               Gestionar casas
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="16"
+                   height="16"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5"
+                   class="group-hover:translate-x-1 transition-transform">
+
                 <path d="m9 18 6-6-6-6"/>
+
               </svg>
             </div>
           </button>
 
-          <!-- Registrar nueva -->
-          <button (click)="goToRegisterHouse()"
+          <!-- REGISTRAR CASA -->
+          <button
+            (click)="goToRegisterHouse()"
             class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#2CA58D]/20">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
-                 style="background: linear-gradient(135deg, rgba(44,165,141,0.15), rgba(44,165,141,0.05))">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.5" style="color: #2CA58D">
-                <path d="M5 12h14"/><path d="M12 5v14"/>
+
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style="background: linear-gradient(135deg, rgba(44,165,141,0.15), rgba(44,165,141,0.05))">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="28"
+                   height="28"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="1.5"
+                   style="color: #2CA58D">
+
+                <path d="M5 12h14"/>
+                <path d="M12 5v14"/>
+
               </svg>
             </div>
-            <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Registrar casa</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Publica una nueva propiedad para empezar a recibir reservas de clientes.</p>
-            <div class="flex items-center gap-1 mt-4 text-sm font-bold" style="color: #2CA58D">
+
+            <h3 class="text-lg font-black mb-1"
+                style="color: var(--rhouses-secondary-dark)">
+              Registrar casa
+            </h3>
+
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Publica una nueva propiedad y empieza a recibir reservas.
+            </p>
+
+            <div class="flex items-center gap-1 mt-4 text-sm font-bold"
+                 style="color: #2CA58D">
+
               Nueva propiedad
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="16"
+                   height="16"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5"
+                   class="group-hover:translate-x-1 transition-transform">
+
                 <path d="m9 18 6-6-6-6"/>
+
               </svg>
             </div>
           </button>
 
-          <!-- Paquetes de alquiler -->
-          <button (click)="goToRentalPackages()"
+          <!-- PAQUETES -->
+          <button
+            (click)="goToRentalPackages()"
             class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#AA4465]/20">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
-                 style="background: linear-gradient(135deg, rgba(170,68,101,0.12), rgba(51,55,69,0.05))">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.5" style="color: #AA4465">
+
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style="background: linear-gradient(135deg, rgba(170,68,101,0.12), rgba(51,55,69,0.05))">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="28"
+                   height="28"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="1.5"
+                   style="color: #AA4465">
+
                 <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                <line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/>
+                <line x1="16" x2="16" y1="2" y2="6"/>
+                <line x1="8" x2="8" y1="2" y2="6"/>
                 <line x1="3" x2="21" y1="10" y2="10"/>
+
               </svg>
             </div>
-            <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Paquetes de alquiler</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Gestiona fechas, precios y disponibilidad de tus paquetes.</p>
-            <div class="flex items-center gap-1 mt-4 text-sm font-bold" style="color: #AA4465">
+
+            <h3 class="text-lg font-black mb-1"
+                style="color: var(--rhouses-secondary-dark)">
+              Paquetes
+            </h3>
+
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Gestiona disponibilidad, precios y fechas de alquiler.
+            </p>
+
+            <div class="flex items-center gap-1 mt-4 text-sm font-bold"
+                 style="color: #AA4465">
+
               Ver paquetes
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="16"
+                   height="16"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5"
+                   class="group-hover:translate-x-1 transition-transform">
+
                 <path d="m9 18 6-6-6-6"/>
+
               </svg>
             </div>
           </button>
 
-          <!-- Datos bancarios -->
-          <button (click)="goToSettings()"
-            class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#333745]/20">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
-                 style="background: linear-gradient(135deg, rgba(51,55,69,0.12), rgba(51,55,69,0.04))">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.5" style="color: var(--rhouses-secondary-dark)">
-                <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+          <!-- DATOS BANCARIOS -->
+          <button
+            (click)="goToSettings()"
+            class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#333745]/20 flex flex-col">
+
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style="background: linear-gradient(135deg, rgba(51,55,69,0.12), rgba(51,55,69,0.04))">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  style="color: var(--rhouses-secondary-dark)">
+
+                <rect width="20" height="14" x="2" y="5" rx="2"/>
+                <line x1="2" x2="22" y1="10" y2="10"/>
+
               </svg>
             </div>
-            <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Datos bancarios</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Configura las cuentas donde recibirás los pagos de tus reservas.</p>
-            <div class="flex items-center gap-1 mt-4 text-sm font-bold" style="color: var(--rhouses-secondary-dark)">
+
+            <h3 class="text-lg font-black mb-1"
+                style="color: var(--rhouses-secondary-dark)">
+              Datos bancarios
+            </h3>
+
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Configura las cuentas donde recibirás los pagos de tus reservas.
+            </p>
+
+            <div class="flex items-center gap-1 mt-auto pt-4 text-sm font-bold"
+                style="color: var(--rhouses-secondary-dark)">
+
               Configurar cuentas
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  class="group-hover:translate-x-1 transition-transform">
+
                 <path d="m9 18 6-6-6-6"/>
+
               </svg>
             </div>
           </button>
 
-<<<<<<< HEAD
-=======
-          <!-- Reservas -->
-          <button (click)="goToOwnerReservations()"
+          <!-- RESERVAS -->
+          <button
+            (click)="goToOwnerReservations()"
             class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#f59e0b]/25">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
-                 style="background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(245,158,11,0.04))">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.5" style="color: #b45309">
+
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style="background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(245,158,11,0.04))">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="28"
+                   height="28"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="1.5"
+                   style="color: #b45309">
+
                 <rect width="18" height="18" x="3" y="4" rx="2"/>
                 <line x1="8" x2="16" y1="10" y2="10"/>
                 <line x1="8" x2="16" y1="14" y2="14"/>
+
               </svg>
             </div>
-            <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Reservas</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Revisa pagos, confirma reservas y gestiona pendientes vencidas.</p>
-            <div class="flex items-center gap-1 mt-4 text-sm font-bold" style="color: #b45309">
+
+            <h3 class="text-lg font-black mb-1"
+                style="color: var(--rhouses-secondary-dark)">
+              Reservas
+            </h3>
+
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Revisa pagos y administra reservas pendientes.
+            </p>
+
+            <div class="flex items-center gap-1 mt-4 text-sm font-bold"
+                 style="color: #b45309">
+
               Gestionar reservas
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="16"
+                   height="16"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5"
+                   class="group-hover:translate-x-1 transition-transform">
+
                 <path d="m9 18 6-6-6-6"/>
+
               </svg>
             </div>
           </button>
 
->>>>>>> devVal
-        </div>
-
-        <!-- Sección informativa propietario -->
-        <div class="mt-10 bg-white rounded-2xl shadow-md p-8 border-l-4" style="border-left-color: #AA4465">
-          <h3 class="text-base font-black mb-4" style="color: var(--rhouses-secondary-dark)">
-            ¿Cómo funciona rhouses para propietarios?
-          </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-gray-600">
-            <div class="flex gap-3">
-              <span class="w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0 mt-0.5"
-                    style="background-color: #AA4465">1</span>
-              <div>
-                <p class="font-bold text-gray-800 mb-1">Registra tu propiedad</p>
-                <p>Sube fotos, describe la casa y define sus habitaciones y amenidades.</p>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0 mt-0.5"
-                    style="background-color: #AA4465">2</span>
-              <div>
-                <p class="font-bold text-gray-800 mb-1">Crea paquetes de alquiler</p>
-                <p>Define rangos de fechas y precios para que los clientes puedan reservar.</p>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0 mt-0.5"
-                    style="background-color: #AA4465">3</span>
-              <div>
-                <p class="font-bold text-gray-800 mb-1">Recibe y gestiona reservas</p>
-                <p>Confirma pagos del 20% de depósito y gestiona el estado de cada reserva.</p>
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -243,9 +343,9 @@
   </ng-container>
 
   <!-- ══════════════════════════════════════════
-       VISTA CLIENTE / ANÓNIMO: Homepage con búsqueda
+       CLIENTE / ANÓNIMO
   ══════════════════════════════════════════ -->
-  <ng-container *ngIf="!authService.isOwner()">
+  <ng-template #clientView>
 
     <app-hero-section
       (searchResults)="onSearchResults($event)"
@@ -255,18 +355,25 @@
     <main class="flex-grow">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <div *ngIf="!isLoading && allHouses.length > 0" class="mb-6">
-          <app-filter-trigger (triggerClick)="toggleFilter()"></app-filter-trigger>
+        <div *ngIf="!isLoading && allHouses.length > 0"
+             class="mb-6">
+
+          <app-filter-trigger
+            (triggerClick)="toggleFilter()">
+          </app-filter-trigger>
+
         </div>
 
         <div class="flex gap-8 relative">
+
+          <!-- Sidebar -->
           <div
             [ngClass]="{
               'w-80 opacity-100': isFilterOpen,
               'w-0 opacity-0 overflow-hidden': !isFilterOpen
             }"
-            class="transition-all duration-300 ease-in-out flex-shrink-0"
-          >
+            class="transition-all duration-300 ease-in-out flex-shrink-0">
+
             <app-filter-sidebar
               [isOpen]="isFilterOpen"
               [houses]="allHouses"
@@ -275,19 +382,32 @@
               (filtered)="onFiltered($event)"
               (filterApplied)="onFilterApplied($event)">
             </app-filter-sidebar>
+
           </div>
 
+          <!-- GRID -->
           <div class="flex-1 transition-all duration-300 ease-in-out min-w-0">
 
             <div *ngIf="showingSuggestions && !isLoading"
                  class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
+
               <div class="flex gap-3">
-                <svg class="h-5 w-5 text-yellow-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+
+                <svg class="h-5 w-5 text-yellow-400 shrink-0"
+                     viewBox="0 0 20 20"
+                     fill="currentColor">
+
+                  <path fill-rule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd"/>
+
                 </svg>
+
                 <p class="text-sm text-yellow-700">
-                  No encontramos una casa exactamente con esas características. ¡Aquí tienes algunas sugerencias!
+                  No encontramos exactamente lo que buscabas.
+                  Aquí tienes algunas sugerencias.
                 </p>
+
               </div>
             </div>
 
@@ -296,16 +416,14 @@
               [loading]="isLoading"
               [searchParams]="searchParams">
             </app-house-grid>
+
           </div>
         </div>
       </div>
     </main>
 
-  </ng-container>
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> devVal
+  </ng-template>
 
   <app-footer></app-footer>
+
 </div>

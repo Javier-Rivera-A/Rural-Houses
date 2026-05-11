@@ -3,18 +3,11 @@
 
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-<<<<<<< HEAD
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-      <div>
-        <h1 class="text-3xl font-black" style="color: var(--rhouses-secondary-dark)">Mis reservas</h1>
-        <p class="text-gray-500 mt-1">Consulta y gestiona todas tus reservas</p>
-=======
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
         <h1 class="text-3xl font-black" style="color: var(--rhouses-secondary-dark)">Mis reservas</h1>
         <p class="text-gray-500 mt-1">Consulta, paga y gestiona todas tus reservas</p>
->>>>>>> devVal
       </div>
       <a routerLink="/"
          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-bold text-sm hover:bg-white transition-all self-start"
@@ -25,10 +18,7 @@
       </a>
     </div>
 
-<<<<<<< HEAD
-=======
     <!-- Tabs -->
->>>>>>> devVal
     <div class="flex gap-1 bg-white rounded-xl p-1 shadow-md mb-8 w-fit">
       <button (click)="activeTab = 'list'"
               [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
@@ -46,15 +36,10 @@
       </button>
     </div>
 
-<<<<<<< HEAD
-    <ng-container *ngIf="activeTab === 'list'">
-
-=======
     <!-- ════════════════ TAB: LISTA ════════════════ -->
     <ng-container *ngIf="activeTab === 'list'">
 
       <!-- Cargando -->
->>>>>>> devVal
       <div *ngIf="isLoading" class="flex items-center justify-center py-24">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2" class="animate-spin"
@@ -63,10 +48,7 @@
         </svg>
       </div>
 
-<<<<<<< HEAD
-=======
       <!-- Contadores -->
->>>>>>> devVal
       <div *ngIf="!isLoading && rentals.length > 0" class="flex items-center gap-4 mb-6">
         <div class="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-100">
           <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
@@ -83,10 +65,7 @@
         </div>
       </div>
 
-<<<<<<< HEAD
-=======
       <!-- Sin reservas -->
->>>>>>> devVal
       <div *ngIf="!isLoading && rentals.length === 0"
            class="bg-white rounded-2xl shadow-md p-14 text-center">
         <div class="w-20 h-20 rounded-2xl mx-auto mb-5 flex items-center justify-center"
@@ -99,13 +78,7 @@
           </svg>
         </div>
         <h3 class="text-xl font-black mb-2" style="color: var(--rhouses-secondary-dark)">Sin reservas todavía</h3>
-<<<<<<< HEAD
-        <p class="text-gray-500 mb-6 max-w-sm mx-auto text-sm">
-          Explora nuestras casas rurales y haz tu primera reserva.
-        </p>
-=======
         <p class="text-gray-500 mb-6 max-w-sm mx-auto text-sm">Explora nuestras casas rurales y haz tu primera reserva.</p>
->>>>>>> devVal
         <a routerLink="/"
            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 shadow-md"
            style="background-color: var(--rhouses-accent)">
@@ -113,10 +86,7 @@
         </a>
       </div>
 
-<<<<<<< HEAD
-=======
       <!-- Lista de reservas -->
->>>>>>> devVal
       <div *ngIf="!isLoading && rentals.length > 0" class="space-y-4">
         <div *ngFor="let rental of rentals"
              class="bg-white rounded-2xl shadow-md overflow-hidden border-2 transition-all hover:shadow-lg"
@@ -126,18 +96,6 @@
                'border-gray-200':   rental.state === 'CANCELLED' || rental.state === 'EXPIRED'
              }">
 
-<<<<<<< HEAD
-          <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100">
-            <div class="flex items-center gap-3">
-              <div>
-                <p class="font-mono font-black text-sm" style="color: var(--rhouses-secondary-dark)">
-                  {{ rental.rentalCode }}
-                </p>
-                <p class="text-xs text-gray-400">Creada el {{ rental.uiDayMade }}</p>
-              </div>
-            </div>
-
-=======
           <!-- Cabecera de la tarjeta -->
           <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100">
             <div>
@@ -146,17 +104,13 @@
               </p>
               <p class="text-xs text-gray-400">Creada el {{ rental.uiDayMade }}</p>
             </div>
->>>>>>> devVal
             <span *ngIf="rental.uiBadge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border"
                   [class]="rental.uiBadge.class">
               {{ rental.uiBadge.icon }} {{ rental.uiBadge.label }}
             </span>
           </div>
 
-<<<<<<< HEAD
-=======
           <!-- Cuerpo -->
->>>>>>> devVal
           <div class="px-6 py-5">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
               <div>
@@ -177,17 +131,6 @@
               </div>
             </div>
 
-<<<<<<< HEAD
-            <div *ngIf="rental.state === 'PENDING'"
-                 class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 flex gap-2">
-              <span class="shrink-0">⚠️</span>
-              <span>
-                Esta reserva está pendiente de pago. Recuerda pagar el <strong>20% ($ {{ rental.totalPrice * 0.2 | number:'1.2-2' }})</strong> en los próximos 3 días usando el código
-                <strong class="font-mono">{{ rental.rentalCode }}</strong> para que sea confirmada.
-              </span>
-            </div>
-
-=======
             <!-- Bloque anticipo para reservas PENDIENTES -->
             <div *ngIf="rental.state === 'PENDING'"
                  class="mb-4 p-4 rounded-xl border-2"
@@ -229,7 +172,6 @@
             </div>
 
             <!-- Footer de la tarjeta -->
->>>>>>> devVal
             <div class="flex items-center justify-between pt-4 border-t border-gray-100">
               <p class="text-xs text-gray-400">
                 {{ rental.numberNights }} noche{{ rental.numberNights !== 1 ? 's' : '' }}
@@ -238,27 +180,6 @@
                 </span>
               </p>
 
-<<<<<<< HEAD
-              <button *ngIf="rental.uiCanCancel"
-                      (click)="openCancelModal(rental)"
-                      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all hover:bg-red-50 hover:border-red-400 hover:text-red-600"
-                      style="border-color: #e5e7eb; color: #6b7280">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-                </svg>
-                Cancelar reserva
-              </button>
-
-              <span *ngIf="rental.state === 'CONFIRMED'"
-                    class="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
-                ✓ Reserva confirmada
-              </span>
-              <span *ngIf="rental.state === 'CANCELLED'"
-                    class="text-xs font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-xl">
-                Reserva cancelada
-              </span>
-=======
               <div class="flex gap-2">
                 <button *ngIf="rental.uiCanCancel"
                         (click)="openCancelModal(rental)"
@@ -283,7 +204,6 @@
                   Vencida
                 </span>
               </div>
->>>>>>> devVal
             </div>
           </div>
         </div>
@@ -291,21 +211,14 @@
 
     </ng-container>
 
-<<<<<<< HEAD
-=======
     <!-- ════════════════ TAB: BÚSQUEDA ════════════════ -->
->>>>>>> devVal
     <ng-container *ngIf="activeTab === 'search'">
       <div class="bg-white rounded-2xl shadow-md p-8">
         <h2 class="text-lg font-black mb-2" style="color: var(--rhouses-secondary-dark)">
           Consultar reserva por código
         </h2>
         <p class="text-sm text-gray-500 mb-6">
-<<<<<<< HEAD
-          Ingresa el código de reserva que recibiste al confirmar tu reserva (ej: RES-1234567890-42).
-=======
           Ingresa el código de reserva que recibiste al confirmar (ej: RES-1234567890-42).
->>>>>>> devVal
         </p>
 
         <div class="flex gap-3 mb-6">
@@ -330,11 +243,7 @@
         </div>
 
         <div *ngIf="searchError" class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 mb-4">
-<<<<<<< HEAD
-          ❌ {{ searchError }}
-=======
            {{ searchError }}
->>>>>>> devVal
         </div>
 
         <div *ngIf="searchResult" class="animate-fade-in border-2 rounded-2xl overflow-hidden"
@@ -353,19 +262,11 @@
                  'bg-gray-50':   searchResult.state === 'EXPIRED'
                }">
             <div>
-<<<<<<< HEAD
-              <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-0.5">Código de reserva</p>
-=======
               <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-0.5">Código</p>
->>>>>>> devVal
               <p class="font-mono font-black text-lg" style="color: var(--rhouses-secondary-dark)">
                 {{ searchResult.rentalCode }}
               </p>
             </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> devVal
             <span *ngIf="searchResult.uiBadge" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black border-2"
                   [class]="searchResult.uiBadge.class">
               {{ searchResult.uiBadge.icon }} {{ searchResult.uiBadge.label }}
@@ -392,19 +293,6 @@
               </div>
             </div>
 
-<<<<<<< HEAD
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-              <p class="text-xs text-gray-400">
-                {{ searchResult.numberNights }} noche{{ searchResult.numberNights !== 1 ? 's' : '' }}
-              </p>
-              <button *ngIf="searchResult.uiCanCancel"
-                      (click)="openCancelModal(searchResult)"
-                      class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 border-red-200 text-red-500 hover:bg-red-50 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-                </svg>
-=======
             <!-- Bloque de pago en búsqueda -->
             <div *ngIf="searchResult.state === 'PENDING'"
                  class="p-4 rounded-xl border-2"
@@ -435,48 +323,28 @@
               <button *ngIf="searchResult.uiCanCancel"
                       (click)="openCancelModal(searchResult)"
                       class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 border-red-200 text-red-500 hover:bg-red-50 transition-all">
->>>>>>> devVal
                 Cancelar reserva
               </button>
               <span *ngIf="searchResult.state === 'CONFIRMED'"
                     class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1.5 rounded-full">
-<<<<<<< HEAD
-                ✓ Pago confirmado
-              </span>
-              <span *ngIf="searchResult.state === 'CANCELLED'"
-                    class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1.5 rounded-full">
-                Reserva cancelada
-=======
                 ✓ Confirmada
               </span>
               <span *ngIf="searchResult.state === 'CANCELLED'"
                     class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1.5 rounded-full">
                 Cancelada
->>>>>>> devVal
               </span>
             </div>
           </div>
         </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> devVal
       </div>
     </ng-container>
 
   </div>
 
-<<<<<<< HEAD
-  <div *ngIf="cancelTarget"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-slide-up">
-
-=======
   <!-- ════════════════ MODAL: CANCELAR ════════════════ -->
   <div *ngIf="cancelTarget"
        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
->>>>>>> devVal
       <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center bg-red-50">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="1.5" class="text-red-500">
@@ -484,10 +352,6 @@
           <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
         </svg>
       </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> devVal
       <h3 class="text-xl font-black text-center mb-2" style="color: var(--rhouses-secondary-dark)">
         ¿Cancelar esta reserva?
       </h3>
@@ -495,21 +359,11 @@
         Reserva: <strong class="font-mono">{{ cancelTarget.rentalCode }}</strong>
       </p>
       <p class="text-center text-gray-400 text-xs mb-6">
-<<<<<<< HEAD
-        Las fechas serán liberadas y el propietario será notificado. Esta acción no se puede deshacer.
-      </p>
-
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 text-xs text-amber-700 text-center">
-        ⚠️ Si ya realizaste el pago del anticipo, contacta directamente con el propietario para gestionar el reembolso.
-      </div>
-
-=======
         Las fechas serán liberadas. Esta acción no se puede deshacer.
       </p>
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 text-xs text-amber-700 text-center">
         ⚠️ Si ya realizaste el anticipo, contacta al propietario para gestionar el reembolso.
       </div>
->>>>>>> devVal
       <div class="flex gap-3">
         <button (click)="closeCancelModal()"
                 class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 transition-all">
@@ -523,9 +377,6 @@
     </div>
   </div>
 
-<<<<<<< HEAD
-</div>
-=======
   <!-- ════════════════ MODAL: PAGO REAL DEL ANTICIPO ════════════════ -->
 <div *ngIf="payTarget"
 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-fade-in">
@@ -755,4 +606,3 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 anima
 </div>
 
 </div>
->>>>>>> devVal

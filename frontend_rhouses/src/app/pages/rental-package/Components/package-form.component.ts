@@ -102,12 +102,10 @@ import {
   `
 })
 export class PackageFormComponent implements OnInit {
-  // Entradas y salidas
   @Input() initialData?: RentalPackage | null;
   @Output() save = new EventEmitter<RentalPackage>();
   @Output() cancel = new EventEmitter<void>();
 
-  // Estado del formulario
   typeRental = '';
   priceNight: number | null = null;
   startingDate = '';
@@ -126,27 +124,22 @@ export class PackageFormComponent implements OnInit {
       this.endingDate = this.initialData.endingDate;
       this.description = this.initialData.description;
       this.status = this.initialData.status || 'Activo';
-      // Creamos una copia del array para no mutar el objeto original accidentalmente
       this.features = [...this.initialData.features];
     }
   }
 
 
   handleSubmit() {
-    // Validación básica
-    // 1. Validación básica
     if (!this.typeRental || !this.priceNight || !this.startingDate || !this.endingDate) {
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
 
-    // 2. Validación de fechas
     if (new Date(this.startingDate) >= new Date(this.endingDate)) {
       alert('La fecha de inicio debe ser anterior a la fecha de fin.');
       return;
     }
 
-    // 3. Construimos el JSON tal cual lo pide el Backend
     const packagePayload = {
       typeRental: this.typeRental,
       priceNight: Number(this.priceNight),

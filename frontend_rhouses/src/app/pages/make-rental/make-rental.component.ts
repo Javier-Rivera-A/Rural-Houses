@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { Component, inject, OnInit } from '@angular/core';
-=======
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
->>>>>>> devVal
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -11,26 +7,15 @@ import { AuthService } from '../../Services/Auth/Auth.service';
 import { NavbarComponent } from '../homepage/components/navbar/navbar.component';
 import { CountryHouseService, CountryHouseResponse, RentalPackageResponse } from '../../Services/CountryHouse/country-house.service';
 import { RentalService, RentalResponse } from '../../Services/Rental/rental.service';
-<<<<<<< HEAD
-
-// Interfaz para la vista de la reserva confirmada
-=======
 import { AvailabilityCalendarComponent } from '../rental-package/Components/availability-calendar.component';
 import { ReservationOverlay } from '../rental-package/Components/availability-calendar.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
->>>>>>> devVal
 export interface ConfirmedRentalVM extends RentalResponse {
   uiCheckIn?: string;
   uiCheckOut?: string;
 }
 
-<<<<<<< HEAD
-@Component({
-  selector: 'app-make-rental',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent],
-=======
 interface StepDef {
   label: string;
 }
@@ -39,7 +24,6 @@ interface StepDef {
   selector: 'app-make-rental',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, NavbarComponent, AvailabilityCalendarComponent],
->>>>>>> devVal
   templateUrl: './make-rental.component.html',
   styleUrls: ['./make-rental.component.css']
 })
@@ -49,10 +33,7 @@ export class MakeRentalComponent implements OnInit {
   private toastr      = inject(ToastrService);
   private houseSvc    = inject(CountryHouseService);
   private rentalSvc   = inject(RentalService);
-<<<<<<< HEAD
-=======
   private destroyRef  = inject(DestroyRef);
->>>>>>> devVal
   authService         = inject(AuthService);
 
   house: CountryHouseResponse | null = null;
@@ -61,8 +42,6 @@ export class MakeRentalComponent implements OnInit {
   isSubmitting = false;
 
   confirmedRental: ConfirmedRentalVM | null = null;
-<<<<<<< HEAD
-=======
   reservationOverlays: ReservationOverlay[] = [];
 
   // ── PASO ACTUAL (mejora 2) ──────────────────────────────
@@ -77,7 +56,6 @@ export class MakeRentalComponent implements OnInit {
 
   // ── PAQUETE SELECCIONADO (mejora 1) ──────────────────────
   selectedPackage: RentalPackageResponse | null = null;
->>>>>>> devVal
 
   today = new Date().toISOString().split('T')[0];
 
@@ -91,23 +69,6 @@ export class MakeRentalComponent implements OnInit {
 
   errors: Record<string, string> = {};
 
-<<<<<<< HEAD
-  // --- VARIABLES PRE-CALCULADAS PARA LA VISTA (Evitan el bucle infinito) ---
-  calculatedCheckOutDate = '';
-  calculatedPrice = 0;
-  calculatedDeposit = 0;
-  currentPackages: RentalPackageResponse[] = [];
-  currentRentalOptions: { value: 'ENTIRE_HOUSE' | 'ROOMS'; label: string; desc: string; icon: string }[] = [];
-
-  uiFormCheckIn = '';
-  uiFormCheckOut = '';
-  firstPhotoUrl = '';
-
-  get houseId(): string { return this.route.snapshot.paramMap.get('id') ?? ''; }
-
-  ngOnInit(): void {
-    if (!this.houseId) { this.router.navigate(['/']); return; }
-=======
   // ── VARIABLES PRE-CALCULADAS ─────────────────────────────
   calculatedCheckOutDate = '';
   calculatedPrice = 0;
@@ -130,30 +91,22 @@ export class MakeRentalComponent implements OnInit {
   ngOnInit(): void {
     if (!this.houseId) { this.router.navigate(['/']); return; }
 
->>>>>>> devVal
     this.houseSvc.findById(this.houseId).subscribe({
       next: (res) => {
         this.house = res?.data ?? null;
         if (!this.house) { this.router.navigate(['/']); return; }
 
-<<<<<<< HEAD
-        // Configuramos la foto inicial
-=======
->>>>>>> devVal
         this.firstPhotoUrl = this.house.photo?.[0]?.url?.trim()
           ? this.house.photo[0].url
           : 'https://images.unsplash.com/photo-1572345901383-be2fcd1625f3?w=800&q=80';
 
         this.loadPackages();
-<<<<<<< HEAD
-=======
         this.loadReservationOverlays();
         this.rentalSvc.observeActiveRentalsByHouse(this.house.code)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((rentals) => {
             this.reservationOverlays = rentals.map((r) => this.toOverlay(r));
           });
->>>>>>> devVal
       },
       error: () => {
         this.toastr.error('No se pudo cargar la casa', 'Error');
@@ -167,21 +120,11 @@ export class MakeRentalComponent implements OnInit {
       next: (res) => {
         this.packages  = res?.data ?? [];
         this.isLoading = false;
-<<<<<<< HEAD
-        this.updateCalculations(); // Calculamos todo por primera vez
-=======
->>>>>>> devVal
       },
       error: () => { this.isLoading = false; }
     });
   }
 
-<<<<<<< HEAD
-  // --- LÓGICA DE CÁLCULO ESTÁTICO ---
-  // Se llama desde el HTML usando (ngModelChange)
-  onInputsChanged(field: string): void {
-    this.errors[field] = '';
-=======
   private loadReservationOverlays(): void {
     const user = this.authService.user();
     if (!user?.id) return;
@@ -321,16 +264,11 @@ export class MakeRentalComponent implements OnInit {
   onInputsChanged(field: string): void {
     this.errors[field] = '';
     this.dateRangeError = '';
->>>>>>> devVal
     this.updateCalculations();
   }
 
   updateCalculations(): void {
-<<<<<<< HEAD
-    // 1. Calcular Fecha de Check-Out
-=======
     // Check-out
->>>>>>> devVal
     if (this.form.checkInDate && this.form.numberNights) {
       const d = new Date(this.form.checkInDate + 'T00:00:00');
       d.setDate(d.getDate() + this.form.numberNights);
@@ -339,51 +277,6 @@ export class MakeRentalComponent implements OnInit {
       this.calculatedCheckOutDate = '';
     }
 
-<<<<<<< HEAD
-    // Formateo visual de fechas
-    this.uiFormCheckIn = this.formatDate(this.form.checkInDate);
-    this.uiFormCheckOut = this.formatDate(this.calculatedCheckOutDate);
-
-    // 2. Calcular Paquetes Disponibles
-    if (!this.form.checkInDate) {
-      this.currentPackages = [...this.packages];
-    } else {
-      const ci = new Date(this.form.checkInDate + 'T00:00:00');
-      const co = this.calculatedCheckOutDate ? new Date(this.calculatedCheckOutDate + 'T00:00:00') : null;
-      this.currentPackages = this.packages.filter(p => {
-        const s = new Date(p.startingDate.split('T')[0] + 'T00:00:00');
-        const e = new Date(p.endingDate.split('T')[0] + 'T00:00:00');
-        return ci >= s && (!co || co <= e);
-      });
-    }
-
-    // 3. Calcular Opciones de Reserva
-    const options: any[] = [];
-    const pkgTypes = new Set(this.currentPackages.map(p => p.typeRental));
-
-    if (pkgTypes.has('ENTIRE_HOUSE') || pkgTypes.has('BOTH')) {
-      options.push({ value: 'ENTIRE_HOUSE', label: 'Casa completa', desc: 'Reserva toda la propiedad', icon: '🏠' });
-    }
-    if (pkgTypes.has('ROOMS') || pkgTypes.has('BOTH')) {
-      options.push({ value: 'ROOMS', label: 'Por habitaciones', desc: 'Elige las habitaciones que necesitas', icon: '🛏️' });
-    }
-    if (!options.length) {
-      options.push({ value: 'ENTIRE_HOUSE', label: 'Casa completa', desc: 'Reserva toda la propiedad', icon: '🏠' });
-      options.push({ value: 'ROOMS', label: 'Por habitaciones', desc: 'Elige las habitaciones que necesitas', icon: '🛏️' });
-    }
-    this.currentRentalOptions = options;
-
-    // 4. Calcular Precio y Depósito
-    if (this.currentPackages.length && this.form.numberNights) {
-      this.calculatedPrice = this.currentPackages[0].priceNight * this.form.numberNights;
-    } else {
-      this.calculatedPrice = 0;
-    }
-    this.calculatedDeposit = this.calculatedPrice * 0.2;
-  }
-
-  // --- MANEJO DE HABITACIONES ---
-=======
     this.uiFormCheckIn  = this.formatDate(this.form.checkInDate);
     this.uiFormCheckOut = this.formatDate(this.calculatedCheckOutDate);
 
@@ -454,7 +347,6 @@ export class MakeRentalComponent implements OnInit {
   }
 
   // ── Habitaciones ──────────────────────────────────────────
->>>>>>> devVal
   toggleBedroom(code: any): void {
     const strCode = String(code);
     const idx = this.form.selectedBedroomCodes.indexOf(strCode);
@@ -467,18 +359,6 @@ export class MakeRentalComponent implements OnInit {
     return this.form.selectedBedroomCodes.includes(String(code));
   }
 
-<<<<<<< HEAD
-  // --- VALIDACIÓN Y ENVÍO ---
-  validate(): boolean {
-    const e: Record<string, string> = {};
-    if (!this.form.checkInDate) e['checkIn']  = 'La fecha de entrada es obligatoria';
-    else if (this.form.checkInDate < this.today) e['checkIn'] = 'La fecha no puede ser en el pasado';
-    if (!this.form.numberNights || this.form.numberNights < 1) e['nights'] = 'Mínimo 1 noche';
-    if (!this.form.contactPhoneNumber.trim()) e['phone'] = 'El teléfono de contacto es obligatorio';
-    if (this.form.typeRental === 'ROOMS' && this.form.selectedBedroomCodes.length === 0) {
-      e['bedrooms'] = 'Selecciona al menos una habitación';
-    }
-=======
   // ── Submit ────────────────────────────────────────────────
   validate(): boolean {
     const e: Record<string, string> = {};
@@ -508,7 +388,6 @@ export class MakeRentalComponent implements OnInit {
       if (this.currentStep > 2) this.currentStep = 3;
     }
 
->>>>>>> devVal
     this.errors = e;
     return Object.keys(e).length === 0;
   }
@@ -523,37 +402,21 @@ export class MakeRentalComponent implements OnInit {
     this.isSubmitting = true;
 
     const payload = {
-<<<<<<< HEAD
-      countryHouseCode:     this.house!.code,
-      checkInDate:          this.form.checkInDate,
-      numberNights:         this.form.numberNights,
-      contactPhoneNumber:   this.form.contactPhoneNumber.trim(),
-      typeRental:           this.form.typeRental,
-      bedroomCodes:         this.form.typeRental === 'ROOMS' ? this.form.selectedBedroomCodes : undefined
-=======
       countryHouseCode:   this.house!.code,
       checkInDate:        this.form.checkInDate,
       numberNights:       this.form.numberNights,
       contactPhoneNumber: this.form.contactPhoneNumber.trim(),
       typeRental:         this.form.typeRental,
       bedroomCodes:       this.form.typeRental === 'ROOMS' ? this.form.selectedBedroomCodes : undefined
->>>>>>> devVal
     };
 
     this.rentalSvc.makeRental(customerId, payload).subscribe({
       next: (res) => {
         const raw = res?.data;
         if (raw) {
-<<<<<<< HEAD
-          // Pre-formateamos las fechas de la respuesta
-          this.confirmedRental = {
-            ...raw,
-            uiCheckIn: this.formatDate(raw.checkInDate),
-=======
           this.confirmedRental = {
             ...raw,
             uiCheckIn:  this.formatDate(raw.checkInDate),
->>>>>>> devVal
             uiCheckOut: this.formatDate(raw.checkOutDate)
           };
         }
@@ -567,13 +430,6 @@ export class MakeRentalComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
-  goBack(): void { this.router.navigate(['/houses', this.houseId]); }
-  goMyRentals(): void { this.router.navigate(['/my-rentals']); }
-  goHome(): void { this.router.navigate(['/']); }
-
-  private formatDate(d: string): string {
-=======
   // ── Helpers ───────────────────────────────────────────────
   getRentalTypeLabel(type: string): string {
     const map: Record<string, string> = {
@@ -594,18 +450,11 @@ export class MakeRentalComponent implements OnInit {
   }
 
   formatDate(d: string): string {
->>>>>>> devVal
     if (!d) return '';
     try {
       return new Date(d.split('T')[0] + 'T00:00:00').toLocaleDateString('es-CO', {
         day: '2-digit', month: 'long', year: 'numeric'
       });
-<<<<<<< HEAD
-    }
-    catch { return d; }
-  }
-}
-=======
     } catch { return d; }
   }
 
@@ -631,4 +480,3 @@ export class MakeRentalComponent implements OnInit {
     };
   }
 }
->>>>>>> devVal

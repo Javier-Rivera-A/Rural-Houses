@@ -10,7 +10,6 @@ import co.uniquindio.rural_house.Rural_House.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +23,6 @@ public class RentalServiceImpl implements RentalService {
     private final RentalPackageRepository rentalPackageRepository;
     private final PaidRepository paidRepository;
     private final CountryHouseService countryHouseService;
-    private final OwnerRepository ownerRepository;
     private final BankAccountRepository bankAccountRepository;
     private final EmailService emailService;
 
@@ -87,12 +85,43 @@ public class RentalServiceImpl implements RentalService {
         }
 
         Rental saved = rentalRepository.save(rental);
+        
+        // Notificar al cliente sobre la reserva creada
+        if (customer != null) {
+            float deposit = totalPrice * 0.20f;
+            
+            sendEmailSafely(
+                customer.getEmail(),
+                 "Reserva creada - Pendiente de pago",
+                 "Su reserva " + saved.getRentalCode() + " fue creada exitosamente.\n\n " +
+                 "Estado: PENDIENTE\n" +
+                 "Valor total: " + totalPrice + "\n" +
+                 "Anitcipo requerido: " + deposit + "\n\n" +
+                 "Debe realizar el pago para confirmar la reserva." 
+            );
+        }
 
-        String ownerBankAccount = house.getOwner().getBankAccounts().stream()
-                .findFirst().map(BankAccount::getNumberAccount).orElse("No disponible");
+        //Notificar al propietario sobre una nueva reserva
+        Owner owner = house.getOwner();
+        if (owner != null) {
+            
+            sendEmailSafely(
+                owner.getEmail(),
+                "Nueva reserva pendiente",
+                "Se ha creado una nueva reserva para su casa.\n\n" +
+                "Código: " + saved.getRentalCode() + "\n" +
+                "Cliente: " + (saved.getCustomer() != null ? saved.getCustomer().getUserName() : "No disponible") + "\n" +
+                "Check-in: " + saved.getCheckInDate() + "\n" +
+                "Check-out: " + saved.getCheckOutDate() + "\n" +
+                "Valor: " + saved.getTotalPrice() + "\n" +
+                "Estado: PENDIENTE DE PAGO"
+            );
+        }
+
+        List<String> ownerBankAccounts = house.getOwner().getBankAccounts().stream().map(BankAccount::getNumberAccount).toList();
 
         RentalResponse response = toResponse(saved);
-        response.setOwnerBankAccount(ownerBankAccount);
+        response.setOwnerBankAccount(ownerBankAccounts);
         response.setDepositRequired(totalPrice * 0.20f);
         return response;
     }
@@ -121,7 +150,7 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     @Transactional
-    public void payRental(String customerId, String rentalId, Float amount) {
+    public void payRental(String customerId, String rentalId, PayRentalRequest request) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada: " + rentalId));
         
@@ -129,59 +158,114 @@ public class RentalServiceImpl implements RentalService {
             throw new UnauthorizedException("No tienes permiso para pagar esta reserva");
         }
 
-        // Obtener la primera cuenta bancaria del cliente
-        List<BankAccount> customerAccounts = bankAccountRepository.findByUser_Id(customerId);
-        if (customerAccounts.isEmpty()) {
-            throw new BusinessException("El cliente no tiene una cuenta bancaria asociada para realizar el pago.");
-        }
-        BankAccount customerAccount = customerAccounts.get(0);
-
-        if (customerAccount.getMount() < amount) {
-            throw new BusinessException("Fondos insuficientes en la cuenta del cliente para realizar el pago.");
+        // Estados inválidos
+        if (rental.getState() == RentalState.CANCELLED){
+            throw new BusinessException("No se puede pagar una reserva CANCELADA");
         }
 
-        // Obtener la primera cuenta bancaria del propietario
+        if (rental.getState() == RentalState.EXPIRED){
+            throw new BusinessException("No se puede pagar una reserva EXPIRADA");
+        }
+
+        if (rental.getState() == RentalState.PAID) {
+            throw new BusinessException("La reserva ya ha sido pagada");
+        }
+
+        // Total pagado hasta la fecha
+        float totalPaid = paidRepository.findByRental_Id(rental.getId()).stream().map(Paid::getAmount).reduce(0f, Float::sum);
+
+        // Saldo restante
+        float remainingBalance = rental.getTotalPrice() - totalPaid;
+
+        // Evitar sobrepago
+        if(request.getAmount() > remainingBalance) {
+            throw new BusinessException("El pago excede el saldo restante.\n" + "Saldo pendiente: " + remainingBalance);
+        }
+
+        // Obtener cuenta bancaria cliente
+        BankAccount customerAccount = bankAccountRepository.findById(request.getCustomerBankAccountId()).orElseThrow(() -> new ResourceNotFoundException("Cuenta bancaria del cliente no encontrada"));
+
+        // Validar que pertenece al cliente
+        if (!customerAccount.getUser().getId().equals(customerId)) {
+            throw new UnauthorizedException("La cuenta bancaria no pertenece al cliente.");
+        }
+
+        // Fondos suficientes
+        if (customerAccount.getMount() < request.getAmount()) {
+            throw new BusinessException("Fondos insuficientes.");
+        }
+
+        // Obtener propiietario
         Owner owner = rental.getCountryHouse().getOwner();
-        List<BankAccount> ownerAccounts = bankAccountRepository.findByUser_Id(owner.getId());
-        if (ownerAccounts.isEmpty()) {
-            throw new BusinessException("El propietario no tiene una cuenta bancaria asociada para recibir el pago.");
+
+
+        //Obtener cuenta bancaria del propietario
+        BankAccount ownerAccount = bankAccountRepository.findById(request.getOwnerBankAccountId()).orElseThrow(() -> new ResourceNotFoundException("Cuenta bancaria del propieatrio no encontrada."));
+
+        // Valicar que pertenece al propietario
+        if (!ownerAccount.getUser().getId().equals(owner.getId())) {
+            throw new UnauthorizedException("La cuenta bancaria no pertenece al propietario.");
         }
-        BankAccount ownerAccount = ownerAccounts.get(0);
 
-        // Descontar al cliente y sumar al propietario
-        customerAccount.setMount(customerAccount.getMount() - amount);
-        ownerAccount.setMount(ownerAccount.getMount() + amount);
-
+        // Transferencia bancaria
+        customerAccount.setMount(customerAccount.getMount() - request.getAmount());
+        ownerAccount.setMount(ownerAccount.getMount() + request.getAmount());
         bankAccountRepository.save(customerAccount);
         bankAccountRepository.save(ownerAccount);
 
-        // Registrar el pago asociado a la cuenta del cliente
+        // Registrar pago
         Paid payment = new Paid();
         payment.setPaidDate(LocalDate.now());
-        payment.setAmount(amount);
+        payment.setAmount(request.getAmount());
         payment.setPaidState(PaidState.CONFIRMED);
         payment.setRental(rental);
         payment.setRentalId(rental.getId());
         payment.setBankAccount(customerAccount);
         paidRepository.save(payment);
 
-        // Confirmar la reserva (segun los requerimientos, se confirma inmediatamente)
-        rental.setState(RentalState.CONFIRMED);
+        // Recalcular total pagado
+        totalPaid += request.getAmount();
+        remainingBalance = rental.getTotalPrice() - totalPaid;
+
+        // Anticipo mínimo
+        float minimumDeposit = rental.getTotalPrice() * 0.20f;
+        
+        // Actualizar estado
+        if (totalPaid >= rental.getTotalPrice()) {
+            rental.setState(RentalState.PAID);
+        } else if (totalPaid >= minimumDeposit) {
+            rental.setState(RentalState.CONFIRMED);
+        }
         rentalRepository.save(rental);
 
-        // Enviar notificaciones por email
-        String customerEmail = rental.getCustomer().getEmail();
-        String ownerEmail = owner.getEmail();
-
-        if (customerEmail != null) {
-            emailService.sendEmail(customerEmail, "Confirmación de Reserva " + rental.getRentalCode(),
-                    "Su pago de " + amount + " se ha procesado exitosamente. La reserva está confirmada.");
+        // Notificación al cliente
+        String customerMessage =
+                "Su pago de " + request.getAmount() + " fue procesado exitosamente.\n\n" +
+                "Total pagado: " + totalPaid + "\n" +
+                "Saldo restante: " + remainingBalance + "\n\n";
+        if (remainingBalance <= 0) {
+            customerMessage += "La reserva ha sido PAGADA COMPLETAMENTE.";
+        } else {
+            customerMessage += "La reserva está CONFIRMADA.";
         }
 
-        if (ownerEmail != null) {
-            emailService.sendEmail(ownerEmail, "Pago Recibido por Reserva " + rental.getRentalCode(),
-                    "Se ha recibido un pago de " + amount + " para la reserva " + rental.getRentalCode() + ". La reserva está confirmada.");
-        }
+        sendEmailSafely(
+                rental.getCustomer().getEmail(),
+                "Pago procesado - Reserva " +
+                        rental.getRentalCode(),
+                customerMessage
+        );
+
+        //Notificación al propietario
+        sendEmailSafely(
+                owner.getEmail(),
+                "Pago recibido - Reserva " + rental.getRentalCode(),
+                "Se recibió un pago de " + request.getAmount() +
+                    " para la reserva " + rental.getRentalCode() +
+                    ".\n\nSaldo restante: " +
+                    remainingBalance
+        );
+
     }
 
     @Override
@@ -199,12 +283,27 @@ public class RentalServiceImpl implements RentalService {
         payment.setRentalId(rental.getId()); // UML: rentalId: String
         paidRepository.save(payment);
 
+        // Notificar pago registrado
+        if (rental.getCustomer() != null) {
+            sendEmailSafely(
+                rental.getCustomer().getEmail(),
+                "Pago registrado - Reserva " + rental.getRentalCode(),
+                "Se registro un pago de " + amount + " para su reserva."
+            );
+        }
+
         // Si el pago cubre el total → confirmar reserva
         float totalPaid = rental.getPayments().stream()
                 .map(Paid::getAmount).reduce(0f, Float::sum) + amount;
         if (totalPaid >= rental.getTotalPrice()) {
             rental.setState(RentalState.CONFIRMED);
             rentalRepository.save(rental);
+
+            sendEmailSafely(
+                rental.getCustomer().getEmail(),
+                "Reserva confirmada",
+                "La reserva " + rental.getRentalCode() + " ha sido CONFIRMADA. El pago total fue completado"
+            );
         }
 
         // Avisar al propietario de reservas con plazo de pago vencido (> 3 días)
@@ -214,6 +313,15 @@ public class RentalServiceImpl implements RentalService {
                 .forEach(r -> {
                     r.setState(RentalState.EXPIRED);
                     rentalRepository.save(r);
+
+                    if (r.getCustomer() != null) {
+                        sendEmailSafely(
+                            r.getCustomer().getEmail(), 
+                            " Reserva expirada",
+                            "La reserva " + r.getRentalCode() +
+                            " expiró porque no se realizó el pago dentro del tiempo permitido."
+                        );
+                    }
                 });
     }
 
@@ -225,6 +333,14 @@ public class RentalServiceImpl implements RentalService {
         verifyOwnerOfRental(ownerId, rental);
         rental.setState(RentalState.CANCELLED);
         rentalRepository.save(rental);
+
+        if (rental.getCustomer() != null) {
+            sendEmailSafely(
+                rental.getCustomer().getEmail(),
+                "Reserva cancelada",
+                "La reserva " +  rental.getRentalCode() + " ha sido CANCELADA por el propietario."
+            );
+        }
     }
 
     @Override
@@ -282,6 +398,17 @@ public class RentalServiceImpl implements RentalService {
         }
     }
 
+    private void sendEmailSafely(String to, String subject, String body) {
+        if (to == null || to.isBlank()) {
+            return;
+        }
+        try {
+            emailService.sendEmail(to, subject, body);
+        } catch (Exception e) {
+            System.out.println("Error al enviar email: " + e.getMessage());
+        }
+    }
+
     private RentalResponse toResponse(Rental r) {
         RentalResponse res = new RentalResponse();
         res.setId(r.getId());
@@ -292,10 +419,19 @@ public class RentalServiceImpl implements RentalService {
         res.setNumberNights(r.getNumberNights());
         res.setState(r.getState());
         res.setContactPhoneNumber(r.getContactPhoneNumber());
-        res.setTotalPrice(r.getTotalPrice());
-        res.setRentalPlaceId(r.getRentalPlaceId()); // UML: rentalPlaceId
+        float totalPrice = r.getTotalPrice();
+        res.setTotalPrice(totalPrice);
+        res.setRentalPlaceId(r.getRentalPlaceId());
         res.setCountryHouseCode(r.getCountryHouse().getCode());
-        if (r.getCustomer() != null) res.setCustomerUserName(r.getCustomer().getUserName());
+        if (r.getCustomer() != null) {
+            res.setCustomerUserName(r.getCustomer().getUserName());
+        }
+        float totalPaid = paidRepository.findByRental_Id(r.getId()).stream().map(Paid::getAmount).reduce(0f, Float::sum);
+        float remainingBalance = Math.max(totalPrice - totalPaid, 0);
+        float depositRequired = totalPrice * 0.20f;
+        res.setTotalPaid(totalPaid);
+        res.setRemainingBalance(remainingBalance);
+        res.setDepositRequired(depositRequired);
         return res;
     }
 }

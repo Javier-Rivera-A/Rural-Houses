@@ -1,32 +1,13 @@
 <div class="min-h-screen" style="background-color: var(--rhouses-background-light); font-family: 'Be Vietnam Pro', sans-serif;">
-<<<<<<< HEAD
-  <app-navbar></app-navbar>
-
-  <!-- Top bar / breadcrumb -->
-  <div class="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center gap-3">
-      <button (click)="goHome()" class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-=======
-<<<<<<< Updated upstream
-  <div class="min-h-screen" style="background-color: var(--rhouses-background-light)">
-  <app-navbar></app-navbar> 
-  <!-- Top bar / breadcrumb -->
-  <div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-3">
-      <button (click)="goHome()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-=======
   <app-navbar></app-navbar>
 
   <!-- Top bar -->
   <div class="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center gap-3">
       <button (click)="goHome()" class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
->>>>>>> Stashed changes
->>>>>>> devVal
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
       </button>
       <span class="text-gray-300">/</span>
       <span class="text-sm font-semibold" style="color: var(--rhouses-secondary-dark)">Configuración de cuenta</span>
@@ -35,18 +16,20 @@
 
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-    <!-- Header de perfil -->
+    <!-- Header perfil -->
     <div class="bg-white rounded-2xl shadow-md p-6 mb-8 flex flex-col sm:flex-row items-center gap-5">
-      <img *ngIf="profileAvatar" [src]="profileAvatar" alt="Avatar"
-           class="w-20 h-20 rounded-2xl object-cover shadow-lg border-2 border-white"/>
+      <img *ngIf="profileAvatar" [src]="profileAvatar" alt="Avatar" class="w-20 h-20 rounded-2xl object-cover shadow-lg border-2 border-white"/>
+
       <div *ngIf="!profileAvatar"
            class="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-4xl font-black shadow-lg"
            [ngClass]="authService.isOwner() ? 'bg-[#AA4465]' : 'bg-[var(--rhouses-accent)]'">
         {{ authService.userInitial() }}
       </div>
+
       <div class="text-center sm:text-left">
         <h1 class="text-2xl font-black" style="color: var(--rhouses-secondary-dark)">{{ displayName }}</h1>
         <p class="text-sm text-gray-400 mt-0.5">{{ authService.user()?.email }}</p>
+
         <span class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-sm font-bold"
               [ngClass]="authService.isOwner() ? 'bg-[#AA4465]/10 text-[#AA4465]' : 'bg-[var(--rhouses-accent)]/10 text-[var(--rhouses-accent)]'">
           {{ authService.isOwner() ? '🏡 Propietario' : '👤 Cliente' }}
@@ -57,64 +40,40 @@
     <!-- Tabs -->
     <div class="flex gap-1 bg-white rounded-xl p-1 shadow-md mb-8 w-fit">
       <button (click)="activeTab = 'bank'"
-              [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
-                (activeTab === 'bank' ? 'bg-[var(--rhouses-accent)] text-white shadow' : 'text-gray-500 hover:text-gray-700')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/>
-          <line x1="2" x2="22" y1="10" y2="10"/></svg>
+              [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' + (activeTab === 'bank' ? 'bg-[var(--rhouses-accent)] text-white shadow' : 'text-gray-500 hover:text-gray-700')">
         Datos bancarios
       </button>
+
       <button (click)="activeTab = 'profile'"
-              [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' +
-                (activeTab === 'profile' ? 'bg-[var(--rhouses-accent)] text-white shadow' : 'text-gray-500 hover:text-gray-700')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/></svg>
+              [class]="'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ' + (activeTab === 'profile' ? 'bg-[var(--rhouses-accent)] text-white shadow' : 'text-gray-500 hover:text-gray-700')">
         Perfil
       </button>
     </div>
 
-    <!-- ══════════════════════════════
-         TAB: DATOS BANCARIOS
-    ══════════════════════════════ -->
+    <!-- TAB BANK -->
     <div *ngIf="activeTab === 'bank'">
-<<<<<<< Updated upstream
 
-<<<<<<< HEAD
-=======
-      <!-- Header sección -->
-=======
->>>>>>> Stashed changes
->>>>>>> devVal
       <div class="flex items-center justify-between mb-6">
         <div>
           <h2 class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">Cuentas Bancarias 💳</h2>
           <p class="text-sm text-gray-500 mt-0.5">Gestiona tus cuentas para recibir y realizar pagos</p>
         </div>
+
         <button (click)="openAddModal()"
                 class="flex items-center gap-2 px-5 py-2.5 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-md"
                 style="background-color: var(--rhouses-accent)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           Añadir cuenta
         </button>
       </div>
 
-      <!-- Empty state -->
+      <!-- Empty -->
       <div *ngIf="accounts.length === 0" class="bg-white rounded-2xl shadow-md p-14 text-center">
-        <div class="w-20 h-20 rounded-2xl mx-auto mb-5 flex items-center justify-center"
-             style="background-color: var(--rhouses-background-light)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="1.5" class="text-gray-300">
-            <rect width="20" height="14" x="2" y="5" rx="2"/>
-            <line x1="2" x2="22" y1="10" y2="10"/>
-          </svg>
-        </div>
         <h3 class="text-lg font-bold mb-1" style="color: var(--rhouses-secondary-dark)">Sin cuentas bancarias</h3>
-        <p class="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+
+        <p class="text-sm text-gray-500 mb-6">
           Añade una cuenta bancaria para gestionar tus pagos dentro de rhouses.
         </p>
+
         <button (click)="openAddModal()"
                 class="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-md"
                 style="background-color: var(--rhouses-accent)">
@@ -122,495 +81,239 @@
         </button>
       </div>
 
-      <!-- Grid cuentas -->
+      <!-- Cards -->
       <div *ngIf="accounts.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-<<<<<<< Updated upstream
-        <div
-          *ngFor="let account of accounts"
-          class="bg-white rounded-2xl p-6 shadow-md border-2 transition-all hover:shadow-lg"
-          [ngClass]="account.isPrimary ? 'border-[var(--rhouses-accent)]' : 'border-transparent'"
-        >
-<<<<<<< HEAD
-=======
-          <!-- Badge principal + acciones -->
-=======
+
         <div *ngFor="let account of accounts"
              class="bg-white rounded-2xl p-6 shadow-md border-2 transition-all hover:shadow-lg"
              [ngClass]="account.isPrimary ? 'border-[var(--rhouses-accent)]' : 'border-transparent'">
 
->>>>>>> Stashed changes
->>>>>>> devVal
           <div class="flex items-start justify-between mb-4">
+
             <span *ngIf="account.isPrimary"
                   class="inline-flex items-center gap-1 bg-[var(--rhouses-accent)] text-white text-xs px-3 py-1 rounded-full font-bold">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
-              </svg>
               Principal
             </span>
+
             <div *ngIf="!account.isPrimary" class="h-6"></div>
+
             <div class="flex gap-1 ml-auto">
               <button (click)="openEditModal(account)"
                       class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-[var(--rhouses-accent)]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2">
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                </svg>
+                ✏️
               </button>
+
               <button (click)="deleteAccount(account.id)"
                       class="p-2 rounded-lg hover:bg-red-50 transition-colors text-gray-400 hover:text-red-500">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2">
-                  <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
+                🗑️
               </button>
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-          <!-- Info banco -->
->>>>>>> devVal
-          <div class="mb-5">
-=======
           <div class="mb-4">
->>>>>>> Stashed changes
-            <p class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">{{ account.bankName }}</p>
-            <p class="text-base font-mono text-gray-400 mt-0.5">{{ formatAccountNumber(account.numberAccount) }}</p>
+            <p class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">
+              {{ account.bankName }}
+            </p>
+
+            <p class="text-base font-mono text-gray-400 mt-0.5">
+              {{ formatAccountNumber(account.numberAccount) }}
+            </p>
           </div>
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-          <!-- Detalles -->
->>>>>>> devVal
-          <div class="space-y-2 mb-5 bg-gray-50 rounded-xl p-3">
-=======
           <div class="space-y-2 mb-4 bg-gray-50 rounded-xl p-3">
->>>>>>> Stashed changes
+
             <div class="flex justify-between items-center">
               <span class="text-xs text-gray-500">Tipo:</span>
+
               <span class="text-xs font-bold" style="color: var(--rhouses-secondary-dark)">
                 {{ getAccountTypeLabel(account.accountType) }}
               </span>
             </div>
+
             <div class="flex justify-between items-center">
               <span class="text-xs text-gray-500">Balance:</span>
+
               <span class="text-sm font-black" style="color: var(--rhouses-accent)">
                 {{ formatBalance(account.balance) }}
               </span>
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-          <!-- Botón principal -->
->>>>>>> devVal
-          <button
-            *ngIf="!account.isPrimary"
-            (click)="setPrimaryAccount(account.id)"
-            class="w-full py-2 border-2 rounded-xl text-sm font-bold transition-all hover:text-white hover:bg-[var(--rhouses-accent)] hover:border-[var(--rhouses-accent)]"
-            style="border-color: var(--rhouses-accent); color: var(--rhouses-accent)"
-          >
-=======
-          <button *ngIf="!account.isPrimary" (click)="setPrimaryAccount(account.id)"
+          <button *ngIf="!account.isPrimary"
+                  (click)="setPrimaryAccount(account.id)"
                   class="w-full py-2 border-2 rounded-xl text-sm font-bold transition-all hover:text-white hover:bg-[var(--rhouses-accent)] hover:border-[var(--rhouses-accent)]"
                   style="border-color: var(--rhouses-accent); color: var(--rhouses-accent)">
->>>>>>> Stashed changes
             Establecer como principal
           </button>
+
         </div>
       </div>
     </div>
 
-    <!-- ══════════════════════════════
-         TAB: PERFIL (email, tel, pass)
-    ══════════════════════════════ -->
+    <!-- TAB PROFILE -->
     <div *ngIf="activeTab === 'profile'">
       <div class="bg-white rounded-2xl shadow-md p-8">
+
         <div class="mb-6">
           <h2 class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">Datos de contacto</h2>
-          <p class="text-sm text-gray-400 mt-1">
-            Actualiza tu correo, teléfono y
-            {{ authService.isOwner() ? 'palabra de acceso' : 'contraseña' }}.
-          </p>
-        </div>
 
-        <!-- Datos no editables -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-          <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Nombre de usuario</p>
-            <p class="font-black text-sm" style="color: var(--rhouses-secondary-dark)">
-              {{ authService.user()?.userName }}
-            </p>
-          </div>
-          <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Tipo de cuenta</p>
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
-                  [ngClass]="authService.isOwner() ? 'bg-[#AA4465]/10 text-[#AA4465]' : 'bg-[var(--rhouses-accent)]/10 text-[var(--rhouses-accent)]'">
-              {{ authService.isOwner() ? '🏡 Propietario' : '👤 Cliente' }}
-            </span>
-          </div>
+          <p class="text-sm text-gray-400 mt-1">
+            Actualiza tu correo, teléfono y contraseña.
+          </p>
         </div>
 
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-5">
 
-          <!-- Email -->
           <div>
             <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
               Correo electrónico *
             </label>
-            <input type="email" formControlName="email" placeholder="tu@correo.com"
-                   [class]="'w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ' +
-                     (profileCtrl.email.touched && profileCtrl.email.invalid
-                       ? 'border-red-400 focus:ring-2 focus:ring-red-400/20'
-                       : 'border-gray-200 focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465]')"/>
-            <p *ngIf="profileCtrl.email.touched && profileCtrl.email.invalid"
-               class="text-red-500 text-xs mt-1">Correo electrónico inválido.</p>
+
+            <input type="email"
+                   formControlName="email"
+                   placeholder="tu@correo.com"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none transition-all"/>
           </div>
 
-          <!-- Teléfono -->
           <div>
             <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
               Teléfono *
             </label>
-            <input type="tel" formControlName="phone" placeholder="+57 300 000 0000"
-                   [class]="'w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ' +
-                     (profileCtrl.phone.touched && profileCtrl.phone.invalid
-                       ? 'border-red-400 focus:ring-2 focus:ring-red-400/20'
-                       : 'border-gray-200 focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465]')"/>
-            <p *ngIf="profileCtrl.phone.touched && profileCtrl.phone.invalid"
-               class="text-red-500 text-xs mt-1">Debe tener entre 7 y 15 dígitos.</p>
+
+            <input type="tel"
+                   formControlName="phone"
+                   placeholder="+57 300 000 0000"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none transition-all"/>
           </div>
 
-          <!-- Divisor contraseña -->
-          <div class="pt-2 pb-1 border-t border-gray-100">
-            <p class="text-sm font-bold" style="color: var(--rhouses-secondary-dark)">
-              {{ authService.isOwner() ? '🔑 Cambiar palabra de acceso' : '🔒 Cambiar contraseña' }}
-            </p>
-            <p class="text-xs text-gray-400 mt-0.5">Déjalo vacío para conservar la actual.</p>
-          </div>
-
-          <!-- Nueva contraseña / accessWord -->
           <div>
             <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
-              {{ authService.isOwner() ? 'Nueva palabra de acceso' : 'Nueva contraseña' }}
+              Nueva contraseña
             </label>
-            <input type="password" formControlName="password"
-                   [placeholder]="authService.isOwner() ? 'Nueva palabra de acceso' : 'Mínimo 8 chars, mayúscula, número y símbolo'"
-                   [class]="'w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ' +
-                     (profileCtrl.password.touched && profileCtrl.password.invalid
-                       ? 'border-red-400 focus:ring-2 focus:ring-red-400/20'
-                       : 'border-gray-200 focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465]')"/>
-            <p *ngIf="profileCtrl.password.touched && profileCtrl.password.invalid"
-               class="text-red-500 text-xs mt-1">
-              {{ authService.isOwner() ? 'Mínimo 4 caracteres.' : 'Mínimo 8 chars con mayúscula, número y símbolo.' }}
-            </p>
+
+            <input type="password"
+                   formControlName="password"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none transition-all"/>
           </div>
 
-          <!-- Confirmar contraseña -->
-          <div *ngIf="profileCtrl.password.value">
-            <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
-              Confirmar {{ authService.isOwner() ? 'palabra de acceso' : 'contraseña' }}
-            </label>
-            <input type="password" formControlName="confirmPassword" placeholder="••••••••"
-                   [class]="'w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all ' +
-                     (profileForm.errors?.['passwordsMismatch'] && profileCtrl.confirmPassword.touched
-                       ? 'border-red-400 focus:ring-2 focus:ring-red-400/20'
-                       : 'border-gray-200 focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465]')"/>
-            <p *ngIf="profileForm.errors?.['passwordsMismatch'] && profileCtrl.confirmPassword.touched"
-               class="text-red-500 text-xs mt-1">Las contraseñas no coinciden.</p>
-          </div>
-
-          <!-- Botón guardar -->
           <div class="flex justify-end pt-2">
-            <button type="submit" [disabled]="isSavingProfile"
-                    class="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            <button type="submit"
+                    [disabled]="isSavingProfile"
+                    class="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50"
                     style="background-color: var(--rhouses-accent)">
-              <svg *ngIf="!isSavingProfile" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/>
-                <polyline points="7 3 7 8 15 8"/>
-              </svg>
-              <svg *ngIf="isSavingProfile" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-              </svg>
               {{ isSavingProfile ? 'Guardando...' : 'Guardar cambios' }}
             </button>
           </div>
+
         </form>
       </div>
     </div>
-<<<<<<< Updated upstream
-
   </div>
 
-  <!-- ══════════════════════════════════════
-       MODAL: Añadir / Editar cuenta
-  ══════════════════════════════════════ -->
+  <!-- MODAL -->
   <div *ngIf="showAddModal"
        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
 
-<<<<<<< HEAD
-=======
-<!-- ══════════════════════════════════════
-     MODAL: Añadir / Editar cuenta
-══════════════════════════════════════ -->
-<div *ngIf="showAddModal"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
-
-    <!-- Header modal -->
-    <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-      <h3 class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">
-        {{ editingAccountId ? 'Editar cuenta' : 'Nueva cuenta bancaria' }}
-      </h3>
-      <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-    </div>
-
-    <!-- Body modal -->
-    <form class="p-6 space-y-5" (ngSubmit)="onSubmit()">
-
-      <!-- Número de cuenta -->
-      <div>
-        <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">Número de cuenta *</label>
-        <input
-          [class]="'w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)] outline-none transition-all text-sm ' +
-            (errors.accountNumber ? 'border-red-400' : 'border-gray-200')"
-          placeholder="CO00 0000 0000 0000 0000 0000"
-          type="text"
-          name="accountNumber"
-          [(ngModel)]="formData.accountNumber"
-          (ngModelChange)="onInputChange('accountNumber')"
-        />
-        <p *ngIf="errors.accountNumber" class="text-red-500 text-xs mt-1">{{ errors.accountNumber }}</p>
-=======
-  </div>
-
-  <!-- ══════════════════════════════
-       MODAL: Añadir / Editar cuenta
-  ══════════════════════════════ -->
-  <div *ngIf="showAddModal"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
-
->>>>>>> devVal
       <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
         <h3 class="text-xl font-black" style="color: var(--rhouses-secondary-dark)">
           {{ editingAccountId ? 'Editar cuenta' : 'Nueva cuenta bancaria' }}
         </h3>
-<<<<<<< HEAD
+
         <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          ✖
         </button>
-=======
-        <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
->>>>>>> Stashed changes
->>>>>>> devVal
       </div>
 
       <form class="p-6 space-y-5" (ngSubmit)="onSubmit()">
 
-<<<<<<< HEAD
-        <div>
-          <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">Número de cuenta *</label>
-=======
-<<<<<<< Updated upstream
-      <!-- Tipo de cuenta -->
-      <div>
-        <label class="block text-sm font-bold mb-2" style="color: var(--rhouses-secondary-dark)">Tipo de cuenta *</label>
-        <div class="grid grid-cols-2 gap-2">
-          <label *ngFor="let type of accountTypes" class="relative cursor-pointer">
-            <input type="radio" name="accountType" [value]="type.value" [(ngModel)]="formData.accountType" class="peer sr-only"/>
-            <div class="p-3 border-2 rounded-xl text-sm font-semibold text-center transition-all peer-checked:border-[var(--rhouses-accent)] peer-checked:bg-[var(--rhouses-accent)]/5 peer-checked:text-[var(--rhouses-accent)] border-gray-200 text-gray-600 hover:border-gray-300">
-              {{ type.label }}
-            </div>
-          </label>
-        </div>
-        <p *ngIf="errors.accountType" class="text-red-500 text-xs mt-1">{{ errors.accountType }}</p>
-      </div>
-
-      <!-- Balance -->
-      <div>
-        <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">Balance inicial *</label>
-        <div class="relative">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
->>>>>>> devVal
-          <input
-            [class]="'w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)] outline-none transition-all text-sm ' +
-              (errors.accountNumber ? 'border-red-400' : 'border-gray-200')"
-            placeholder="CO00 0000 0000 0000 0000 0000"
-            type="text"
-            name="accountNumber"
-            [(ngModel)]="formData.accountNumber"
-            (ngModelChange)="onInputChange('accountNumber')"
-          />
-<<<<<<< HEAD
-          <p *ngIf="errors.accountNumber" class="text-red-500 text-xs mt-1">{{ errors.accountNumber }}</p>
-=======
-=======
         <div>
           <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
             Número de cuenta *
           </label>
-          <input [class]="'w-full px-4 py-3 border rounded-xl outline-none transition-all text-sm ' +
-                   (errors.accountNumber ? 'border-red-400' : 'border-gray-200 focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)]')"
-                 placeholder="0000 0000 0000 0000"
-                 type="text" name="accountNumber"
+
+          <input type="text"
+                 name="accountNumber"
                  [(ngModel)]="formData.accountNumber"
-                 (ngModelChange)="onInputChange('accountNumber')"/>
-          <p *ngIf="errors.accountNumber" class="text-red-500 text-xs mt-1">{{ errors.accountNumber }}</p>
->>>>>>> Stashed changes
->>>>>>> devVal
+                 class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none"/>
         </div>
 
-<<<<<<< HEAD
         <div>
-          <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">Banco *</label>
-          <select
-            [class]="'w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)] outline-none transition-all text-sm ' +
-              (errors.bankName ? 'border-red-400' : 'border-gray-200')"
-            name="bankName"
-            [(ngModel)]="formData.bankName"
-            (ngModelChange)="onInputChange('bankName')"
-          >
+          <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
+            Banco *
+          </label>
+
+          <select name="bankName"
+                  [(ngModel)]="formData.bankName"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none">
             <option value="">Selecciona un banco</option>
-            <option *ngFor="let bank of popularBanks" [value]="bank">{{ bank }}</option>
-          </select>
-          <p *ngIf="errors.bankName" class="text-red-500 text-xs mt-1">{{ errors.bankName }}</p>
-        </div>
-=======
-<<<<<<< Updated upstream
-      <!-- Info -->
-      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        <p class="text-xs text-blue-700 font-medium">Tus datos bancarios están protegidos y solo se usan para procesar pagos de rhouses.</p>
-      </div>
->>>>>>> devVal
 
-        <div>
-          <label class="block text-sm font-bold mb-2" style="color: var(--rhouses-secondary-dark)">Tipo de cuenta *</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label *ngFor="let type of accountTypes" class="relative cursor-pointer">
-              <input type="radio" name="accountType" [value]="type.value" [(ngModel)]="formData.accountType" class="peer sr-only"/>
-              <div class="p-3 border-2 rounded-xl text-sm font-semibold text-center transition-all peer-checked:border-[var(--rhouses-accent)] peer-checked:bg-[var(--rhouses-accent)]/5 peer-checked:text-[var(--rhouses-accent)] border-gray-200 text-gray-600 hover:border-gray-300">
-                {{ type.label }}
-              </div>
-            </label>
-          </div>
-          <p *ngIf="errors.accountType" class="text-red-500 text-xs mt-1">{{ errors.accountType }}</p>
-        </div>
-
-<<<<<<< HEAD
-        <div>
-          <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">Balance inicial *</label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
-            <input
-              [class]="'w-full pl-8 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)] outline-none transition-all text-sm ' +
-                (errors.balance ? 'border-red-400' : 'border-gray-200')"
-              placeholder="0"
-              type="number"
-              step="1"
-              name="balance"
-              [(ngModel)]="formData.balance"
-              (ngModelChange)="onInputChange('balance')"
-            />
-=======
-=======
-        <div>
-          <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">Banco *</label>
-          <select [class]="'w-full px-4 py-3 border rounded-xl outline-none transition-all text-sm ' +
-                    (errors.bankName ? 'border-red-400' : 'border-gray-200 focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)]')"
-                  name="bankName" [(ngModel)]="formData.bankName"
-                  (ngModelChange)="onInputChange('bankName')">
-            <option value="">Selecciona un banco</option>
-            <option *ngFor="let bank of popularBanks" [value]="bank">{{ bank }}</option>
+            <option *ngFor="let bank of popularBanks" [value]="bank">
+              {{ bank }}
+            </option>
           </select>
-          <p *ngIf="errors.bankName" class="text-red-500 text-xs mt-1">{{ errors.bankName }}</p>
         </div>
 
         <div>
           <label class="block text-sm font-bold mb-2" style="color: var(--rhouses-secondary-dark)">
             Tipo de cuenta *
           </label>
+
           <div class="grid grid-cols-2 gap-2">
+
             <label *ngFor="let type of accountTypes" class="cursor-pointer">
-              <input type="radio" name="accountType" [value]="type.value"
-                     [(ngModel)]="formData.accountType" class="peer sr-only"/>
-              <div class="p-3 border-2 rounded-xl text-sm font-semibold text-center transition-all
-                           peer-checked:border-[var(--rhouses-accent)] peer-checked:bg-[var(--rhouses-accent)]/5 peer-checked:text-[var(--rhouses-accent)]
-                           border-gray-200 text-gray-600 hover:border-gray-300">
+
+              <input type="radio"
+                     name="accountType"
+                     [value]="type.value"
+                     [(ngModel)]="formData.accountType"
+                     class="peer sr-only"/>
+
+              <div class="p-3 border-2 rounded-xl text-sm font-semibold text-center transition-all border-gray-200 text-gray-600 hover:border-gray-300 peer-checked:border-[var(--rhouses-accent)] peer-checked:bg-[var(--rhouses-accent)]/5 peer-checked:text-[var(--rhouses-accent)]">
                 {{ type.label }}
               </div>
+
             </label>
           </div>
-          <p *ngIf="errors.accountType" class="text-red-500 text-xs mt-1">{{ errors.accountType }}</p>
         </div>
 
         <div>
           <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
             Balance inicial *
           </label>
+
           <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
-            <input [class]="'w-full pl-8 pr-4 py-3 border rounded-xl outline-none transition-all text-sm ' +
-                     (errors.balance ? 'border-red-400' : 'border-gray-200 focus:ring-2 focus:ring-[var(--rhouses-accent)]/20 focus:border-[var(--rhouses-accent)]')"
-                   placeholder="0" type="number" step="1" name="balance"
+
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">
+              $
+            </span>
+
+            <input type="number"
+                   step="1"
+                   name="balance"
                    [(ngModel)]="formData.balance"
-                   (ngModelChange)="onInputChange('balance')"/>
->>>>>>> devVal
+                   class="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl text-sm outline-none"/>
           </div>
-          <p *ngIf="errors.balance" class="text-red-500 text-xs mt-1">{{ errors.balance }}</p>
-          <p class="text-xs text-gray-400 mt-1">Solo es un registro, no afecta tu cuenta real.</p>
-        </div>
-
-<<<<<<< HEAD
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          <p class="text-xs text-blue-700 font-medium">Tus datos bancarios están protegidos y solo se usan para procesar pagos de rhouses.</p>
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" (click)="closeModal()"
-            class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 transition-all">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="isLoading"
-            class="flex-1 py-3 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            style="background-color: var(--rhouses-accent)">
-=======
-        <div class="flex gap-3 pt-2">
-          <button type="button" (click)="closeModal()"
+
+          <button type="button"
+                  (click)="closeModal()"
                   class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 transition-all">
             Cancelar
           </button>
-          <button type="submit" [disabled]="isLoading"
+
+          <button type="submit"
+                  [disabled]="isLoading"
                   class="flex-1 py-3 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50"
                   style="background-color: var(--rhouses-accent)">
->>>>>>> devVal
             {{ isLoading ? 'Guardando...' : editingAccountId ? 'Actualizar' : 'Guardar cuenta' }}
           </button>
+
         </div>
       </form>
-<<<<<<< HEAD
-
     </div>
-=======
-    </div>
->>>>>>> Stashed changes
->>>>>>> devVal
   </div>
 </div>

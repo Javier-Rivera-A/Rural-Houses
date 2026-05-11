@@ -57,7 +57,6 @@ export class SettingsComponent implements OnInit {
   isSavingProfile   = false;
   editingAccountId: string | null = null;
 
-  // ── Formulario de perfil: solo email, teléfono y contraseña ──
   profileForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{7,15}$/)]],
@@ -99,7 +98,6 @@ export class SettingsComponent implements OnInit {
     return this.profileForm.controls;
   }
 
-  /** Pre-rellena con los datos actuales de sesión */
   prefillProfile(): void {
     const user = this.authService.user();
     if (!user) return;
@@ -145,7 +143,6 @@ export class SettingsComponent implements OnInit {
 
     const values = this.profileForm.getRawValue();
 
-    // Si hay nueva contraseña y no coincide, ya lo captura el validador de grupo
     if (values.password && values.password !== values.confirmPassword) {
       this.toastr.warning('Las contraseñas no coinciden', 'Error de validación');
       return;
@@ -153,55 +150,65 @@ export class SettingsComponent implements OnInit {
 
     this.isSavingProfile = true;
 
-    // Construir payload según el tipo de usuario
-    const isOwner = this.authService.isOwner();
-    const endpoint = isOwner
-      ? `${this.base}/api/owners/${user.id}`
-      : `${this.base}/api/customers/${user.id}`;
+    const isOwner    = this.authService.isOwner();
+    const headers    = this.getAuthHeaders();
+    const newPassword = values.password?.trim();
+    const requests: Promise<void>[] = [];
 
-    const headers = this.getAuthHeaders();
-
-    // Payload mínimo requerido por el backend (userName siempre requerido)
-    const payload: any = {
-      userName:  user.userName,
-      email:     values.email,
-      phone:     values.phone,
-    };
-
-    // Solo incluir contraseña si se ingresó una nueva
-    if (values.password && values.password.trim() !== '') {
-      if (isOwner) {
-        payload.accessWord = values.password;
-      } else {
-        payload.password = values.password;
-      }
-    } else {
-      // Mantener la contraseña actual con un placeholder que el backend ignorará
-      // Se envía con la contraseña encriptada actual — el backend no la cambiará si no se provee
-      payload.password   = user.userName; // fallback seguro; el backend debe validarlo
-      payload.accessWord = user.userName;
+    if (values.email && values.email !== user.email) {
+      const emailUrl = isOwner
+        ? `${this.base}/api/owners/${user.id}/email`
+        : `${this.base}/api/customers/${user.id}/email`;
+      requests.push(
+        this.http.put(emailUrl, { email: values.email }, { headers }).toPromise().then(() => {})
+      );
     }
 
-    this.http.put<any>(endpoint, payload, { headers }).subscribe({
-      next: () => {
-        this.authService.updateUserProfile({
-          email: values.email ?? undefined,
-          phone: values.phone ?? undefined,
-        });
-        this.profileForm.patchValue({ password: '', confirmPassword: '' });
-        this.toastr.success('Datos actualizados correctamente', '¡Éxito!');
-        this.isSavingProfile = false;
-      },
-      error: (err) => {
-        // Si falla (el backend no tiene PUT implementado), al menos actualizamos la sesión local
-        this.authService.updateUserProfile({
-          email: values.email ?? undefined,
-          phone: values.phone ?? undefined,
-        });
-        this.profileForm.patchValue({ password: '', confirmPassword: '' });
-        this.toastr.success('Datos actualizados en sesión', '¡Listo!');
-        this.isSavingProfile = false;
+    if (values.phone && values.phone !== user.phone) {
+      const phoneUrl = isOwner
+        ? `${this.base}/api/owners/${user.id}/phone`
+        : `${this.base}/api/customers/${user.id}/phone`;
+      requests.push(
+        this.http.put(phoneUrl, { phone: values.phone }, { headers }).toPromise().then(() => {})
+      );
+    }
+
+    if (newPassword) {
+      if (isOwner) {
+        const accessWordUrl = `${this.base}/api/owners/${user.id}/access-word`;
+        requests.push(
+          this.http.put(accessWordUrl, { accessWord: newPassword }, { headers }).toPromise().then(() => {})
+        );
+      } else {
+        const passwordUrl = `${this.base}/api/customers/${user.id}/password`;
+        requests.push(
+          this.http.put(passwordUrl, { password: newPassword }, { headers }).toPromise().then(() => {})
+        );
       }
+    }
+
+    Promise.allSettled(requests).then((results) => {
+      const failures = results.filter(r => r.status === 'rejected');
+
+      if (failures.length === 0) {
+        this.authService.updateUserProfile({
+          email: values.email ?? undefined,
+          phone: values.phone ?? undefined,
+        });
+        this.toastr.success('Datos actualizados correctamente', '¡Éxito!');
+      } else if (failures.length < results.length) {
+        // Partial success
+        this.authService.updateUserProfile({
+          email: values.email ?? undefined,
+          phone: values.phone ?? undefined,
+        });
+        this.toastr.warning('Algunos datos no pudieron actualizarse', 'Actualización parcial');
+      } else {
+        this.toastr.error('No se pudieron guardar los cambios', 'Error');
+      }
+
+      this.profileForm.patchValue({ password: '', confirmPassword: '' });
+      this.isSavingProfile = false;
     });
   }
 
@@ -266,17 +273,8 @@ export class SettingsComponent implements OnInit {
     const payload: BankAccountPayload = {
       numberAccount: this.formData.accountNumber,
       bank:          this.formData.bankName,
-<<<<<<< HEAD
-      accountType:   this.formData.accountType,
-      mount: parseFloat(this.formData.balance) || 0
-=======
-<<<<<<< Updated upstream
-      accountType:   this.formData.accountType
-=======
       accountType:   this.formData.accountType,
       mount:         parseFloat(this.formData.balance) || 0
->>>>>>> Stashed changes
->>>>>>> devVal
     };
 
     if (this.editingAccountId) {

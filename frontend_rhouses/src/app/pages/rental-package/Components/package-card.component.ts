@@ -81,19 +81,15 @@ import {
   `
 })
 export class PackageCardComponent {
-  // Entradas de datos (Props)
   @Input({ required: true }) pkg!: RentalPackage;
 
-  // Eventos de salida (Callbacks)
   @Output() edit = new EventEmitter<RentalPackage>();
   @Output() delete = new EventEmitter<string>();
 
-  // Getter para facilitar la lectura en el HTML
   get isDraft(): boolean {
     return this.pkg.status === 'Borrador';
   }
 
-  // Funciones disparadoras de eventos
   onEditClick() {
     this.edit.emit(this.pkg);
   }

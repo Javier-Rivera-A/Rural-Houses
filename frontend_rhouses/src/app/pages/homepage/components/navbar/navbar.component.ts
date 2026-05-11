@@ -48,23 +48,15 @@ export class NavbarComponent {
       this.dropdownOpen = false;
     }
   }
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> devVal
 
   goToMyRentals(): void {
     this.dropdownOpen = false;
     this.router.navigate(['/my-rentals']);
   }
-<<<<<<< HEAD
-=======
 
   goToOwnerReservations(): void {
     this.dropdownOpen = false;
     this.router.navigate(['/owner-reservations']);
   }
->>>>>>> Stashed changes
->>>>>>> devVal
+
 }
