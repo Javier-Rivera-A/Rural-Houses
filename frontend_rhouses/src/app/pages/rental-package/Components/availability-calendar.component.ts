@@ -16,7 +16,7 @@ export interface ReservationOverlay {
   rentalCode: string;
   checkInDate: string;
   checkOutDate: string;
-  state: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
+  state: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED' | 'PAID';
 }
 
 @Component({
@@ -140,7 +140,8 @@ export interface ReservationOverlay {
                   class="pkg-pill"
                   [style.background]="getPkgColor(pkg.typeRental)">
               <ng-container *ngIf="isStartDay(cell.date, pkg)">
-                $ {{ pkg.priceNight }} &middot; {{ getRentalLabel(pkg.typeRental) }}
+                $ {{ pkg.typeRental === 'ROOMS' ? pkg.pricePerRoomNight : pkg.priceNight }}
+                &middot; {{ getRentalLabel(pkg.typeRental) }}
               </ng-container>
               <ng-container *ngIf="!isStartDay(cell.date, pkg)">&nbsp;</ng-container>
             </span>
@@ -196,7 +197,10 @@ export interface ReservationOverlay {
             <span class="font-semibold text-gray-700 flex-1">
               {{ formatDate(pkg.startingDate) }} &rarr; {{ formatDate(pkg.endingDate) }}
             </span>
-            <span class="font-black" style="color:#AA4465">$ {{ pkg.priceNight }}/noche</span>
+            <span class="font-black" style="color:#AA4465">
+              $ {{ pkg.typeRental === 'ROOMS' ? pkg.pricePerRoomNight : pkg.priceNight }}
+              {{ pkg.typeRental === 'ROOMS' ? '/hab/noche' : '/noche' }}
+            </span>
             <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
                   [style.background]="getPkgLightColor(pkg.typeRental)"
                   [style.color]="getPkgColor(pkg.typeRental)">
@@ -290,7 +294,7 @@ export class AvailabilityCalendarComponent implements OnInit, OnChanges {
       const reservationsForDay = this.reservations.filter((reservation) => {
         if (reservation.state !== 'PENDING' && reservation.state !== 'CONFIRMED') return false;
         const start = this.parseDate(reservation.checkInDate);
-        const end = this.parseDate(reservation.checkOutDate);
+        const end   = this.parseDate(reservation.checkOutDate);
         return date >= start && date < end;
       });
 

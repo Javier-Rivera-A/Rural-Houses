@@ -8,6 +8,8 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../Services/Auth/Auth.service';
 import { BankAccountService, BankAccountPayload } from '../../Services/BankAccount/BankAccount.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 interface BankAccount {
   id: string;
@@ -58,9 +60,16 @@ export class SettingsComponent implements OnInit {
   editingAccountId: string | null = null;
 
   profileForm = this.fb.group({
+    userName: ['', [
+      Validators.required,
+      Validators.minLength(4),
+      Validators.maxLength(30),
+      Validators.pattern(/^[a-zA-Z0-9_.-]+$/)
+    ]],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{7,15}$/)]],
-    password: ['', [Validators.minLength(8), Validators.pattern(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/)]],
+    phone: ['', [Validators.pattern(/^\+?[0-9]{7,15}$/)]],
+    // Campo reutilizado: para propietario = accessWord (min 4), para cliente = password (min 8 + patrón)
+    password: [''],
     confirmPassword: ['']
   }, { validators: [this.passwordsMatchValidator] });
 
@@ -80,6 +89,29 @@ export class SettingsComponent implements OnInit {
     'Banco Santander', 'Nequi', 'Nubank', 'Banco Popular',
     'Scotiabank Colpatria', 'Otro'
   ];
+
+  // ── Getters para el template ──────────────────────────────────────────
+
+  get isOwner(): boolean {
+    return this.authService.isOwner();
+  }
+
+  /** Etiqueta del campo de credencial según tipo de usuario */
+  get credentialLabel(): string {
+    return this.isOwner ? 'Nueva palabra de acceso' : 'Nueva contraseña';
+  }
+
+  /** Placeholder del campo de credencial */
+  get credentialPlaceholder(): string {
+    return this.isOwner ? 'Mínimo 4 caracteres' : 'Mínimo 8 caracteres, mayúscula, número y símbolo';
+  }
+
+  /** Hint descriptivo bajo el campo */
+  get credentialHint(): string {
+    return this.isOwner
+      ? 'La palabra de acceso se usa para iniciar sesión como propietario.'
+      : 'Debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (ej: Hola1234!)';
+  }
 
   ngOnInit(): void {
     this.loadAccounts();
@@ -102,8 +134,9 @@ export class SettingsComponent implements OnInit {
     const user = this.authService.user();
     if (!user) return;
     this.profileForm.patchValue({
-      email:           user.email ?? '',
-      phone:           user.phone ?? '',
+      userName:        user.userName ?? '',
+      email:           user.email   ?? '',
+      phone:           user.phone   ?? '',
       password:        '',
       confirmPassword: ''
     });
@@ -133,86 +166,124 @@ export class SettingsComponent implements OnInit {
     });
   }
 
+  // ── Guardar perfil ────────────────────────────────────────────────────
+
   saveProfile(): void {
-    if (this.profileForm.invalid) {
-      this.profileForm.markAllAsTouched();
+    this.profileForm.markAllAsTouched();
+
+    const values  = this.profileForm.getRawValue();
+    const newCred = values.password?.trim();
+
+    // Validar que las credenciales coincidan
+    if (newCred && newCred !== values.confirmPassword?.trim()) {
+      this.toastr.warning('Las credenciales no coinciden', 'Error de validación');
       return;
     }
+
+    // Validar longitud mínima de la credencial
+    if (newCred) {
+      if (this.isOwner && newCred.length < 4) {
+        this.toastr.warning('La palabra de acceso debe tener al menos 4 caracteres', 'Inválida');
+        return;
+      }
+      if (!this.isOwner && newCred.length < 8) {
+        this.toastr.warning('La contraseña debe tener al menos 8 caracteres', 'Inválida');
+        return;
+      }
+      if (!this.isOwner && !/^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/.test(newCred)) {
+        this.toastr.warning(
+          'La contraseña debe tener al menos una mayúscula, un número y un carácter especial',
+          'Inválida'
+        );
+        return;
+      }
+    }
+
     const user = this.authService.user();
     if (!user) return;
 
-    const values = this.profileForm.getRawValue();
+    const headers = this.getAuthHeaders();
+    const isOwner = this.isOwner;
+    const base    = `${this.base}/api/${isOwner ? 'owners' : 'customers'}/${user.id}`;
+    const requests: { [key: string]: any } = {};
 
-    if (values.password && values.password !== values.confirmPassword) {
-      this.toastr.warning('Las contraseñas no coinciden', 'Error de validación');
+    const newUserName = values.userName?.trim();
+    if (newUserName && newUserName !== user.userName) {
+      requests['userName'] = this.http.put(
+        `${base}/username`,
+        { userName: newUserName },
+        { headers }
+      ).pipe(catchError(err => { throw err; }));
+    }
+
+    const newEmail = values.email?.trim();
+    if (newEmail && newEmail !== user.email) {
+      requests['email'] = this.http.put(
+        `${base}/email`,
+        { email: newEmail },
+        { headers }
+      ).pipe(catchError(err => { throw err; }));
+    }
+
+    const newPhone = values.phone?.trim();
+    if (newPhone && newPhone !== user.phone) {
+      requests['phone'] = this.http.put(
+        `${base}/phone`,
+        { phone: newPhone },
+        { headers }
+      ).pipe(catchError(err => { throw err; }));
+    }
+
+    if (newCred) {
+      if (isOwner) {
+        // Propietario: actualiza la palabra de acceso (texto plano)
+        requests['accessWord'] = this.http.put(
+          `${base}/access-word`,
+          { accessWord: newCred },
+          { headers }
+        ).pipe(catchError(err => { throw err; }));
+      } else {
+        // Cliente: actualiza la contraseña (BCrypt en el backend)
+        requests['password'] = this.http.put(
+          `${base}/password`,
+          { password: newCred },
+          { headers }
+        ).pipe(catchError(err => { throw err; }));
+      }
+    }
+
+    if (Object.keys(requests).length === 0) {
+      this.toastr.info('No hay cambios para guardar', 'Sin cambios');
       return;
     }
 
     this.isSavingProfile = true;
 
-    const isOwner    = this.authService.isOwner();
-    const headers    = this.getAuthHeaders();
-    const newPassword = values.password?.trim();
-    const requests: Promise<void>[] = [];
+    forkJoin(requests).subscribe({
+      next: () => {
+        // Reflejar cambios en la sesión activa inmediatamente
+        const updatedProfile: Partial<typeof user> = {};
+        if (requests['userName']) updatedProfile['userName'] = newUserName!;
+        if (requests['email'])    updatedProfile['email']    = newEmail!;
+        if (requests['phone'])    updatedProfile['phone']    = newPhone!;
 
-    if (values.email && values.email !== user.email) {
-      const emailUrl = isOwner
-        ? `${this.base}/api/owners/${user.id}/email`
-        : `${this.base}/api/customers/${user.id}/email`;
-      requests.push(
-        this.http.put(emailUrl, { email: values.email }, { headers }).toPromise().then(() => {})
-      );
-    }
+        this.authService.updateUserProfile(updatedProfile);
 
-    if (values.phone && values.phone !== user.phone) {
-      const phoneUrl = isOwner
-        ? `${this.base}/api/owners/${user.id}/phone`
-        : `${this.base}/api/customers/${user.id}/phone`;
-      requests.push(
-        this.http.put(phoneUrl, { phone: values.phone }, { headers }).toPromise().then(() => {})
-      );
-    }
+        // Limpiar campos de credencial
+        this.profileForm.patchValue({ password: '', confirmPassword: '' });
 
-    if (newPassword) {
-      if (isOwner) {
-        const accessWordUrl = `${this.base}/api/owners/${user.id}/access-word`;
-        requests.push(
-          this.http.put(accessWordUrl, { accessWord: newPassword }, { headers }).toPromise().then(() => {})
-        );
-      } else {
-        const passwordUrl = `${this.base}/api/customers/${user.id}/password`;
-        requests.push(
-          this.http.put(passwordUrl, { password: newPassword }, { headers }).toPromise().then(() => {})
-        );
+        this.toastr.success('Perfil actualizado correctamente', '¡Éxito!');
+        this.isSavingProfile = false;
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Error al actualizar el perfil';
+        this.toastr.error(msg, 'Error');
+        this.isSavingProfile = false;
       }
-    }
-
-    Promise.allSettled(requests).then((results) => {
-      const failures = results.filter(r => r.status === 'rejected');
-
-      if (failures.length === 0) {
-        this.authService.updateUserProfile({
-          email: values.email ?? undefined,
-          phone: values.phone ?? undefined,
-        });
-        this.toastr.success('Datos actualizados correctamente', '¡Éxito!');
-      } else if (failures.length < results.length) {
-        // Partial success
-        this.authService.updateUserProfile({
-          email: values.email ?? undefined,
-          phone: values.phone ?? undefined,
-        });
-        this.toastr.warning('Algunos datos no pudieron actualizarse', 'Actualización parcial');
-      } else {
-        this.toastr.error('No se pudieron guardar los cambios', 'Error');
-      }
-
-      this.profileForm.patchValue({ password: '', confirmPassword: '' });
-      this.isSavingProfile = false;
     });
   }
 
-  // ── Cuentas bancarias ──────────────────────────────────────────────────
+  // ── Cuentas bancarias ─────────────────────────────────────────────────
 
   openAddModal(): void {
     this.showAddModal     = true;

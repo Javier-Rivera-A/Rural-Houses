@@ -12,6 +12,13 @@ export interface RentalRequest {
   typeRental: 'ENTIRE_HOUSE' | 'ROOMS';
 }
 
+/** Body que espera el backend en POST /api/rentals/{rentalId}/pay */
+export interface PayRentalRequest {
+  customerBankAccountId: string;
+  ownerBankAccountId: string;
+  amount: number;
+}
+
 export interface RentalResponse {
   id: string;
   rentalCode: string;
@@ -19,14 +26,16 @@ export interface RentalResponse {
   checkInDate: string;
   checkOutDate: string;
   numberNights: number;
-  state: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
+  state: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED' | 'PAID';
   contactPhoneNumber: string;
   totalPrice: number;
+  totalPaid?: number;
+  remainingBalance?: number;
+  depositRequired?: number;
   rentalPlaceId: string[];
   countryHouseCode: string;
   customerUserName: string | null;
-  ownerBankAccount?: string;
-  depositRequired?: number;
+  ownerBankAccount?: string | string[];
   ownerId?: string;
 }
 
@@ -50,6 +59,8 @@ export class RentalService {
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 
+  // ── CRUD ──────────────────────────────────────────────────────────────────
+
   /** Crear reserva */
   makeRental(customerId: string | null, body: RentalRequest): Observable<ApiResponse<RentalResponse>> {
     const params = customerId ? `?customerId=${customerId}` : '';
@@ -70,17 +81,29 @@ export class RentalService {
     ).pipe(tap((res) => this.hydrateRentals(res?.data ?? [])));
   }
 
-  /** Cancelar reserva (cliente) */
-  cancelByCustomer(rentalId: string, customerId: string): Observable<ApiResponse<RentalResponse>> {
-    return this.http.delete<ApiResponse<RentalResponse>>(
-      `${this.base}/${rentalId}?customerId=${customerId}`, { headers: this.headers() }
-    ).pipe(tap((res) => this.upsertRental(res?.data)));
+  /** Listar reservas de una casa concreta (propietario) */
+  findByOwner(houseId: string): Observable<ApiResponse<RentalResponse[]>> {
+    return this.http.get<ApiResponse<RentalResponse[]>>(
+      `${this.base}/house/${houseId}`, { headers: this.headers() }
+    ).pipe(tap((res) => this.hydrateRentals(res?.data ?? [])));
   }
 
   /**
-   * El propietario confirma el pago del anticipo.
+   * Reservas con plazo vencido (+3 días sin pago) de un propietario.
+   * Endpoint: GET /api/rentals/expired?ownerId={id}
+   */
+  getExpiredRentals(ownerId: string): Observable<ApiResponse<RentalResponse[]>> {
+    return this.http.get<ApiResponse<RentalResponse[]>>(
+      `${this.base}/expired?ownerId=${ownerId}`, { headers: this.headers() }
+    ).pipe(tap((res) => this.hydrateRentals(res?.data ?? [])));
+  }
+
+  // ── Acciones del propietario ──────────────────────────────────────────────
+
+  /**
+   * El propietario registra el cobro del anticipo.
    * Endpoint: POST /api/rentals/{rentalId}/payment?ownerId={id}&amount={importe}
-   * Cambia el estado de la reserva a CONFIRMED en el backend.
+   * Cambia el estado a CONFIRMED cuando el pago cubre el anticipo mínimo (20 %).
    */
   registerPaymentAsOwner(rentalId: string, amount: number, ownerId: string): Observable<ApiResponse<void>> {
     return this.http.post<ApiResponse<void>>(
@@ -89,7 +112,6 @@ export class RentalService {
       { headers: this.headers() }
     ).pipe(
       tap(() => {
-        // Actualizar estado local a CONFIRMED inmediatamente
         const rental = this.rentalsCache$.value[rentalId];
         if (rental) this.upsertRental({ ...rental, state: 'CONFIRMED' });
       })
@@ -113,18 +135,36 @@ export class RentalService {
     );
   }
 
-  /** Listar reservas de un propietario (por sus casas) */
-  findByOwner(ownerId: string): Observable<ApiResponse<RentalResponse[]>> {
-    return this.http.get<ApiResponse<RentalResponse[]>>(
-      `${this.base}/house/${ownerId}`, { headers: this.headers() }
-    ).pipe(tap((res) => this.hydrateRentals(res?.data ?? [])));
-  }
+  // ── Acciones del cliente ──────────────────────────────────────────────────
 
-  /** Reservas expiradas del propietario */
-  getExpiredRentals(ownerId: string): Observable<ApiResponse<RentalResponse[]>> {
-    return this.http.get<ApiResponse<RentalResponse[]>>(
-      `${this.base}/expired?ownerId=${ownerId}`, { headers: this.headers() }
-    ).pipe(tap((res) => this.hydrateRentals(res?.data ?? [])));
+  /**
+   * El cliente paga transfiriendo desde su cuenta bancaria a la del propietario.
+   * Endpoint: POST /api/rentals/{rentalId}/pay?customerId={id}&amount={importe}
+   *
+   * El backend requiere en el BODY:
+   *   { customerBankAccountId, ownerBankAccountId, amount }
+   *
+   * Si el pago cubre el anticipo (20 %), el estado pasa a CONFIRMED.
+   * Si cubre el total, pasa a PAID.
+   */
+  payDeposit(
+    rentalId: string,
+    customerId: string,
+    payload: PayRentalRequest
+  ): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(
+      `${this.base}/${rentalId}/pay?customerId=${customerId}`,
+      payload,
+      { headers: this.headers() }
+    ).pipe(
+      tap(() => {
+        const rental = this.rentalsCache$.value[rentalId];
+        if (rental) {
+          // Optimistic update: si el pago es >= 20 % marcamos CONFIRMED
+          this.upsertRental({ ...rental, state: 'CONFIRMED' });
+        }
+      })
+    );
   }
 
   // ── Observadores reactivos ────────────────────────────────────────────────
@@ -175,6 +215,8 @@ export class RentalService {
     });
   }
 
+  // ── Helpers del caché ─────────────────────────────────────────────────────
+
   private hydrateRentals(rentals: RentalResponse[]): void {
     if (!rentals?.length) return;
     const next = { ...this.rentalsCache$.value };
@@ -194,37 +236,5 @@ export class RentalService {
 
   private parseDate(dateValue: string): Date {
     return new Date(dateValue.split('T')[0] + 'T00:00:00');
-  }
-
-  /**
-   * El cliente paga el anticipo (20%) desde su cuenta bancaria.
-   *
-   * Endpoint del backend: POST /api/rentals/{rentalId}/pay?customerId={id}&amount={importe}
-   *
-   * El backend maneja internamente la transferencia entre cuentas:
-   * - Descuenta el monto de la primera cuenta bancaria del cliente
-   * - Lo acredita en la primera cuenta del propietario
-   * - Confirma la reserva automáticamente si el pago es exitoso
-   *
-   * NOTA: El backend NO acepta customerAccountId. Siempre usa la primera
-   * cuenta registrada del cliente. El monto debe ser el 20% del totalPrice.
-   */
-  payDeposit(
-    rentalId: string,
-    customerId: string,
-    amount: number
-  ): Observable<ApiResponse<RentalResponse>> {
-    return this.http.post<ApiResponse<RentalResponse>>(
-      `${this.base}/${rentalId}/pay?customerId=${customerId}&amount=${amount}`,
-      {},
-      { headers: this.headers() }
-    ).pipe(
-      tap((res) => {
-        // Actualizar el cache reactivo con la reserva confirmada
-        if (res?.data) {
-          this.upsertRental({ ...res.data, state: 'CONFIRMED' });
-        }
-      })
-    );
   }
 }

@@ -16,6 +16,7 @@ interface PackageForm {
   startingDate: string;
   endingDate:   string;
   priceNight:   number | null;
+  pricePerRoomNight: number | null;
   typeRental:   'ENTIRE_HOUSE' | 'ROOMS' | 'BOTH';
 }
 
@@ -57,6 +58,7 @@ export class RentalPackageComponent implements OnInit {
     startingDate: '',
     endingDate:   '',
     priceNight:   null,
+    pricePerRoomNight: null,
     typeRental:   'ENTIRE_HOUSE'
   };
 
@@ -134,7 +136,7 @@ export class RentalPackageComponent implements OnInit {
 
   openForm(): void {
     this.editingId = null;
-    this.form = { startingDate: '', endingDate: '', priceNight: null, typeRental: 'ENTIRE_HOUSE' };
+    this.form = { startingDate: '', endingDate: '', priceNight: null, pricePerRoomNight: null,  typeRental: 'ENTIRE_HOUSE' };
     this.showForm = true;
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
   }
@@ -145,6 +147,7 @@ export class RentalPackageComponent implements OnInit {
       startingDate: (pkg.startingDate ?? '').split('T')[0],
       endingDate:   (pkg.endingDate   ?? '').split('T')[0],
       priceNight:   pkg.priceNight,
+      pricePerRoomNight: pkg.pricePerRoomNight,
       typeRental:   pkg.typeRental as any
     };
     this.showForm = true;
@@ -157,35 +160,51 @@ export class RentalPackageComponent implements OnInit {
   }
 
   savePackage(): void {
+    const needsWholePrice = this.form.typeRental === 'ENTIRE_HOUSE' || this.form.typeRental === 'BOTH';
+    const needsRoomPrice  = this.form.typeRental === 'ROOMS'        || this.form.typeRental === 'BOTH';
+
     if (!this.selectedHouseId) {
       this.toastr.warning('Selecciona una casa primero', 'Sin casa seleccionada');
       return;
     }
-    if (!this.form.startingDate || !this.form.endingDate || this.form.priceNight === null || this.form.priceNight <= 0) {
-      this.toastr.warning('Completa todos los campos (precio mayor a 0)', 'Campos requeridos');
+
+    if (!this.form.startingDate || !this.form.endingDate) {
+      this.toastr.warning('Las fechas son obligatorias', 'Campos requeridos');
       return;
     }
+
+    if (needsWholePrice && (!this.form.priceNight || this.form.priceNight <= 0)) {
+      this.toastr.warning('El precio por noche de la casa es obligatorio y debe ser mayor a 0', 'Campos requeridos');
+      return;
+    }
+
+    if (needsRoomPrice && (!this.form.pricePerRoomNight || this.form.pricePerRoomNight <= 0)) {
+      this.toastr.warning('El precio por habitación/noche es obligatorio y debe ser mayor a 0', 'Campos requeridos');
+      return;
+    }
+
     if (new Date(this.form.startingDate) >= new Date(this.form.endingDate)) {
       this.toastr.warning('La fecha de inicio debe ser anterior a la fecha de fin', 'Fechas inválidas');
       return;
     }
 
     this.isSaving = true;
+
     const payload = {
       startingDate: this.form.startingDate,
       endingDate:   this.form.endingDate,
-      priceNight:   Number(this.form.priceNight),
+      priceNight:   Number(this.form.priceNight) || 0,
+      pricePerRoomNight: Number(this.form.pricePerRoomNight) || 0,
       typeRental:   this.form.typeRental
     };
 
     if (this.editingId) {
       this.houseSvc.updateRentalPackage(this.ownerId!, this.editingId, payload).subscribe({
         next: (res) => {
-          const idx = this.packages.findIndex(p => p.id === this.editingId);
-          if (idx !== -1 && res?.data) this.packages[idx] = res.data;
           this.toastr.success('Paquete actualizado', '¡Éxito!');
           this.isSaving = false;
           this.cancelForm();
+          this.loadPackages();
         },
         error: (err) => {
           this.toastr.error(err?.error?.message ?? 'Error al actualizar', 'Error');
@@ -195,10 +214,10 @@ export class RentalPackageComponent implements OnInit {
     } else {
       this.houseSvc.addRentalPackage(this.ownerId!, this.selectedHouseId, payload).subscribe({
         next: (res) => {
-          if (res?.data) this.packages = [res.data, ...this.packages];
           this.toastr.success('Paquete creado', '¡Éxito!');
           this.isSaving = false;
           this.cancelForm();
+          this.loadPackages();
         },
         error: (err) => {
           this.toastr.error(err?.error?.message ?? 'Error al crear el paquete', 'Error');
@@ -212,8 +231,8 @@ export class RentalPackageComponent implements OnInit {
     if (!confirm('¿Eliminar este paquete de alquiler?')) return;
     this.houseSvc.deleteRentalPackage(this.ownerId!, id).subscribe({
       next: () => {
-        this.packages = this.packages.filter(p => p.id !== id);
         this.toastr.success('Paquete eliminado', '¡Listo!');
+        this.loadPackages();
       },
       error: (err) => {
         this.toastr.error(err?.error?.message ?? 'Error al eliminar', 'Error');

@@ -7,6 +7,7 @@ import { AuthService } from '../../Services/Auth/Auth.service';
 import { CountryHouseService } from '../../Services/CountryHouse/country-house.service';
 import { RentalResponse, RentalService } from '../../Services/Rental/rental.service';
 import { NavbarComponent } from '../homepage/components/navbar/navbar.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-owner-reservations',
@@ -29,7 +30,7 @@ export class OwnerReservationsComponent implements OnInit {
 
   processingId: string | null = null;
 
-  selectedTab: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED' | 'ALL' = 'ALL';
+  selectedTab: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED' | 'PAID' | 'ALL' = 'ALL';
 
   confirmTarget: RentalResponse | null = null;
   cancelTarget:  RentalResponse | null = null;
@@ -50,8 +51,9 @@ export class OwnerReservationsComponent implements OnInit {
         const houses = res?.data ?? [];
         this.ownerHouseCodes = new Set(houses.map((h) => h.code));
         this.listenReactiveRentals();
-        
-        this.hydrateOwnerRentals(houses.map(h => h.id));
+
+        // Cargar reservas activas por cada casa y las expiradas del propietario en paralelo
+        this.hydrateOwnerRentals(houses.map(h => h.id), ownerId);
       },
       error: () => {
         this.toastr.error('No se pudieron cargar tus casas', 'Error');
@@ -59,6 +61,8 @@ export class OwnerReservationsComponent implements OnInit {
       }
     });
   }
+
+  // ── Filtros ───────────────────────────────────────────────────────────────
 
   get filteredRentals(): RentalResponse[] {
     const filtered = this.rentals.filter((r) => this.ownerHouseCodes.has(r.countryHouseCode));
@@ -75,6 +79,12 @@ export class OwnerReservationsComponent implements OnInit {
   get confirmedCount(): number {
     return this.rentals.filter(r =>
       this.ownerHouseCodes.has(r.countryHouseCode) && r.state === 'CONFIRMED'
+    ).length;
+  }
+
+  get paidCount(): number {
+    return this.rentals.filter(r =>
+      this.ownerHouseCodes.has(r.countryHouseCode) && r.state === 'PAID'
     ).length;
   }
 
@@ -100,6 +110,7 @@ export class OwnerReservationsComponent implements OnInit {
     this.processingId  = rental.id;
     this.confirmTarget = null;
 
+    // El backend requiere el monto del anticipo (20 %) como parámetro
     const amount = Math.ceil(rental.totalPrice * 0.2);
 
     this.rentalSvc.registerPaymentAsOwner(rental.id, amount, ownerId).subscribe({
@@ -142,6 +153,10 @@ export class OwnerReservationsComponent implements OnInit {
   openExpiredModal(rental: RentalResponse): void  { this.expiredTarget = rental; }
   closeExpiredModal(): void { this.expiredTarget = null; }
 
+  /**
+   * Cancela una reserva con plazo de pago vencido.
+   * Usa el endpoint POST /api/rentals/{rentalId}/cancel?ownerId={id}
+   */
   cancelExpiredRental(): void {
     if (!this.expiredTarget) return;
     const ownerId = this.auth.user()?.id;
@@ -204,15 +219,6 @@ export class OwnerReservationsComponent implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  canMarkExpired(rental: RentalResponse): boolean {
-    return rental.state === 'PENDING' && this.isOverdue(rental);
-  }
-
-  markExpired(rental: RentalResponse): void {
-    this.rentalSvc.updateRentalStateLocal(rental.id, 'EXPIRED');
-    this.toastr.warning(`Reserva ${rental.rentalCode} marcada como vencida`, 'Vencida');
-  }
-
   isProcessing(rentalId: string): boolean {
     return this.processingId === rentalId;
   }
@@ -226,6 +232,8 @@ export class OwnerReservationsComponent implements OnInit {
     } catch { return date; }
   }
 
+  // ── Carga reactiva ────────────────────────────────────────────────────────
+
   private listenReactiveRentals(): void {
     this.rentalSvc.observeRentals()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -237,17 +245,37 @@ export class OwnerReservationsComponent implements OnInit {
       });
   }
 
-
-  private hydrateOwnerRentals(houseIds: string[]): void {
+  /**
+   * Hidrata el caché reactivo con:
+   *  1. Las reservas de cada casa del propietario (por houseId)
+   *  2. Las reservas con plazo de pago vencido (endpoint /expired)
+   *
+   * Al terminar, el observable de listenReactiveRentals() las muestra.
+   */
+  private hydrateOwnerRentals(houseIds: string[], ownerId: string): void {
     if (houseIds.length === 0) {
       this.isLoading = false;
       return;
     }
-    for (const houseId of houseIds) {
-      this.rentalSvc.findByOwner(houseId).subscribe({
-        next: () => {},
-        error: () => {}
-      });
-    }
+
+    // Peticiones por casa
+    const houseRequests = houseIds.map(houseId =>
+      this.rentalSvc.findByOwner(houseId)
+    );
+
+    // Petición de reservas vencidas del propietario
+    const expiredRequest = this.rentalSvc.getExpiredRentals(ownerId);
+
+    // Ejecutar todo en paralelo
+    forkJoin([...houseRequests, expiredRequest]).subscribe({
+      next: () => {
+        // El caché reactivo se actualiza automáticamente via tap() en el servicio.
+        // listenReactiveRentals() ya está suscrito y actualizará this.rentals.
+      },
+      error: () => {
+        // Fallos parciales no son críticos; el observable reactivo mostrará lo que haya
+        this.isLoading = false;
+      }
+    });
   }
 }

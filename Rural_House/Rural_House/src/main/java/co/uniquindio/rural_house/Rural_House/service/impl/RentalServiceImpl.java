@@ -384,8 +384,10 @@ public class RentalServiceImpl implements RentalService {
     private float calculatePrice(List<RentalPackage> packages, int nights, boolean isRoomRental, int numberOfRooms) {
         float pricePerNight = (float) packages.stream()
                 .mapToDouble(RentalPackage::getPriceNight).average().orElse(0);
+        float pricePerRoomNight = (float) packages.stream()
+                .mapToDouble(RentalPackage::getPricePerRoomNight).average().orElse(0);
         // El precio de la casa entera NO es necesariamente precio/hab × nº hab (enunciado)
-        return isRoomRental ? pricePerNight * numberOfRooms * nights : pricePerNight * nights;
+        return isRoomRental ? pricePerRoomNight * numberOfRooms * nights : pricePerNight * nights;
     }
 
     private String generateRentalCode() {

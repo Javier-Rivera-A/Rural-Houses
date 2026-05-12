@@ -70,7 +70,9 @@
               <div class="space-y-1.5 text-sm text-gray-600">
                 <p *ngIf="confirmedRental.ownerBankAccount && confirmedRental.ownerBankAccount !== 'No disponible'">
                   📤 Cuenta del propietario:
-                  <strong class="font-black" style="color: var(--rhouses-secondary-dark)">{{ confirmedRental.ownerBankAccount }}</strong>
+                  <strong class="font-black" style="color: var(--rhouses-secondary-dark)">
+                    {{ maskAccount(confirmedRental.ownerBankAccount) }}
+                  </strong>
                 </p>
                 <p>🔖 Concepto / referencia:
                   <strong class="font-mono font-black" style="color: #AA4465">{{ confirmedRental.rentalCode }}</strong>
@@ -230,6 +232,12 @@
                       ${{ pkg.priceNight }}
                     </p>
                     <p class="text-xs text-gray-400 font-medium">/noche</p>
+                    <p class="text-2xl font-black" style="color: #AA4465">
+                      ${{ pkg.typeRental === 'ROOMS' ? pkg.pricePerRoomNight : pkg.priceNight }}
+                      <span class="font-normal text-gray-400">
+                        {{ pkg.typeRental === 'ROOMS' ? '/hab/noche' : '/noche' }}
+                      </span>
+                    </p>
                   </div>
                 </div>
 
@@ -588,7 +596,9 @@
                 <span class="font-semibold">{{ selectedPackage ? 'Paquete seleccionado' : 'Elige un paquete' }}</span>
               </div>
               <div *ngIf="selectedPackage" class="ml-6 text-xs text-gray-500">
-                ${{ selectedPackage.priceNight }}/noche · {{ getRentalTypeLabel(selectedPackage.typeRental) }}
+                ${{ selectedPackage.typeRental === 'ROOMS' ? selectedPackage.pricePerRoomNight : selectedPackage.priceNight }}
+                {{ selectedPackage.typeRental === 'ROOMS' ? '/hab/noche' : '/noche' }}
+                · {{ getRentalTypeLabel(selectedPackage.typeRental) }}
               </div>
 
               <div class="flex items-center gap-2 text-xs"

@@ -28,6 +28,9 @@ public class RentalPackage {
     @Column(nullable = false)
     private Float priceNight;
 
+    @Column(nullable = false)
+    private Float pricePerRoomNight;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TypeRental typeRental;

@@ -1,6 +1,5 @@
 package co.uniquindio.rural_house.Rural_House.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data

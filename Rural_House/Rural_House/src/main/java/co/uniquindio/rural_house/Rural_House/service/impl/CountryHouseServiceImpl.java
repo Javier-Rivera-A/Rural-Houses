@@ -178,6 +178,7 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         pkg.setEndingDate(request.getEndingDate());
         pkg.setPriceNight(request.getPriceNight());
         pkg.setTypeRental(request.getTypeRental());
+        pkg.setPricePerRoomNight(request.getPricePerRoomNight());
         pkg.setCountryHouse(house);
 
         return toPackageResponse(rentalPackageRepository.save(pkg));
@@ -199,6 +200,7 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         pkg.setStartingDate(request.getStartingDate());
         pkg.setEndingDate(request.getEndingDate());
         pkg.setPriceNight(request.getPriceNight());
+        pkg.setPricePerRoomNight(request.getPricePerRoomNight());
         pkg.setTypeRental(request.getTypeRental());
         return toPackageResponse(rentalPackageRepository.save(pkg));
     }
@@ -547,6 +549,7 @@ public class CountryHouseServiceImpl implements CountryHouseService {
             return pr;
         }).collect(Collectors.toList()));
 
+        r.setOwnerId(h.getOwner().getId());
         return r;
     }
 
@@ -558,6 +561,7 @@ public class CountryHouseServiceImpl implements CountryHouseService {
         r.setPriceNight(pkg.getPriceNight());
         r.setTypeRental(pkg.getTypeRental());
         r.setCountryHouseCode(pkg.getCountryHouse().getCode());
+        r.setPricePerRoomNight(pkg.getPricePerRoomNight());
         return r;
     }
 

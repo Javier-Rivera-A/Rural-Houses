@@ -15,6 +15,7 @@ export interface CountryHouseResponse {
   bedrooms: BedroomResponse[];
   diningRooms: KitchenResponse[];
   photo: PhotoResponse[];
+  ownerId: string;
 }
 
 export interface BedroomResponse {
@@ -60,6 +61,7 @@ export interface RentalPackageResponse {
   priceNight: number;
   typeRental: string;
   countryHouseCode: string;
+  pricePerRoomNight: number;
 }
 
 export interface RegisterHousePayload {

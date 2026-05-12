@@ -15,6 +15,7 @@ interface PackageForm {
   startingDate: string;
   endingDate:   string;
   priceNight:   number | null;
+  pricePerRoomNight: number | null;
   typeRental:   'ENTIRE_HOUSE' | 'ROOMS' | 'BOTH';
 }
 
@@ -58,7 +59,8 @@ export class HouseDetailComponent implements OnInit {
   pkgForm: PackageForm = {
     startingDate: '',
     endingDate:   '',
-    priceNight:   null,
+    priceNight:   null ,
+    pricePerRoomNight: null,
     typeRental:   'ENTIRE_HOUSE'
   };
 
@@ -93,6 +95,7 @@ export class HouseDetailComponent implements OnInit {
     this.countrySvc.getPackagesByHouse(this.houseId).subscribe({
       next: (res) => {
         this.packages      = res?.data ?? [];
+        console.log('packages:', this.packages);
         this.isLoadingPkgs = false;
       },
       error: () => {
@@ -126,7 +129,7 @@ export class HouseDetailComponent implements OnInit {
   // ── Formulario paquetes ──────────────────────────────────────
   openPkgForm(): void {
     this.editingPkgId = null;
-    this.pkgForm = { startingDate: '', endingDate: '', priceNight: null, typeRental: 'ENTIRE_HOUSE' };
+    this.pkgForm = { startingDate: '', endingDate: '', priceNight: null,pricePerRoomNight: null, typeRental: 'ENTIRE_HOUSE' };
     this.showPackageForm = true;
   }
 
@@ -136,6 +139,7 @@ export class HouseDetailComponent implements OnInit {
       startingDate: (pkg.startingDate ?? '').split('T')[0],
       endingDate:   (pkg.endingDate   ?? '').split('T')[0],
       priceNight:   pkg.priceNight,
+      pricePerRoomNight: pkg.pricePerRoomNight,
       typeRental:   pkg.typeRental as any
     };
     this.showPackageForm = true;
@@ -147,9 +151,19 @@ export class HouseDetailComponent implements OnInit {
   }
 
   savePackage(): void {
-    if (!this.pkgForm.startingDate || !this.pkgForm.endingDate ||
-        this.pkgForm.priceNight === null || this.pkgForm.priceNight <= 0) {
-      this.toastr.warning('Completa todos los campos (precio mayor a 0)', 'Campos requeridos');
+    const needsWholePrice = this.pkgForm.typeRental === 'ENTIRE_HOUSE' || this.pkgForm.typeRental === 'BOTH';
+    const needsRoomPrice  = this.pkgForm.typeRental === 'ROOMS'        || this.pkgForm.typeRental === 'BOTH';
+
+    if (!this.pkgForm.startingDate || !this.pkgForm.endingDate) {
+      this.toastr.warning('Las fechas son obligatorias', 'Campos requeridos');
+      return;
+    }
+    if (needsWholePrice && (!this.pkgForm.priceNight || this.pkgForm.priceNight <= 0)) {
+      this.toastr.warning('El precio por noche es obligatorio y debe ser mayor a 0', 'Campos requeridos');
+      return;
+    }
+    if (needsRoomPrice && (!this.pkgForm.pricePerRoomNight || this.pkgForm.pricePerRoomNight <= 0)) {
+      this.toastr.warning('El precio por habitación/noche es obligatorio y debe ser mayor a 0', 'Campos requeridos');
       return;
     }
     if (new Date(this.pkgForm.startingDate) >= new Date(this.pkgForm.endingDate)) {
@@ -164,31 +178,37 @@ export class HouseDetailComponent implements OnInit {
     const payload = {
       startingDate: this.pkgForm.startingDate,
       endingDate:   this.pkgForm.endingDate,
-      priceNight:   Number(this.pkgForm.priceNight),
+      priceNight:   Number(this.pkgForm.priceNight) || 0,
+      pricePerRoomNight: Number(this.pkgForm.pricePerRoomNight) || 0,
       typeRental:   this.pkgForm.typeRental
     };
 
+
     if (this.editingPkgId) {
-      this.countrySvc.updateRentalPackage(ownerId, this.editingPkgId, payload).subscribe({
-        next: (res) => {
-          const idx = this.packages.findIndex(p => p.id === this.editingPkgId);
-          if (idx !== -1 && res?.data) this.packages[idx] = res.data;
-          this.toastr.success('Paquete actualizado', '¡Éxito!');
-          this.isSavingPkg = false;
-          this.cancelPkgForm();
-        },
-        error: (err) => {
-          this.toastr.error(err?.error?.message ?? 'Error al actualizar', 'Error');
-          this.isSavingPkg = false;
-        }
-      });
+      this.countrySvc
+        .updateRentalPackage(ownerId, this.editingPkgId, payload)
+        .subscribe({
+          next: (res) => {
+            this.toastr.success('Paquete actualizado', '¡Éxito!');
+            this.isSavingPkg = false;
+            this.cancelPkgForm();
+            this.loadPackages();
+          },
+          error: (err) => {
+            this.toastr.error(
+              err?.error?.message ?? 'Error al actualizar',
+              'Error'
+            );
+            this.isSavingPkg = false;
+          }
+        });
     } else {
       this.countrySvc.addRentalPackage(ownerId, this.houseId, payload).subscribe({
         next: (res) => {
-          if (res?.data) this.packages = [res.data, ...this.packages];
           this.toastr.success('Paquete creado', '¡Éxito!');
           this.isSavingPkg = false;
           this.cancelPkgForm();
+          this.loadPackages();
         },
         error: (err) => {
           this.toastr.error(err?.error?.message ?? 'Error al crear', 'Error');
@@ -204,8 +224,8 @@ export class HouseDetailComponent implements OnInit {
     if (!ownerId) return;
     this.countrySvc.deleteRentalPackage(ownerId, id).subscribe({
       next: () => {
-        this.packages = this.packages.filter(p => p.id !== id);
         this.toastr.success('Paquete eliminado', '¡Listo!');
+        this.loadPackages();
       },
       error: (err) => {
         this.toastr.error(err?.error?.message ?? 'Error al eliminar', 'Error');

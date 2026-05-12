@@ -19,4 +19,5 @@ public class CountryHouseResponse {
     private List<BedroomResponse> bedrooms;
     private List<KitchenResponse> diningRooms;
     private List<PhotoResponse> photo;
+    private String ownerId;
 }
