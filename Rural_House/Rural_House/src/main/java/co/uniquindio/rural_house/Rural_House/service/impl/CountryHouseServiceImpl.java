@@ -2,7 +2,7 @@ package co.uniquindio.rural_house.Rural_House.service.impl;
 
 
 import co.uniquindio.rural_house.Rural_House.dto.request.*;
-        import co.uniquindio.rural_house.Rural_House.dto.response.*;
+import co.uniquindio.rural_house.Rural_House.dto.response.*;
         import co.uniquindio.rural_house.Rural_House.entity.enums.*;
         import co.uniquindio.rural_house.Rural_House.repository.*;
         import co.uniquindio.rural_house.Rural_House.service.*;
@@ -336,6 +336,44 @@ public class CountryHouseServiceImpl implements CountryHouseService {
 
         response.setDailyAvailability(daily);
         return response;
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public OccupancyResponse getOccupancyRate(String houseId, LocalDate startDate, LocalDate endDate) {
+
+        if (startDate == null || endDate == null) {
+            throw new BusinessException("Las fechas de inicio y fin son obligatorias");
+        }
+        if (!startDate.isBefore(endDate)) {
+            throw new BusinessException("La fecha de inicio debe ser anterior a la fecha de fin");
+        }
+
+        // Verificar que la casa existe
+        CountryHouse house = getEntityById(houseId);
+
+        // Total de días del período
+        long totalDays = startDate.datesUntil(endDate).count(); // java.time — excluye endDate
+
+        // Recuperar todas las reservas activas que se solapan con el período
+        List<Rental> rentals = rentalRepository.findActiveRentalsInRange(house.getId(), startDate, endDate);
+
+        // Calcular días únicos ocupados (puede haber solapamientos entre reservas)
+        long occupiedDays = startDate.datesUntil(endDate)
+                .filter(day -> rentals.stream().anyMatch(r ->
+                        !r.getCheckInDate().isAfter(day) && r.getCheckOutDate().isAfter(day)))
+                .count();
+
+        double percentage = totalDays == 0 ? 0.0
+                : Math.round((occupiedDays * 100.0 / totalDays) * 100.0) / 100.0;
+
+        return new OccupancyResponse(
+                house.getCode(),
+                startDate,
+                endDate,
+                (int) totalDays,
+                (int) occupiedDays,
+                percentage
+        );
     }
 
     // ─── Helpers internos ─────────────────────────────────────────────────────

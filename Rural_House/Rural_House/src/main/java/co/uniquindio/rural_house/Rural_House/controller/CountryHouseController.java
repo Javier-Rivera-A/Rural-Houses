@@ -246,6 +246,19 @@ public class CountryHouseController {
                 .body(ApiResponse.ok("Imagen agregada correctamente", response));
     }
 
+    /**
+     /**
+     * GET /api/houses/{houseId}/occupancy?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+     * Retorna el porcentaje de ocupación de una casa en un período determinado.
+     */
+    @GetMapping("/{houseId}/occupancy")
+    public ResponseEntity<ApiResponse<OccupancyResponse>> getOccupancy(
+            @PathVariable String houseId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        OccupancyResponse response = countryHouseService.getOccupancyRate(houseId, startDate, endDate);
+        return ResponseEntity.ok(ApiResponse.ok("Ocupación calculada correctamente", response));
     @GetMapping("/{code}/suggestions")
     public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> suggestAlternatives(
             @PathVariable String code,

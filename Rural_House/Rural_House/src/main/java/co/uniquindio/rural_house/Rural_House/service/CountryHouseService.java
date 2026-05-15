@@ -5,10 +5,7 @@ package co.uniquindio.rural_house.Rural_House.service;
 import co.uniquindio.rural_house.Rural_House.dto.request.CountryHouseRequest;
 import co.uniquindio.rural_house.Rural_House.dto.request.PhotoRequest;
 import co.uniquindio.rural_house.Rural_House.dto.request.RentalPackageRequest;
-import co.uniquindio.rural_house.Rural_House.dto.response.AvailabilityResponse;
-import co.uniquindio.rural_house.Rural_House.dto.response.CountryHouseResponse;
-import co.uniquindio.rural_house.Rural_House.dto.response.PhotoResponse;
-import co.uniquindio.rural_house.Rural_House.dto.response.RentalPackageResponse;
+import co.uniquindio.rural_house.Rural_House.dto.response.*;
 import co.uniquindio.rural_house.Rural_House.entity.CountryHouse;
 
 import java.time.LocalDate;
@@ -56,6 +53,8 @@ public interface CountryHouseService {
 
     //Fotos
     PhotoResponse addPhoto(String ownerId, String houseId, PhotoRequest request);
+    // Ocupación (US05)
+    OccupancyResponse getOccupancyRate(String houseId, LocalDate startDate, LocalDate endDate);
 
     //Sugerencias
     List<CountryHouseResponse> suggestAlternatives(String houseCode, LocalDate checkIn, int nights);
