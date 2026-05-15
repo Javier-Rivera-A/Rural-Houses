@@ -39,4 +39,11 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
     List<Rental> findActiveRentalsInRange(@Param("houseId") String houseId,
                                           @Param("startDate") LocalDate startDate,
                                           @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT r FROM Rental r WHERE r.countryHouse.owner.id = :ownerId " +
+            "AND r.state NOT IN ('CANCELLED', 'EXPIRED') " +
+            "AND r.checkInDate < :endDate AND r.checkOutDate > :startDate")
+    List<Rental> findActiveRentalsByOwnerInPeriod(@Param("ownerId") String ownerId,
+                                                  @Param("startDate") LocalDate startDate,
+                                                  @Param("endDate") LocalDate endDate);
 }
