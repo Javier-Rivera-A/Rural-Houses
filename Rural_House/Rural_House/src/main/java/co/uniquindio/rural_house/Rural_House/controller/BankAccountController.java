@@ -32,9 +32,7 @@ public class BankAccountController {
 
         BankAccount account = bankAccountService.addToUser(
                 userId,
-                request.getNumberAccount(),
-                request.getBank(),
-                request.getAccountType()
+                request
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Cuenta bancaria añadida correctamente", toResponse(account)));

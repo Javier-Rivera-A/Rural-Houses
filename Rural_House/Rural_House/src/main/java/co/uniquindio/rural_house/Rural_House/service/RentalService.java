@@ -2,6 +2,7 @@ package co.uniquindio.rural_house.Rural_House.service;
 
 
 
+import co.uniquindio.rural_house.Rural_House.dto.request.PayRentalRequest;
 import co.uniquindio.rural_house.Rural_House.dto.request.RentalRequest;
 import co.uniquindio.rural_house.Rural_House.dto.response.RentalResponse;
 
@@ -12,6 +13,9 @@ public interface RentalService {
     RentalResponse findByCode(String rentalCode);
     List<RentalResponse> findByCustomer(String customerId);
     List<RentalResponse> findByCountryHouse(String houseId);
+
+    // Operaciones del cliente
+    void payRental(String customerId, String rentalId, PayRentalRequest request);
 
     // Operaciones del propietario
     void registerPayment(String ownerId, String rentalId, Float amount);

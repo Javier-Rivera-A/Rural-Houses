@@ -50,4 +50,37 @@ public class OwnerController {
         Owner owner = ownerService.findById(id);
         return ResponseEntity.ok(ApiResponse.ok(owner));
     }
+
+    //Metodos de actualizacion
+
+    @PutMapping("/{id}/username")
+    public ResponseEntity<ApiResponse<String>> updateUserName(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdateUserNameRequest request) {
+        ownerService.updateUserName(id, request.getUserName());
+        return ResponseEntity.ok(ApiResponse.ok("Nombre de usuario actualizado correctamente", id));
+    }
+
+    @PutMapping("/{id}/email")
+    public ResponseEntity<ApiResponse<String>> updateEmail(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdateEmailRequest request) {
+        ownerService.updateEmail(id, request.getEmail());
+        return ResponseEntity.ok(ApiResponse.ok("Email actualizado correctamente", id));
+    }
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<ApiResponse<String>> updatePassword(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdatePasswordRequest request) {
+        ownerService.updatePassword(id, request.getPassword());
+        return ResponseEntity.ok(ApiResponse.ok("Contraseña actualizada correctamente", id));
+    }
+
+    @PutMapping("/{id}/phone")
+    public ResponseEntity<ApiResponse<String>> updatePhone(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdatePhoneRequest request) {
+        ownerService.updatePhone(id, request.getPhone());
+        return ResponseEntity.ok(ApiResponse.ok("Teléfono actualizado correctamente", id));
+    }
+
+    @PutMapping("/{id}/access-word")
+    public ResponseEntity<ApiResponse<String>> updateAccessWord(@PathVariable String id, @Valid @RequestBody co.uniquindio.rural_house.Rural_House.dto.request.UpdateAccessWordRequest request) {
+        ownerService.updateAccessWord(id, request.getAccessWord());
+        return ResponseEntity.ok(ApiResponse.ok("Palabra de acceso actualizada correctamente", id));
+    }
 }
+

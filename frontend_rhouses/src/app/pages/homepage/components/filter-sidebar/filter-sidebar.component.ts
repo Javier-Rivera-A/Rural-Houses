@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CountryHouseResponse } from '../../../../Services/CountryHouse/country-house.service';
+import { CountryHouseResponse, CountryHouseService } from '../../../../Services/CountryHouse/country-house.service';
 import { SearchParams } from '../hero-section/hero-section.component';
 
 @Component({
@@ -12,26 +12,38 @@ import { SearchParams } from '../hero-section/hero-section.component';
   styleUrls: ['./filter-sidebar.component.css']
 })
 export class FilterSidebarComponent implements OnChanges {
+
+  private countryHouseService = inject(CountryHouseService);
+
   @Input() isOpen = false;
   @Input() houses: CountryHouseResponse[] = [];
   @Input() searchParams: SearchParams = { poblacion: '', fecha: '', noches: 2, tipoAlquiler: 'ambas' };
 
   @Output() close = new EventEmitter<void>();
   @Output() filtered = new EventEmitter<CountryHouseResponse[]>();
-
+  @Output() filterApplied = new EventEmitter<{ population: string, minBedrooms: number, minGaragePlaces: number }>();
   filters = {
-    minBathrooms: 0,
-    minBedrooms: 0,
-    minGarage: 0,
+    poblacion: '',
+    codigoCasa: '',
+    fechaEntrada: '',
+    noches: 1,
+    casaCompleta: false,
+    porHabitaciones: false,
+    numPersonas: 0,
+    dormitorios: 0,
+    banos: 0,
+    cocinas: 0,
+    garajes: 0,
     habitacionesConBano: false,
     lavavajillas: false,
     lavadora: false,
     tipoCamas: 'todas'
   };
 
-  priceRange = [50, 500];
+  priceRange = [10000, 2000000];
   minPrice = 0;
-  maxPrice = 1000;
+  maxPrice = 2000000;
+  protected fechaEntrada: any;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['houses']) {
@@ -50,53 +62,70 @@ export class FilterSidebarComponent implements OnChanges {
   }
 
   applyFilters(): void {
-    let result = [...this.houses];
+    // 1. Mapeamos tus filtros del objeto 'filters' a los nombres que espera el Backend
+    const params = {
+      population: this.filters.poblacion,
+      code: this.filters.codigoCasa,
+      minBedrooms: this.filters.dormitorios,
+      minBathrooms: this.filters.banos,
+      minKitchens: this.filters.cocinas,
+      minGaragePlaces: this.filters.garajes,
+      hasPrivateBathroom: this.filters.habitacionesConBano,
+      hasDishwasher: this.filters.lavavajillas,
+      hasWashingMachine: this.filters.lavadora,
+      bedType: this.filters.tipoCamas // El backend ya maneja 'todas', 'simples', 'dobles'
+    };
 
-    if (this.filters.minBathrooms > 0) {
-      result = result.filter(h =>
-        (h.privateBathrooms ?? 0) + (h.publicBathrooms ?? 0) >= this.filters.minBathrooms
-      );
-    }
+    // 2. Llamamos al backend
+    this.countryHouseService.searchHouses(params).subscribe({
+      next: (response) => {
+        if (response.data) {
+          // Emitimos los resultados reales que vienen del servidor
+          this.filtered.emit(response.data);
 
-    if (this.filters.minBedrooms > 0) {
-      result = result.filter(h => (h.bedrooms?.length ?? 0) >= this.filters.minBedrooms);
-    }
+          // Opcional: Notificamos que se aplicaron (según tu código original)
+          this.filterApplied.emit({
+            population: this.filters.poblacion,
+            minBedrooms: this.filters.dormitorios,
+            minGaragePlaces: this.filters.garajes
+          });
 
-    if (this.filters.minGarage > 0) {
-      result = result.filter(h => (h.garagePlaces ?? 0) >= this.filters.minGarage);
-    }
-
-    if (this.filters.habitacionesConBano) {
-      result = result.filter(h => h.bedrooms?.some(b => b.bathroom));
-    }
-
-    if (this.filters.lavavajillas) {
-      result = result.filter(h => h.diningRooms?.some(k => k.dishWasher));
-    }
-
-    if (this.filters.lavadora) {
-      result = result.filter(h => h.diningRooms?.some(k => k.washingMachine));
-    }
-
-    if (this.filters.tipoCamas !== 'todas') {
-      const tipo = this.filters.tipoCamas === 'dobles' ? 'DOUBLE' : 'SIMPLE';
-      result = result.filter(h => h.bedrooms?.some(b => b.typesOfBeds?.includes(tipo)));
-    }
-
-    this.filtered.emit(result);
+          // Cerramos el sidebar si es necesario
+          this.onClose();
+        }
+      },
+      error: (err) => {
+        console.error('Error filtrando casas:', err);
+        alert('Hubo un error al realizar la búsqueda.');
+      }
+    });
   }
+
 
   clearFilters(): void {
     this.filters = {
-      minBathrooms: 0,
-      minBedrooms: 0,
-      minGarage: 0,
+      poblacion: '',
+      codigoCasa: '',
+      fechaEntrada: '',
+      noches: 1,
+      casaCompleta: false,
+      porHabitaciones: false,
+      numPersonas: 0,
+      dormitorios: 0,
+      banos: 0,
+      cocinas: 0,
+      garajes: 0,
       habitacionesConBano: false,
       lavavajillas: false,
       lavadora: false,
       tipoCamas: 'todas'
     };
-    this.priceRange = [50, 500];
+
+
+    this.priceRange = [10000, 2000000 ];
     this.filtered.emit([...this.houses]);
+    this.applyFilters(); // Recarga la lista completa desde el backend
   }
+
+
 }

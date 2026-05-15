@@ -6,6 +6,7 @@ export interface BankAccountPayload {
   numberAccount: string;
   bank: string;
   accountType: string;
+  mount?: number;
 }
 
 export interface BankAccountData {

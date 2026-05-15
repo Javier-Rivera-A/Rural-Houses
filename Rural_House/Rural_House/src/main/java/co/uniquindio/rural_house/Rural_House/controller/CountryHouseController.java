@@ -58,11 +58,33 @@ public class CountryHouseController {
         return ResponseEntity.ok(ApiResponse.ok("Casa rural desactivada", null));
     }
 
+    /**
+    * PUT /api/houses/{houseId}/reactivate?ownerId={id}
+    * El propietario reactiva una casa rural desactivada.
+    */
+    @PutMapping("/{houseId}/reactivate")
+    public ResponseEntity<ApiResponse<Void>> reactivate(
+            @RequestParam String ownerId,
+            @PathVariable String houseId) {
+        countryHouseService.reactivate(ownerId, houseId);
+        return ResponseEntity.ok(ApiResponse.ok("Casa rural reactivada", null));
+    }
+
     // ─── Paquetes de alquiler ──────────────────────────────────────────────────
 
     /**
      * POST /api/houses/{houseId}/packages?ownerId={id}
-     * El propietario añade un paquete de alquiler.
+     * El propietario añade un paquete de alquiler con rango de fechas, precios y tipo.
+     * 
+     * @param ownerId (QueryParam) ID del propietario.
+     * @param houseId (PathVariable) ID de la casa rural.
+     * @param request Carga del paquete (RentalPackageRequest) a crear enviada en JSON.
+     * 
+     * @return ApiResponse con detalles del paquete creado RentalPackageResponse.
+     * 
+     * Excepciones posibles para FrontEnd:
+     * - "La fecha de inicio no puede ser posterior a la de fin"
+     * - "El paquete se solapa con otro paquete existente (YYYY-MM-DD a YYYY-MM-DD)"
      */
     @PostMapping("/{houseId}/packages")
     public ResponseEntity<ApiResponse<RentalPackageResponse>> addPackage(
@@ -70,19 +92,25 @@ public class CountryHouseController {
             @PathVariable String houseId,
             @Valid @RequestBody RentalPackageRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(countryHouseService.addRentalPackage(ownerId, houseId, request)));
+                .body(ApiResponse.ok("Paquete de alquiler añadido", countryHouseService.addRentalPackage(ownerId, houseId, request)));
     }
 
     /**
      * PUT /api/houses/packages/{packageId}?ownerId={id}
      * El propietario modifica un paquete de alquiler.
+     * 
+     * Funciona idénticamente a la creación pero con el ID del paquete, y se validarán
+     * de la misma forma solapamientos o cruce de fechas erróneas.
+     * 
+     * @param ownerId (QueryParam) ID del propietario.
+     * @param packageId (PathVariable) ID del paquete a editar.
      */
     @PutMapping("/packages/{packageId}")
     public ResponseEntity<ApiResponse<RentalPackageResponse>> updatePackage(
             @RequestParam String ownerId,
             @PathVariable String packageId,
             @Valid @RequestBody RentalPackageRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.updateRentalPackage(ownerId, packageId, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Paquete de alquiler actualizado", countryHouseService.updateRentalPackage(ownerId, packageId, request)));
     }
 
     /**
@@ -97,16 +125,44 @@ public class CountryHouseController {
         return ResponseEntity.ok(ApiResponse.ok("Paquete eliminado", null));
     }
 
-    // ─── Búsquedas públicas ────────────────────────────────────────────────────
+    // ─── Búsquedas públicas 
 
     /**
-     * GET /api/houses/search?population={nombre}
-     * Busca casas rurales por población.
+     * GET /api/houses/search?population={nombre}&minBedrooms={num}&minGaragePlaces={num}
+     * Busca casas rurales extendiendo la búsqueda básica, filtrando por población, número de habitaciones y plazas de garaje.
+     *
+     * @param population      (Opcional) Nombre de la población a buscar.
+     * @param minBedrooms     (Opcional) Cantidad mínima de habitaciones deseadas.
+     * @param minGaragePlaces (Opcional) Cantidad mínima de plazas de garaje deseadas.
+     * 
+     * @return ApiResponse con una lista de CountryHouseResponse con las casas que cumplen los criterios.
+     *
+     * Uso en el FrontEnd: 
+     * En el servicio de React/Angular/Vue, realizar una petición GET a la ruta '/api/houses/search', añadiendo
+     * los filtros como parámetros de consulta (query params). Se pueden omitir los que el usuario no seleccione.
+     * 
+     * Ejemplo con Axios: 
+     * axios.get('/api/houses/search', { params: { population: 'Armenia', minBedrooms: 3, minGaragePlaces: 1 } })
+     * 
+     * El objeto regresado es: 
+     * { "message": "OK", "data": [ { "id": "...", "code": "...", "privateBathrooms": 2, ... } ] }
      */
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> searchByPopulation(
-            @RequestParam String population) {
-        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findByPopulation(population)));
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> searchHouses(
+            @RequestParam(required = false) String population,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) Integer minBedrooms,
+            @RequestParam(required = false) Integer minBathrooms,
+            @RequestParam(required = false) Integer minKitchens,
+            @RequestParam(required = false) Integer minGaragePlaces,
+            @RequestParam(required = false) Boolean hasPrivateBathroom,
+            @RequestParam(required = false) Boolean hasDishwasher,
+            @RequestParam(required = false) Boolean hasWashingMachine,
+            @RequestParam(required = false) String bedType) {
+        return ResponseEntity.ok(ApiResponse.ok("Búsqueda combinada completada", 
+            countryHouseService.searchByFilters(
+                population, code, minBedrooms, minBathrooms, minKitchens, minGaragePlaces, 
+                hasPrivateBathroom, hasDishwasher, hasWashingMachine, bedType)));
     }
 
     /**
@@ -136,11 +192,38 @@ public class CountryHouseController {
         return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findAll()));
     }
 
+    /**
+     * GET /api/houses/owner/{ownerId}
+     * Lista todas las casas de un propietario (activas e inactivas).
+     */
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> getByOwner(
+            @PathVariable String ownerId) {
+        return ResponseEntity.ok(ApiResponse.ok(countryHouseService.findByOwner(ownerId)));
+    }
+
     // ─── Disponibilidad ───────────────────────────────────────────────────────
 
     /**
      * GET /api/houses/{code}/availability?checkIn=YYYY-MM-DD&nights=N
-     * Consulta la disponibilidad de una casa rural para un período.
+     * Consulta la disponibilidad de una casa rural para un período específico (Rango de fechas).
+     * 
+     * @param code    Código único de la casa (PathVariable). Ej: "C-001"
+     * @param checkIn Fecha de ingreso (QueryParam) en formato ISO (YYYY-MM-DD). No puede ser en el pasado.
+     * @param nights  Número de noches (QueryParam). Debe ser mayor a 0.
+     * 
+     * @return ApiResponse con un AvailabilityResponse que contiene el estado global y por habitación para cada día.
+     * 
+     * Uso en el FrontEnd (Selector de fechas):
+     * Tras seleccionar la fecha de inicio en el calendario y calcular la cantidad de noches (o ingresar la fecha de salida y calcular las noches),
+     * realizar la petición GET enviando esos datos numéricos y de fecha estructurada.
+     * 
+     * Ejemplo Axios (Buscando 3 noches desde el 1 de Diciembre de 2026):
+     * axios.get('/api/houses/CHI-001/availability', { params: { checkIn: '2026-12-01', nights: 3 } })
+     * 
+     * Excepciones esperables para atrapar en Frontend:
+     * - 400 Bad Request: "La fecha de ingreso no puede ser en el pasado"
+     * - 400 Bad Request: "El número de noches debe ser mayor a 0"
      */
     @GetMapping("/{code}/availability")
     public ResponseEntity<ApiResponse<AvailabilityResponse>> checkAvailability(
@@ -176,5 +259,27 @@ public class CountryHouseController {
 
         OccupancyResponse response = countryHouseService.getOccupancyRate(houseId, startDate, endDate);
         return ResponseEntity.ok(ApiResponse.ok("Ocupación calculada correctamente", response));
+    @GetMapping("/{code}/suggestions")
+    public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> suggestAlternatives(
+            @PathVariable String code,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
+            @RequestParam int nights) {
+
+        List<CountryHouseResponse> response = countryHouseService.suggestAlternatives(code, checkIn, nights);
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Sugerencias obtenidas correctamente", response)
+        );
+    }
+
+    @GetMapping("/{houseId}/packages")
+    public ResponseEntity<ApiResponse<List<RentalPackageResponse>>> getPackagesByHouse(
+            @PathVariable String houseId) {
+
+        List<RentalPackageResponse> response = countryHouseService.getRentalPackagesByHouse(houseId);
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("Paquetes obtenidos correctamente", response)
+        );
     }
 }

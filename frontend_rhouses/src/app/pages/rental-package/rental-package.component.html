@@ -1,0 +1,284 @@
+<div class="min-h-screen" style="background-color: var(--rhouses-background-light); font-family: 'Be Vietnam Pro', sans-serif;">
+  <app-navbar></app-navbar>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-8">
+      <button (click)="goBack()"
+        class="p-2 rounded-lg hover:bg-white transition-colors text-gray-500">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div class="flex-1">
+        <h1 class="text-2xl font-black" style="color: var(--rhouses-secondary-dark)">Paquetes de alquiler</h1>
+        <p class="text-sm text-gray-500">Gestiona las fechas y precios de tus propiedades</p>
+      </div>
+      <button *ngIf="selectedHouseId && !showForm" (click)="openForm()"
+        class="flex items-center gap-2 px-5 py-3 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md"
+        style="background-color: var(--rhouses-accent)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        Nuevo paquete
+      </button>
+    </div>
+
+    <!-- Selector de casa -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+      <label class="block text-sm font-bold mb-2" style="color: var(--rhouses-secondary-dark)">
+        Selecciona la casa rural
+      </label>
+
+      <!-- Cargando casas -->
+      <div *ngIf="isLoadingHouses" class="flex items-center gap-2 text-sm text-gray-400 py-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" class="animate-spin" style="color: var(--rhouses-accent)">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+        Cargando tus casas...
+      </div>
+
+      <!-- Sin casas activas -->
+      <div *ngIf="!isLoadingHouses && houses.length === 0"
+           class="text-sm text-gray-500 py-2 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" class="text-yellow-400">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+        </svg>
+        No tienes casas activas. Registra o reactiva una propiedad para gestionar sus paquetes.
+      </div>
+
+      <!-- Dropdown -->
+      <select *ngIf="!isLoadingHouses && houses.length > 0"
+              [ngModel]="selectedHouseId"
+              (ngModelChange)="onHouseChange($event)"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none text-sm font-medium
+                     focus:ring-2 focus:border-[#AA4465] transition-all"
+              style="color: var(--rhouses-secondary-dark)">
+        <option value="" disabled>— Elige una propiedad —</option>
+        <option *ngFor="let h of houses" [value]="h.id">
+          {{ h.description || h.code }} · {{ h.populationName }}
+        </option>
+      </select>
+
+      <!-- Info de la casa seleccionada -->
+      <div *ngIf="selectedHouse" class="mt-4 flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+        <img [src]="getFirstPhoto(selectedHouse)" alt="foto"
+             class="w-14 h-14 rounded-lg object-cover shrink-0"/>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate" style="color: var(--rhouses-secondary-dark)">
+            {{ selectedHouse.description || selectedHouse.code }}
+          </p>
+          <p class="text-xs text-gray-400">
+            {{ selectedHouse.populationName }} ·
+            {{ selectedHouse.bedrooms?.length ?? 0 }} hab. ·
+            {{ (selectedHouse.privateBathrooms ?? 0) + (selectedHouse.publicBathrooms ?? 0) }} baños
+          </p>
+        </div>
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
+          Activa
+        </span>
+      </div>
+    </div>
+
+    <!-- Contenido de la casa seleccionada -->
+    <ng-container *ngIf="selectedHouseId">
+
+      <!-- Formulario -->
+      <div *ngIf="showForm" class="bg-white rounded-2xl shadow-md p-8 mb-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-black" style="color: var(--rhouses-secondary-dark)">
+            {{ editingId ? 'Editar paquete' : 'Nuevo paquete de alquiler' }}
+          </h2>
+          <button (click)="cancelForm()"
+            class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="space-y-5">
+          <!-- Fechas -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
+                Fecha de inicio *
+              </label>
+              <input type="date" [(ngModel)]="form.startingDate"
+                     class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none text-sm
+                            focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465] transition-all"
+                     [min]="today"/>
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
+                Fecha de fin *
+              </label>
+              <input type="date" [(ngModel)]="form.endingDate"
+                     class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none text-sm
+                            focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465] transition-all"
+                     [min]="form.startingDate || today"/>
+            </div>
+          </div>
+
+           <!-- Tipo de alquiler -->
+          <div>
+            <label class="block text-sm font-bold mb-2" style="color: var(--rhouses-secondary-dark)">
+              Tipo de alquiler *
+            </label>
+            <div class="grid grid-cols-3 gap-3">
+              <label *ngFor="let opt of rentalTypeOptions" class="cursor-pointer">
+                <input type="radio" name="typeRental" [value]="opt.value" [(ngModel)]="form.typeRental" class="peer sr-only"/>
+                <div class="p-3 border-2 rounded-xl text-sm font-semibold text-center transition-all
+                             peer-checked:border-[#AA4465] peer-checked:bg-[#AA4465]/5 peer-checked:text-[#AA4465]
+                             border-gray-200 text-gray-600 hover:border-gray-300">
+                  <p class="font-bold">{{ opt.label }}</p>
+                  <p class="text-xs font-normal text-gray-400 mt-0.5">{{ opt.desc }}</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Precio -->
+          <div *ngIf="form.typeRental === 'ENTIRE_HOUSE' || form.typeRental === 'BOTH'">
+            <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
+              Precio por noche ($) *
+            </label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
+              <input type="number" min="1" [(ngModel)]="form.priceNight" placeholder="0"
+                    class="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl outline-none text-sm
+                            focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465] transition-all"/>
+            </div>
+          </div>
+
+          <div *ngIf="form.typeRental === 'ROOMS' || form.typeRental === 'BOTH'">
+            <label class="block text-sm font-bold mb-1.5" style="color: var(--rhouses-secondary-dark)">
+              Precio por habitación/noche ($) *
+            </label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">$</span>
+              <input type="number" min="1" [(ngModel)]="form.pricePerRoomNight" placeholder="0"
+                    class="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl outline-none text-sm
+                            focus:ring-2 focus:ring-[#AA4465]/20 focus:border-[#AA4465] transition-all"/>
+            </div>
+          </div>
+          
+          <!-- Botones -->
+          <div class="flex gap-3 pt-2">
+            <button (click)="cancelForm()"
+              class="flex-1 py-3 border-2 border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 transition-all">
+              Cancelar
+            </button>
+            <button (click)="savePackage()" [disabled]="isSaving"
+              class="flex-1 py-3 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              style="background-color: #AA4465">
+              {{ isSaving ? 'Guardando...' : editingId ? 'Actualizar paquete' : 'Crear paquete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading paquetes -->
+      <div *ngIf="isLoadingPkgs" class="flex items-center justify-center py-16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" class="animate-spin" style="color: var(--rhouses-accent)">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+      </div>
+
+      <ng-container *ngIf="!isLoadingPkgs">
+
+        <!-- Calendario -->
+        <div class="mb-6">
+          <app-availability-calendar
+            [packages]="packages"
+            [reservations]="reservations">
+          </app-availability-calendar>
+        </div>
+
+        <!-- Empty state paquetes -->
+        <div *ngIf="packages.length === 0 && !showForm"
+             class="bg-white rounded-2xl shadow-md p-12 text-center mb-6">
+          <div class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+               style="background-color: var(--rhouses-background-light)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5" class="text-gray-300">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+              <line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/>
+              <line x1="3" x2="21" y1="10" y2="10"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-black mb-1" style="color: var(--rhouses-secondary-dark)">Sin paquetes aún</h3>
+          <p class="text-gray-400 text-sm mb-5">Crea el primer paquete de alquiler para esta casa.</p>
+          <button (click)="openForm()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-sm hover:opacity-90 transition-all shadow-md"
+            style="background-color: var(--rhouses-accent)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Crear primer paquete
+          </button>
+        </div>
+
+        <!-- Lista paquetes -->
+        <div *ngIf="packages.length > 0" class="space-y-4">
+          <h2 class="text-lg font-black" style="color: var(--rhouses-secondary-dark)">
+            Paquetes activos ({{ packages.length }})
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let pkg of packages"
+                 class="bg-white rounded-2xl shadow-md p-6 border-2 border-transparent hover:border-[#AA4465]/20 transition-all">
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <span class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full mb-2"
+                        [ngClass]="getRentalTypeClass(pkg.typeRental)">
+                    {{ getRentalTypeLabel(pkg.typeRental) }}
+                  </span>
+                  <p class="text-2xl font-black" style="color: #AA4465">
+                    $ {{ pkg.typeRental === 'ROOMS' ? pkg.pricePerRoomNight : pkg.priceNight }}
+                    <span class="text-sm font-normal text-gray-400">
+                      {{ pkg.typeRental === 'ROOMS' ? '/hab/noche' : '/noche' }}
+                    </span>
+                  </p>
+                </div>
+                <div class="flex gap-1">
+                  <button (click)="editPackage(pkg)"
+                    class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-[#AA4465]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  </button>
+                  <button (click)="deletePackage(pkg.id)"
+                    class="p-2 rounded-lg hover:bg-red-50 transition-colors text-gray-400 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3 space-y-2 text-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-500">Inicio</span>
+                  <span class="font-bold" style="color: var(--rhouses-secondary-dark)">{{ formatDate(pkg.startingDate) }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-500">Fin</span>
+                  <span class="font-bold" style="color: var(--rhouses-secondary-dark)">{{ formatDate(pkg.endingDate) }}</span>
+                </div>
+                <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                  <span class="text-gray-500">Duración</span>
+                  <span class="font-bold" style="color: #2CA58D">
+                    {{ getDurationDays(pkg.startingDate, pkg.endingDate) }} noches
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </ng-container>
+
+  </div>
+</div>

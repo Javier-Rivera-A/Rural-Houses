@@ -88,7 +88,9 @@ export class RegisterComponent {
         id,
         userName: this.formData.username,
         accountType: this.formData.accountType,
-        email: this.formData.email
+        fullName: this.formData.fullName,
+        email: this.formData.email,
+        phone: this.formData.phone
       });
       this.toastr.success(`Bienvenido, ${this.formData.fullName}`, '¡Cuenta creada!');
       this.isLoading = false;

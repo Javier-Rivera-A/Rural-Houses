@@ -22,6 +22,10 @@ public class RentalResponse {
     private String countryHouseCode;
     private String customerUserName;
     // Info de pago al crear reserva (20% del importe, cuenta del propietario)
-    private String ownerBankAccount;
+    private List<String> ownerBankAccount;
     private Float depositRequired;
+
+    // Pagos
+    private Float totalPaid;
+    private Float remainingBalance;
 }

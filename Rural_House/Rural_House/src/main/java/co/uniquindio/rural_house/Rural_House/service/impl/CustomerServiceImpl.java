@@ -66,4 +66,42 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con ID: " + id));
     }
+
+    @Override
+    @Transactional
+    public void updateUserName(String id, String newUserName) {
+        Customer customer = findById(id);
+        if (!customer.getUserName().equals(newUserName) && userRepository.existsByUserName(newUserName)) {
+            throw new BusinessException("El nombre de usuario '" + newUserName + "' ya está en uso. Elige otro.");
+        }
+        customer.setUserName(newUserName);
+        customerRepository.save(customer);
+    }
+
+    @Override
+    @Transactional
+    public void updateEmail(String id, String newEmail) {
+        Customer customer = findById(id);
+        if (!customer.getEmail().equals(newEmail) && userRepository.existsByEmail(newEmail)) {
+            throw new BusinessException("El email '" + newEmail + "' ya está registrado en el sistema.");
+        }
+        customer.setEmail(newEmail);
+        customerRepository.save(customer);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(String id, String newPassword) {
+        Customer customer = findById(id);
+        customer.setPassword(passwordEncoder.encode(newPassword));
+        customerRepository.save(customer);
+    }
+
+    @Override
+    @Transactional
+    public void updatePhone(String id, String newPhone) {
+        Customer customer = findById(id);
+        customer.setPhone(newPhone);
+        customerRepository.save(customer);
+    }
 }

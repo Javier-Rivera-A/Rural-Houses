@@ -1,8 +1,8 @@
 package co.uniquindio.rural_house.Rural_House.dto.request;
 
 import co.uniquindio.rural_house.Rural_House.entity.enums.TypeRental;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,9 +16,12 @@ public class RentalPackageRequest {
     @NotNull(message = "La fecha de fin es obligatoria")
     private LocalDate endingDate;
 
-    @Positive(message = "El precio por noche debe ser positivo")
+    @Min(value = 0, message = "El precio por noche debe ser positivo")
     private Float priceNight;
 
     @NotNull(message = "El tipo de alquiler es obligatorio")
     private TypeRental typeRental;
+
+    @Min(value = 0,message = "El precio por habitación por noche debe ser positivo")
+    private Float pricePerRoomNight;
 }

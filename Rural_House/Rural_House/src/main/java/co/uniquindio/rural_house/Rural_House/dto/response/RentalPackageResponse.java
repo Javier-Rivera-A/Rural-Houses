@@ -13,4 +13,5 @@ public class RentalPackageResponse {
     private Float priceNight;
     private TypeRental typeRental;
     private String countryHouseCode;
+    private Float pricePerRoomNight;
 }

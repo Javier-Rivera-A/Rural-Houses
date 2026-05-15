@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -65,7 +65,7 @@ public class CountryHouse {
 
     // UML: + bedrooms: HashSet<Bedroom>  (minimo 3, validado en service)
     @OneToMany(mappedBy = "countryHouse", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Bedroom> bedrooms = new HashSet<>();
+    private Set<Bedroom> bedrooms = new LinkedHashSet<>();
 
     // UML: + photo: ArrayList<Photo>
     @OneToMany(mappedBy = "countryHouse", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -77,5 +77,5 @@ public class CountryHouse {
 
     // UML: + rental: HashSet<Rental>
     @OneToMany(mappedBy = "countryHouse", cascade = CascadeType.ALL)
-    private Set<Rental> rental = new HashSet<>();
+    private Set<Rental> rental = new LinkedHashSet<>();
 }

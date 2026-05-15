@@ -1,7 +1,7 @@
 package co.uniquindio.rural_house.Rural_House.controller;
 
 
-import co.uniquindio.rural_house.Rural_House.dto.request.RentalRequest;
+import co.uniquindio.rural_house.Rural_House.dto.request.*;
 import co.uniquindio.rural_house.Rural_House.dto.response.ApiResponse;
 import co.uniquindio.rural_house.Rural_House.dto.response.RentalResponse;
 import co.uniquindio.rural_house.Rural_House.service.RentalService;
@@ -64,6 +64,19 @@ public class RentalController {
     @GetMapping("/house/{houseId}")
     public ResponseEntity<ApiResponse<List<RentalResponse>>> getByHouse(@PathVariable String houseId) {
         return ResponseEntity.ok(ApiResponse.ok(rentalService.findByCountryHouse(houseId)));
+    }
+
+    /**
+     * POST /api/rentals/{rentalId}/pay?customerId={id}&amount={importe}
+     * El cliente realiza un pago transfiriendo desde su cuenta bancaria.
+     */
+    @PostMapping("/{rentalId}/pay")
+    public ResponseEntity<ApiResponse<Void>> payRental(
+            @PathVariable String rentalId,
+            @RequestParam String customerId,
+            @Valid @RequestBody PayRentalRequest request) {
+        rentalService.payRental(customerId, rentalId, request);
+        return ResponseEntity.ok(ApiResponse.ok("Pago realizado y transferido correctamente", null));
     }
 
     /**
