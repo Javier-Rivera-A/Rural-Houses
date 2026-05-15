@@ -259,6 +259,7 @@ public class CountryHouseController {
 
         OccupancyResponse response = countryHouseService.getOccupancyRate(houseId, startDate, endDate);
         return ResponseEntity.ok(ApiResponse.ok("Ocupación calculada correctamente", response));
+    }
     @GetMapping("/{code}/suggestions")
     public ResponseEntity<ApiResponse<List<CountryHouseResponse>>> suggestAlternatives(
             @PathVariable String code,
