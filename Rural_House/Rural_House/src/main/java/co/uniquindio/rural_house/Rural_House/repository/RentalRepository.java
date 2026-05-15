@@ -33,4 +33,10 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
     @Query("SELECT r FROM Rental r WHERE r.state = 'PENDING' " +
            "AND r.rentalDayMade <= :expiryDate")
     List<Rental> findExpiredPendingRentals(@Param("expiryDate") LocalDate expiryDate);
+    @Query("SELECT r FROM Rental r WHERE r.countryHouse.id = :houseId " +
+            "AND r.state NOT IN ('CANCELLED', 'EXPIRED') " +
+            "AND r.checkInDate < :endDate AND r.checkOutDate > :startDate")
+    List<Rental> findActiveRentalsInRange(@Param("houseId") String houseId,
+                                          @Param("startDate") LocalDate startDate,
+                                          @Param("endDate") LocalDate endDate);
 }
