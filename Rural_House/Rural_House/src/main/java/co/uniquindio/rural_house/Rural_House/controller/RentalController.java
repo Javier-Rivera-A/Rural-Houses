@@ -3,14 +3,17 @@ package co.uniquindio.rural_house.Rural_House.controller;
 
 import co.uniquindio.rural_house.Rural_House.dto.request.*;
 import co.uniquindio.rural_house.Rural_House.dto.response.ApiResponse;
+import co.uniquindio.rural_house.Rural_House.dto.response.OwnerSummaryResponse;
 import co.uniquindio.rural_house.Rural_House.dto.response.RentalResponse;
 import co.uniquindio.rural_house.Rural_House.service.RentalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -112,5 +115,19 @@ public class RentalController {
     @GetMapping("/expired")
     public ResponseEntity<ApiResponse<List<RentalResponse>>> getExpiredRentals(@RequestParam String ownerId) {
         return ResponseEntity.ok(ApiResponse.ok(rentalService.getExpiredPendingRentals(ownerId)));
+    }
+
+    /**
+     * GET /api/rentals/owner/{ownerId}/summary?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+     * Resumen de reservas e ingresos del propietario en un período (US18).
+     */
+    @GetMapping("/owner/{ownerId}/summary")
+    public ResponseEntity<ApiResponse<OwnerSummaryResponse>> getOwnerSummary(
+            @PathVariable String ownerId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        OwnerSummaryResponse response = rentalService.getOwnerSummary(ownerId, startDate, endDate);
+        return ResponseEntity.ok(ApiResponse.ok("Resumen obtenido correctamente", response));
     }
 }

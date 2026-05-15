@@ -353,6 +353,45 @@ public class RentalServiceImpl implements RentalService {
                 .collect(Collectors.toList());
     }
 
+    // ─── Resumen e ingresos (US18) ────────────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public OwnerSummaryResponse getOwnerSummary(String ownerId, LocalDate startDate, LocalDate endDate) {
+
+        if (startDate == null || endDate == null) {
+            throw new BusinessException("Las fechas de inicio y fin son obligatorias");
+        }
+        if (!startDate.isBefore(endDate)) {
+            throw new BusinessException("La fecha de inicio debe ser anterior a la fecha de fin");
+        }
+
+        List<Rental> rentals = rentalRepository.findActiveRentalsByOwnerInPeriod(ownerId, startDate, endDate);
+
+        int totalActiveRentals = rentals.size();
+
+        double totalIncome = rentals.stream()
+                .filter(r -> r.getState() == RentalState.CONFIRMED || r.getState() == RentalState.PAID)
+                .mapToDouble(r -> r.getTotalPrice() != null ? r.getTotalPrice() : 0.0)
+                .sum();
+
+        Map<String, List<Rental>> byHouse = rentals.stream()
+                .collect(Collectors.groupingBy(r -> r.getCountryHouse().getCode()));
+
+        List<OwnerSummaryResponse.HouseSummary> summaryByHouse = byHouse.entrySet().stream()
+                .map(entry -> {
+                    String houseCode = entry.getKey();
+                    List<Rental> houseRentals = entry.getValue();
+                    double houseIncome = houseRentals.stream()
+                            .filter(r -> r.getState() == RentalState.CONFIRMED || r.getState() == RentalState.PAID)
+                            .mapToDouble(r -> r.getTotalPrice() != null ? r.getTotalPrice() : 0.0)
+                            .sum();
+                    return new OwnerSummaryResponse.HouseSummary(houseCode, houseRentals.size(), houseIncome);
+                })
+                .collect(Collectors.toList());
+
+        return new OwnerSummaryResponse(ownerId, startDate, endDate, totalActiveRentals, totalIncome, summaryByHouse);
+    }
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private List<RentalPackage> findPackagesForPeriod(String houseId, LocalDate from, LocalDate to) {

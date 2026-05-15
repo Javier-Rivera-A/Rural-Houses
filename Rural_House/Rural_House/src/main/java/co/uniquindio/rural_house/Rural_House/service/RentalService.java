@@ -4,8 +4,10 @@ package co.uniquindio.rural_house.Rural_House.service;
 
 import co.uniquindio.rural_house.Rural_House.dto.request.PayRentalRequest;
 import co.uniquindio.rural_house.Rural_House.dto.request.RentalRequest;
+import co.uniquindio.rural_house.Rural_House.dto.response.OwnerSummaryResponse;
 import co.uniquindio.rural_house.Rural_House.dto.response.RentalResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RentalService {
@@ -21,4 +23,6 @@ public interface RentalService {
     void registerPayment(String ownerId, String rentalId, Float amount);
     void cancelRental(String ownerId, String rentalId);
     List<RentalResponse> getExpiredPendingRentals(String ownerId);
+    // Resumen e ingresos (US18)
+    OwnerSummaryResponse getOwnerSummary(String ownerId, LocalDate startDate, LocalDate endDate);
 }
