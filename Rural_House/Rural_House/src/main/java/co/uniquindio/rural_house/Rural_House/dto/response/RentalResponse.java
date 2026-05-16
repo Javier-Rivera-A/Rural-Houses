@@ -13,7 +13,7 @@ public class RentalResponse {
     private LocalDate rentalDayMade;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    private Byte numberNights;
+    private Integer numberNights;
     private RentalState state;
     private String contactPhoneNumber;
     private Float totalPrice;

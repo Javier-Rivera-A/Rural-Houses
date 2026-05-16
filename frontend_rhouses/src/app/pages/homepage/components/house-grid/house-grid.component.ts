@@ -168,4 +168,13 @@ export class HouseGridComponent implements OnChanges, OnInit {
   trackByHouseId(_: number, house: CountryHouseResponse): string {
     return house.id;
   }
+
+  formatPackageDate(date: string): string {
+    if (!date) return '';
+    try {
+      return new Date(date.split('T')[0] + 'T00:00:00').toLocaleDateString('es-CO', {
+        day: '2-digit', month: 'short', year: 'numeric'
+      });
+    } catch { return date; }
+  }
 }

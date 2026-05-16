@@ -40,7 +40,7 @@ public class Rental {
 
     // UML: + numberNights: Byte
     @Column(nullable = false)
-    private Byte numberNights;
+    private Integer numberNights;
 
     // UML: + state: RentalState
     @Enumerated(EnumType.STRING)

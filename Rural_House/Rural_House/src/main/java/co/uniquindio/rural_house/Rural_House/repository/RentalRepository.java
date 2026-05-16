@@ -24,7 +24,7 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
     List<Rental> findByState(RentalState state);
 
     @Query("SELECT r FROM Rental r WHERE r.countryHouse.id = :houseId " +
-           "AND r.state NOT IN ('CANCELLED') " +
+           "AND r.state NOT IN ('CANCELLED', 'EXPIRED') " +
            "AND r.checkInDate <= :checkOut AND r.checkOutDate >= :checkIn")
     List<Rental> findOverlappingRentals(@Param("houseId") String houseId,
                                         @Param("checkIn") LocalDate checkIn,

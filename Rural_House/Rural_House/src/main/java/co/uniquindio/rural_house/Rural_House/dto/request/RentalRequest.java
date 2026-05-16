@@ -19,7 +19,7 @@ public class RentalRequest {
     private LocalDate checkInDate;
 
     @Positive(message = "El número de noches debe ser positivo")
-    private Byte numberNights;
+    private Integer numberNights;
 
     @NotBlank(message = "El teléfono de contacto es obligatorio")
     private String contactPhoneNumber;
