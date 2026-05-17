@@ -1,4 +1,11 @@
-import { Component, OnInit, OnChanges, Input, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { RentalPackageResponse } from '../../../Services/CountryHouse/country-house.service';
 
@@ -23,331 +30,873 @@ export interface ReservationOverlay {
   selector: 'app-availability-calendar',
   standalone: true,
   imports: [CommonModule],
+
   styles: [`
-    :host { display: block; }
-    .cal-day { min-height: 88px; }
-    .pkg-pill {
+    :host {
       display: block;
-      font-size: 10px;
-      line-height: 1.3;
-      padding: 2px 5px;
-      border-radius: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: white;
-      font-weight: 600;
     }
-    .rental-pill {
-      display: block;
-      font-size: 9px;
-      line-height: 1.2;
-      padding: 1px 5px;
-      border-radius: 4px;
-      color: white;
-      font-weight: 700;
+
+    .calendar-container {
+      background: white;
+      border-radius: 24px;
       overflow: hidden;
-      text-overflow: ellipsis;
+      border: 1px solid #e5e7eb;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,.04),
+        0 8px 24px rgba(0,0,0,.04);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-day {
+      min-height: 110px;
+      border-right: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+      position: relative;
+      overflow: hidden;
+      padding: 6px;
+      transition: all .18s ease;
+      background: white;
+    }
+
+    .cal-day:hover {
+      z-index: 10;
+      transform: scale(1.015);
+      box-shadow: 0 4px 18px rgba(0,0,0,.06);
+    }
+
+    .day-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .range-bar {
+      width: 100%;
+      height: 18px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding-inline: 6px;
+      overflow: hidden;
       white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .reservation-bar {
+      width: 100%;
+      height: 16px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      color: white;
+      font-size: 8px;
+      font-weight: 800;
+      padding-inline: 6px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .occupation-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    .empty-day {
+      height: 55px;
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      color: #d1d5db;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+
+      .cal-day {
+        min-height: 78px;
+        padding: 4px;
+      }
+
+      .range-bar {
+        height: 14px;
+        font-size: 7px;
+        padding-inline: 4px;
+      }
+
+      .reservation-bar {
+        height: 13px;
+        font-size: 7px;
+        padding-inline: 4px;
+      }
+
+      .day-number {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+      }
     }
   `],
-  template: `
-    <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
 
-      <!-- Header -->
-      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+  template: `
+    <div class="calendar-container">
+
+      <!-- HEADER -->
+      <div
+        class="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-white sticky top-0 z-20">
+
         <div>
-          <h2 class="text-lg font-black" style="color: var(--rhouses-secondary-dark)">
-            Calendario de paquetes
+          <h2
+            class="text-lg font-black"
+            style="color: var(--rhouses-secondary-dark)">
+            Calendario de disponibilidad
           </h2>
-          <p class="text-xs text-gray-400 mt-0.5">
-            {{ packages.length }} paquete{{ packages.length !== 1 ? 's' : '' }} registrado{{ packages.length !== 1 ? 's' : '' }}
+
+          <p class="text-xs text-gray-400 mt-1">
+            {{ packages.length }}
+            paquete{{ packages.length !== 1 ? 's' : '' }}
           </p>
         </div>
+
         <div class="flex items-center gap-2">
-          <button (click)="prevMonth()"
-            class="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
-            style="color: var(--rhouses-secondary-dark)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+
+          <button
+            (click)="prevMonth()"
+            class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="18"
+                 height="18"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 viewBox="0 0 24 24">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
           </button>
-          <span class="px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold min-w-[150px] text-center"
-                style="color: var(--rhouses-secondary-dark)">
+
+          <div
+            class="px-5 py-2 rounded-xl border border-gray-200 text-sm font-bold min-w-[180px] text-center">
             {{ monthLabel }}
-          </span>
-          <button (click)="nextMonth()"
-            class="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
-            style="color: var(--rhouses-secondary-dark)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+
+          <button
+            (click)="nextMonth()"
+            class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="18"
+                 height="18"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 viewBox="0 0 24 24">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
           </button>
-          <button (click)="goToday()"
-            class="ml-1 px-3 py-2 rounded-xl text-xs font-bold border transition-colors"
+
+          <button
+            (click)="goToday()"
+            class="px-4 py-2 rounded-xl border text-xs font-bold transition-all"
             [style]="isCurrentMonthToday
               ? 'border-color:#AA4465;color:#AA4465;background:#AA446512'
               : 'border-color:#e5e7eb;color:#9ca3af'">
+
             Hoy
           </button>
         </div>
       </div>
 
-      <!-- Leyenda -->
-      <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500">
-        <div class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-sm" style="background:#AA4465"></span> Casa completa
+      <!-- LEYENDA -->
+      <div
+        class="flex flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4 bg-gray-50 border-b border-gray-200 text-sm font-bold text-gray-500">
+
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md" style="background:#AA4465"></span>
+          Casa completa
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-sm" style="background:#7C5CBF"></span> Por habitaciones
+
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md" style="background:#7C5CBF"></span>
+          Por habitaciones
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-sm" style="background:#2CA58D"></span> Ambas opciones
+
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md" style="background:#2CA58D"></span>
+          Ambas opciones
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-sm" style="background:#f59e0b"></span> Reserva pendiente
+
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md" style="background:#f59e0b"></span>
+          Reserva pendiente
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-sm" style="background:#166534"></span> Reserva confirmada
+
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md" style="background:#166534"></span>
+          Reserva confirmada
         </div>
       </div>
 
-      <!-- Días de la semana -->
-      <div class="grid grid-cols-7 border-b border-gray-100">
-        <div *ngFor="let d of weekDays"
-             class="py-2 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
+      <!-- DIAS -->
+      <div class="calendar-grid border-b border-gray-200 bg-gray-50">
+
+        <div
+          *ngFor="let d of weekDays"
+          class="py-3 text-center text-xs font-black uppercase tracking-wider text-gray-400">
+
           {{ d }}
         </div>
       </div>
 
-      <!-- Grilla -->
-      <div class="grid grid-cols-7">
-        <div *ngFor="let cell of calendarDays; let i = index"
-             class="cal-day p-1.5 border-b border-r border-gray-100 overflow-hidden"
-             [style.background]="!cell.isCurrentMonth ? '#fafafa' : 'white'"
-             [style.border-right]="(i + 1) % 7 === 0 ? 'none' : ''">
+      <!-- GRID -->
+      <div class="calendar-grid">
 
-          <!-- Número -->
-          <div class="flex items-center justify-center mb-1">
-            <span class="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold"
-                  [style.background]="cell.isToday ? '#AA4465' : 'transparent'"
-                  [style.color]="cell.isToday ? 'white' : (!cell.isCurrentMonth ? '#d1d5db' : '#374151')">
+        <div
+          *ngFor="let cell of calendarDays; trackBy: trackByDate; let i = index"
+          class="cal-day"
+
+          [style.background]="cell.isCurrentMonth
+            ? getCellBackground(cell)
+            : '#fafafa'"
+
+          [style.border-right]="(i + 1) % 7 === 0 ? 'none' : ''"
+
+          [style.boxShadow]="
+            hasConfirmedReservation(cell)
+              ? 'inset 0 0 0 2px #166534'
+              : ''
+          ">
+
+          <!-- Indicador -->
+          <div
+            class="occupation-dot"
+            [style.background]="getOccupationColor(cell)">
+          </div>
+
+          <!-- Numero -->
+          <div class="flex justify-center mb-2">
+
+            <div
+              class="day-number"
+              [style.background]="cell.isToday ? '#AA4465' : 'transparent'"
+              [style.color]="cell.isToday
+                ? 'white'
+                : (!cell.isCurrentMonth ? '#d1d5db' : '#374151')">
+
               {{ cell.dayNumber }}
-            </span>
+            </div>
           </div>
 
-          <!-- Paquetes del día -->
-          <div *ngIf="cell.isCurrentMonth && cell.packages.length > 0" class="flex flex-col gap-0.5">
-            <span *ngFor="let pkg of cell.packages.slice(0, 2)"
-                  class="pkg-pill"
-                  [style.background]="getPkgColor(pkg.typeRental)">
+          <!-- CONTENIDO -->
+          <ng-container *ngIf="cell.isCurrentMonth">
+
+            <!-- PAQUETES -->
+            <div
+              *ngFor="let pkg of cell.packages.slice(0, 2)"
+              class="range-bar"
+              [style.background]="getPkgColor(pkg.typeRental)"
+              [style.borderRadius]="getRangeRadius(cell.date, pkg)">
+
               <ng-container *ngIf="isStartDay(cell.date, pkg)">
-                $ {{ pkg.typeRental === 'ROOMS' ? pkg.pricePerRoomNight : pkg.priceNight }}
-                &middot; {{ getRentalLabel(pkg.typeRental) }}
+                {{ formatPrice(
+                  pkg.typeRental === 'ROOMS'
+                    ? pkg.pricePerRoomNight
+                    : pkg.priceNight
+                ) }}
               </ng-container>
-              <ng-container *ngIf="!isStartDay(cell.date, pkg)">&nbsp;</ng-container>
-            </span>
-            <span *ngIf="cell.packages.length > 2"
-                  class="text-center text-gray-400 font-semibold"
-                  style="font-size:9px">
-              +{{ cell.packages.length - 2 }} más
-            </span>
-          </div>
 
-          <!-- Overlay de reservas -->
-          <div *ngIf="cell.isCurrentMonth && cell.reservations.length > 0" class="flex flex-col gap-0.5 mt-1">
-            <span *ngFor="let reservation of cell.reservations.slice(0, 1)"
-                  class="rental-pill"
-                  [style.background]="getReservationColor(reservation.state)">
+            </div>
+
+            <!-- RESERVAS -->
+            <div
+              *ngFor="let reservation of cell.reservations.slice(0, 2)"
+              class="reservation-bar"
+              [style.background]="getReservationColor(reservation.state)"
+              [style.borderRadius]="getReservationRadius(cell.date, reservation)">
+
               <ng-container *ngIf="isReservationStartDay(cell.date, reservation)">
-                {{ reservation.state === 'PENDING' ? 'Pendiente' : 'Confirmada' }}
-              </ng-container>
-              <ng-container *ngIf="!isReservationStartDay(cell.date, reservation)">&nbsp;</ng-container>
-            </span>
-            <span *ngIf="cell.reservations.length > 1"
-                  class="text-center text-gray-400 font-semibold"
-                  style="font-size:9px">
-              +{{ cell.reservations.length - 1 }} reserva{{ cell.reservations.length - 1 !== 1 ? 's' : '' }}
-            </span>
-          </div>
 
-          <!-- Sin paquetes -->
-          <div *ngIf="cell.isCurrentMonth && cell.packages.length === 0"
-               class="flex items-end justify-center" style="height:48px">
-            <span style="font-size:9px;color:#d1d5db;font-weight:600">—</span>
-          </div>
+                {{ reservation.rentalCode }}
+
+                ·
+
+                {{
+                  reservation.state === 'PENDING'
+                    ? 'Pendiente'
+                    : 'Confirmada'
+                }}
+
+              </ng-container>
+
+            </div>
+
+            <!-- MAS -->
+            <div
+              *ngIf="cell.packages.length > 2 || cell.reservations.length > 2"
+              class="text-center text-[9px] font-bold text-gray-400 mt-1">
+
+              +más
+            </div>
+
+            <!-- VACIO -->
+            <div
+              *ngIf="
+                cell.packages.length === 0 &&
+                cell.reservations.length === 0
+              "
+              class="empty-day">
+
+              —
+            </div>
+
+          </ng-container>
 
         </div>
       </div>
 
-      <!-- Sin paquetes en el mes -->
-      <div *ngIf="packagesInMonth === 0 && packages.length > 0"
-           class="py-6 text-center text-sm text-gray-400 border-t border-gray-100">
-        No hay paquetes en este mes — navega a otro mes o crea uno nuevo.
-      </div>
+      <!-- FOOTER -->
+      <div
+        *ngIf="packagesInMonthList.length > 0"
+        class="border-t border-gray-200 px-6 py-5 bg-white">
 
-      <!-- Resumen del mes -->
-      <div *ngIf="packagesInMonthList.length > 0" class="border-t border-gray-100 px-6 py-4">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-          Paquetes en {{ monthLabel }}
+        <p
+          class="text-xs font-black uppercase tracking-wider text-gray-400 mb-4">
+
+          Paquetes del mes
         </p>
-        <div class="space-y-2">
-          <div *ngFor="let pkg of packagesInMonthList"
-               class="flex items-center gap-3 text-sm">
-            <span class="w-2.5 h-2.5 rounded-sm shrink-0"
-                  [style.background]="getPkgColor(pkg.typeRental)"></span>
-            <span class="font-semibold text-gray-700 flex-1">
-              {{ formatDate(pkg.startingDate) }} &rarr; {{ formatDate(pkg.endingDate) }}
+
+        <div class="space-y-3">
+
+          <div
+            *ngFor="let pkg of packagesInMonthList"
+            class="flex items-center gap-3 flex-wrap">
+
+            <span
+              class="w-3 h-3 rounded-md"
+              [style.background]="getPkgColor(pkg.typeRental)">
             </span>
-            <span class="font-black" style="color:#AA4465">
-              $ {{ pkg.typeRental === 'ROOMS' ? pkg.pricePerRoomNight : pkg.priceNight }}
-              {{ pkg.typeRental === 'ROOMS' ? '/hab/noche' : '/noche' }}
+
+            <span class="font-bold text-gray-700">
+              {{ formatDate(pkg.startingDate) }}
+              →
+              {{ formatDate(pkg.endingDate) }}
             </span>
-            <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
-                  [style.background]="getPkgLightColor(pkg.typeRental)"
-                  [style.color]="getPkgColor(pkg.typeRental)">
+
+            <span
+              class="font-black"
+              style="color:#AA4465">
+
+              {{
+                formatPrice(
+                  pkg.typeRental === 'ROOMS'
+                    ? pkg.pricePerRoomNight
+                    : pkg.priceNight
+                )
+              }}
+
+            </span>
+
+            <span
+              class="px-2 py-1 rounded-full text-xs font-bold"
+              [style.background]="getPkgLightColor(pkg.typeRental)"
+              [style.color]="getPkgColor(pkg.typeRental)">
+
               {{ getRentalLabel(pkg.typeRental) }}
+
             </span>
+
           </div>
+
         </div>
       </div>
 
     </div>
   `
 })
-export class AvailabilityCalendarComponent implements OnInit, OnChanges {
+
+export class AvailabilityCalendarComponent
+  implements OnInit, OnChanges {
 
   @Input() packages: RentalPackageResponse[] = [];
   @Input() reservations: ReservationOverlay[] = [];
 
-  weekDays    = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
   calendarDays: CalendarDay[] = [];
 
-  currentYear  = new Date().getFullYear();
+  currentYear = new Date().getFullYear();
   currentMonth = new Date().getMonth();
 
+  private packagesByDate =
+    new Map<string, RentalPackageResponse[]>();
+
+  private reservationsByDate =
+    new Map<string, ReservationOverlay[]>();
+
+  ngOnInit(): void {
+
+    this.prepareMaps();
+    this.buildCalendar();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+
+    if (
+      changes['packages'] ||
+      changes['reservations']
+    ) {
+
+      this.prepareMaps();
+      this.buildCalendar();
+    }
+  }
+
   get monthLabel(): string {
-    return new Date(this.currentYear, this.currentMonth, 1)
-      .toLocaleDateString('es-CO', { month: 'long', year: 'numeric' })
+
+    return new Date(
+      this.currentYear,
+      this.currentMonth,
+      1
+    )
+      .toLocaleDateString('es-CO', {
+        month: 'long',
+        year: 'numeric'
+      })
       .replace(/^\w/, c => c.toUpperCase());
   }
 
-  get isCurrentMonthToday(): boolean {
-    const n = new Date();
-    return this.currentMonth === n.getMonth() && this.currentYear === n.getFullYear();
-  }
-
   get packagesInMonthList(): RentalPackageResponse[] {
-    const first = new Date(this.currentYear, this.currentMonth, 1);
-    const last  = new Date(this.currentYear, this.currentMonth + 1, 0);
+
+    const first =
+      new Date(this.currentYear, this.currentMonth, 1);
+
+    const last =
+      new Date(this.currentYear, this.currentMonth + 1, 0);
+
     return this.packages.filter(pkg => {
+
       const s = this.parseDate(pkg.startingDate);
       const e = this.parseDate(pkg.endingDate);
+
       return s <= last && e >= first;
     });
   }
 
-  get packagesInMonth(): number {
-    return this.packagesInMonthList.length;
-  }
+  get isCurrentMonthToday(): boolean {
 
-  ngOnInit(): void  { this.buildCalendar(); }
-  ngOnChanges(c: SimpleChanges): void {
-    if (c['packages'] || c['reservations']) this.buildCalendar();
+    const now = new Date();
+
+    return (
+      this.currentMonth === now.getMonth() &&
+      this.currentYear === now.getFullYear()
+    );
   }
 
   prevMonth(): void {
-    if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
-    else { this.currentMonth--; }
+
+    if (this.currentMonth === 0) {
+      this.currentMonth = 11;
+      this.currentYear--;
+    } else {
+      this.currentMonth--;
+    }
+
     this.buildCalendar();
   }
 
   nextMonth(): void {
-    if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
-    else { this.currentMonth++; }
+
+    if (this.currentMonth === 11) {
+      this.currentMonth = 0;
+      this.currentYear++;
+    } else {
+      this.currentMonth++;
+    }
+
     this.buildCalendar();
   }
 
   goToday(): void {
-    const n = new Date();
-    this.currentMonth = n.getMonth();
-    this.currentYear  = n.getFullYear();
+
+    const now = new Date();
+
+    this.currentMonth = now.getMonth();
+    this.currentYear = now.getFullYear();
+
     this.buildCalendar();
   }
 
   buildCalendar(): void {
-    const today      = new Date();
-    const firstDay   = new Date(this.currentYear, this.currentMonth, 1);
-    const lastDay    = new Date(this.currentYear, this.currentMonth + 1, 0);
-    const startPad   = firstDay.getDay();
-    const totalCells = Math.ceil((startPad + lastDay.getDate()) / 7) * 7;
 
-    this.calendarDays = Array.from({ length: totalCells }, (_, i) => {
-      const date           = new Date(this.currentYear, this.currentMonth, 1 - startPad + i);
-      const isCurrentMonth = date.getMonth() === this.currentMonth;
-      const isToday        = date.toDateString() === today.toDateString();
+    const today = new Date();
 
-      const pkgsForDay = this.packages.filter(pkg => {
-        const s = this.parseDate(pkg.startingDate);
-        const e = this.parseDate(pkg.endingDate);
-        return date >= s && date <= e;
-      });
+    const firstDay =
+      new Date(this.currentYear, this.currentMonth, 1);
 
-      const reservationsForDay = this.reservations.filter((reservation) => {
-        if (reservation.state !== 'PENDING' && reservation.state !== 'CONFIRMED') return false;
-        const start = this.parseDate(reservation.checkInDate);
-        const end   = this.parseDate(reservation.checkOutDate);
-        return date >= start && date < end;
-      });
+    const lastDay =
+      new Date(this.currentYear, this.currentMonth + 1, 0);
 
-      return {
-        date,
-        dayNumber: date.getDate(),
-        isCurrentMonth,
-        isToday,
-        packages: pkgsForDay,
-        reservations: reservationsForDay
-      };
-    });
+    const startPadding =
+      firstDay.getDay();
+
+    const totalCells =
+      Math.ceil((startPadding + lastDay.getDate()) / 7) * 7;
+
+    this.calendarDays = Array.from(
+      { length: totalCells },
+      (_, i) => {
+
+        const date = new Date(
+          this.currentYear,
+          this.currentMonth,
+          1 - startPadding + i
+        );
+
+        const key = date.toDateString();
+
+        return {
+
+          date,
+
+          dayNumber:
+            date.getDate(),
+
+          isCurrentMonth:
+            date.getMonth() === this.currentMonth,
+
+          isToday:
+            date.toDateString() === today.toDateString(),
+
+          packages:
+            this.packagesByDate.get(key) || [],
+
+          reservations:
+            this.reservationsByDate.get(key) || []
+        };
+      }
+    );
   }
 
-  isStartDay(date: Date, pkg: RentalPackageResponse): boolean {
-    return this.parseDate(pkg.startingDate).toDateString() === date.toDateString();
-  }
+  prepareMaps(): void {
 
-  isReservationStartDay(date: Date, reservation: ReservationOverlay): boolean {
-    return this.parseDate(reservation.checkInDate).toDateString() === date.toDateString();
+    this.packagesByDate.clear();
+    this.reservationsByDate.clear();
+
+    // PAQUETES
+    for (const pkg of this.packages) {
+
+      let current =
+        this.parseDate(pkg.startingDate);
+
+      const end =
+        this.parseDate(pkg.endingDate);
+
+      while (current <= end) {
+
+        const key =
+          current.toDateString();
+
+        if (!this.packagesByDate.has(key)) {
+          this.packagesByDate.set(key, []);
+        }
+
+        this.packagesByDate.get(key)!.push(pkg);
+
+        current = new Date(
+          current.getFullYear(),
+          current.getMonth(),
+          current.getDate() + 1
+        );
+      }
+    }
+
+    // RESERVAS
+    for (const reservation of this.reservations) {
+
+      if (
+        reservation.state !== 'PENDING' &&
+        reservation.state !== 'CONFIRMED'&&
+        reservation.state !== 'PAID'
+      ) {
+        continue;
+      }
+
+      let current =
+        this.parseDate(reservation.checkInDate);
+
+      const end =
+        this.parseDate(reservation.checkOutDate);
+
+      while (current <= end) {
+
+        const key =
+          current.toDateString();
+
+        if (!this.reservationsByDate.has(key)) {
+          this.reservationsByDate.set(key, []);
+        }
+
+        this.reservationsByDate.get(key)!.push(reservation);
+
+        current = new Date(
+          current.getFullYear(),
+          current.getMonth(),
+          current.getDate() + 1
+        );
+      }
+    }
   }
 
   parseDate(dateStr: string): Date {
-    return new Date(dateStr.split('T')[0] + 'T00:00:00');
+
+    const onlyDate =
+      dateStr.split('T')[0];
+
+    const [year, month, day] =
+      onlyDate.split('-').map(Number);
+
+    return new Date(year, month - 1, day);
   }
 
-  formatDate(dateStr: string): string {
-    return this.parseDate(dateStr).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+  formatDate(date: string): string {
+
+    return this.parseDate(date)
+      .toLocaleDateString('es-CO', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+  }
+
+  formatPrice(value: number): string {
+
+    if (value >= 1000000) {
+      return '$' + (value / 1000000).toFixed(1) + 'M';
+    }
+
+    if (value >= 1000) {
+      return '$' + Math.floor(value / 1000) + 'k';
+    }
+
+    return '$' + value;
+  }
+
+  trackByDate(index: number, item: CalendarDay): string {
+    return item.date.toISOString();
   }
 
   getRentalLabel(type: string): string {
+
     const map: Record<string, string> = {
-      ENTIRE_HOUSE: 'Casa', ROOMS: 'Cuartos', BOTH: 'Ambas'
+      ENTIRE_HOUSE: 'Casa completa',
+      ROOMS: 'Por habitaciones',
+      BOTH: 'Ambas opciones'
     };
+
     return map[type] ?? type;
   }
 
   getPkgColor(type: string): string {
+
     const map: Record<string, string> = {
-      ENTIRE_HOUSE: '#AA4465', ROOMS: '#7C5CBF', BOTH: '#2CA58D'
+      ENTIRE_HOUSE: '#AA4465',
+      ROOMS: '#7C5CBF',
+      BOTH: '#2CA58D'
     };
-    return map[type] ?? '#E06C3B';
+
+    return map[type] ?? '#AA4465';
   }
 
   getPkgLightColor(type: string): string {
+
     const map: Record<string, string> = {
-      ENTIRE_HOUSE: '#AA446518', ROOMS: '#7C5CBF18', BOTH: '#2CA58D18'
+      ENTIRE_HOUSE: '#AA446518',
+      ROOMS: '#7C5CBF18',
+      BOTH: '#2CA58D18'
     };
-    return map[type] ?? '#E06C3B18';
+
+    return map[type] ?? '#AA446518';
   }
 
   getReservationColor(state: ReservationOverlay['state']): string {
-    if (state === 'PENDING') return '#f59e0b';
-    return '#166534';
+
+    return state === 'PENDING'
+      ? '#f59e0b'
+      : '#166534';
+  }
+
+  getCellBackground(cell: CalendarDay): string {
+
+    const hasConfirmed =
+      cell.reservations.some(
+        r => r.state === 'CONFIRMED'|| r.state === 'PAID'
+      );
+
+    if (hasConfirmed) {
+      return '#16653422';
+    }
+
+    const hasPending =
+      cell.reservations.some(
+        r => r.state === 'PENDING'
+      );
+
+    if (hasPending) {
+      return '#f59e0b22';
+    }
+
+    if (cell.packages.some(p => p.typeRental === 'BOTH')) {
+      return '#2CA58D10';
+    }
+
+    if (cell.packages.some(p => p.typeRental === 'ROOMS')) {
+      return '#7C5CBF10';
+    }
+
+    if (cell.packages.some(p => p.typeRental === 'ENTIRE_HOUSE')) {
+      return '#AA446510';
+    }
+
+    return 'white';
+  }
+
+  getOccupationColor(cell: CalendarDay): string {
+
+    if (
+      cell.reservations.some(
+        r => r.state === 'CONFIRMED'|| r.state === 'PAID'
+      )
+    ) {
+      return '#166534';
+    }
+
+    if (
+      cell.reservations.length > 0 ||
+      cell.packages.length > 0
+    ) {
+      return '#f59e0b';
+    }
+
+    return '#d1d5db';
+  }
+
+  hasConfirmedReservation(cell: CalendarDay): boolean {
+
+    return cell.reservations.some(
+      r => r.state === 'CONFIRMED'|| r.state === 'PAID'
+    );
+  }
+
+  isStartDay(
+    date: Date,
+    pkg: RentalPackageResponse
+  ): boolean {
+
+    return (
+      this.parseDate(pkg.startingDate)
+        .toDateString() === date.toDateString()
+    );
+  }
+
+  isEndDay(
+    date: Date,
+    pkg: RentalPackageResponse
+  ): boolean {
+
+    return (
+      this.parseDate(pkg.endingDate)
+        .toDateString() === date.toDateString()
+    );
+  }
+
+  getRangeRadius(
+    date: Date,
+    pkg: RentalPackageResponse
+  ): string {
+
+    const isStart =
+      this.isStartDay(date, pkg);
+
+    const isEnd =
+      this.isEndDay(date, pkg);
+
+    if (isStart && isEnd) {
+      return '6px';
+    }
+
+    if (isStart) {
+      return '6px 0 0 6px';
+    }
+
+    if (isEnd) {
+      return '0 6px 6px 0';
+    }
+
+    return '0';
+  }
+
+  isReservationStartDay(
+    date: Date,
+    reservation: ReservationOverlay
+  ): boolean {
+
+    return (
+      this.parseDate(reservation.checkInDate)
+        .toDateString() === date.toDateString()
+    );
+  }
+
+  isReservationEndDay(
+    date: Date,
+    reservation: ReservationOverlay
+  ): boolean {
+
+    return (
+      this.parseDate(reservation.checkOutDate)
+        .toDateString() === date.toDateString()
+    );
+  }
+
+  getReservationRadius(
+    date: Date,
+    reservation: ReservationOverlay
+  ): string {
+
+    const isStart =
+      this.isReservationStartDay(date, reservation);
+
+    const isEnd =
+      this.isReservationEndDay(date, reservation);
+
+    if (isStart && isEnd) {
+      return '6px';
+    }
+
+    if (isStart) {
+      return '6px 0 0 6px';
+    }
+
+    if (isEnd) {
+      return '0 6px 6px 0';
+    }
+
+    return '0';
   }
 }

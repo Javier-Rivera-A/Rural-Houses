@@ -105,25 +105,26 @@ export class HouseDetailComponent implements OnInit {
   }
 
   loadReservations(): void {
-    if (!this.house?.code) {
-      this.reservations = [];
-      return;
-    }
+    // 1. Limpiamos el calendario antes de cargar
+    this.reservations = [];
+    if (!this.houseId) return;
 
-    this.rentalSvc.observeActiveRentalsByHouse(this.house.code)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((rentals) => {
-        this.reservations = rentals.map((r) => this.toOverlay(r));
-      });
+    // 2. Traemos TODAS las reservas de esta casa específica.
+    // Usamos findByOwner porque internamente apunta a /api/rentals/house/{houseId}
+    // lo que nos devuelve el estado de ocupación total de la casa.
+    this.rentalSvc.findByOwner(this.houseId).subscribe({
+      next: (res: any) => {
+        const houseRentals = res?.data ?? res ?? [];
 
-    const user = this.authService.user();
-    if (!user) return;
+        console.log('Todas las reservas de la casa cargadas para el calendario:', houseRentals);
 
-    if (this.authService.isOwner()) {
-      this.rentalSvc.findByOwner(this.houseId).subscribe({ next: () => {}, error: () => {} });
-    } else {
-      this.rentalSvc.findByCustomer(user.id).subscribe({ next: () => {}, error: () => {} });
-    }
+        // 3. Mapeamos todas las reservas para que se dibujen en el calendario
+        this.reservations = houseRentals.map((r: any) => this.toOverlay(r));
+      },
+      error: (err) => {
+        console.error('Error al obtener el estado de ocupación de la casa:', err);
+      }
+    });
   }
 
   // ── Formulario paquetes ──────────────────────────────────────

@@ -30,17 +30,17 @@ export class HomepageComponent implements OnInit {
   isFilterOpen = false;
   isLoading    = true;
   showingSuggestions = false;
- 
+
   allHouses:      CountryHouseResponse[] = [];
   filteredHouses: CountryHouseResponse[] = [];
   searchParams:   SearchParams = { poblacion: '', fecha: '', noches: 2, tipoAlquiler: 'ambas' };
- 
+
   constructor(
     private countryHouseService: CountryHouseService,
     public authService: AuthService,
     private router: Router
   ) {}
- 
+
   ngOnInit(): void {
     if (this.authService.isOwner()) {
       this.isLoading = false;
@@ -48,7 +48,7 @@ export class HomepageComponent implements OnInit {
     }
     this.loadHouses();
   }
- 
+
   loadHouses(): void {
     this.isLoading = true;
     this.countryHouseService.findAll().subscribe({
@@ -62,10 +62,10 @@ export class HomepageComponent implements OnInit {
       }
     });
   }
- 
+
   toggleFilter() { this.isFilterOpen = !this.isFilterOpen; }
   closeFilter()  { this.isFilterOpen = false; }
- 
+
   onSearchResults(event: { houses: CountryHouseResponse[], params: SearchParams }): void {
     this.allHouses      = event.houses;
     this.filteredHouses = event.houses;
@@ -73,21 +73,21 @@ export class HomepageComponent implements OnInit {
     this.isLoading      = false;
     this.showingSuggestions = false;
   }
- 
+
   onSearchLoading(): void {
     this.isLoading = true;
   }
- 
+
   onFiltered(houses: CountryHouseResponse[]): void {
     this.filteredHouses = houses;
     this.showingSuggestions = false;
   }
 
- 
+
   onFilterApplied(filters: any): void {
     this.isLoading = true;
     this.showingSuggestions = false;
- 
+
     this.countryHouseService.searchHouses(filters).subscribe({
       next: (res: ApiResponse<CountryHouseResponse[]>) => {
         const foundHouses = res?.data ?? [];
@@ -107,11 +107,13 @@ export class HomepageComponent implements OnInit {
       }
     });
   }
- 
+
  // Owner quick actions
   goToMyHouses()      { this.router.navigate(['/my-houses']); }
   goToRegisterHouse() { this.router.navigate(['/register-house']); }
   goToSettings()      { this.router.navigate(['/settings']); }
   goToRentalPackages() { const ownerId = this.authService.user()?.id; this.router.navigate(['/rental-packages', ownerId]);}
   goToOwnerReservations() { this.router.navigate(['/owner-reservations']); }
+  goToStatsDashBoard() { this.router.navigate(['/estadisticas']);}
+
 }

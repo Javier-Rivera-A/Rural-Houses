@@ -1,0 +1,20 @@
+<div class="bg-white rounded-xl shadow-md p-6 flex flex-col gap-3">
+
+  <div class="flex items-center justify-between">
+    <h3 class="text-sm text-[#333745]/70">{{ title }}</h3>
+    <lucide-icon [name]="iconName" class="w-5 h-5 text-[#333745]/40"></lucide-icon>
+  </div>
+
+  <div class="flex items-baseline gap-1">
+    <span
+      class="text-3xl font-semibold"
+      [ngStyle]="{ 'color': isEmpty ? '#999999' : valueColor }"
+    >
+      {{ value }}
+    </span>
+    <span *ngIf="suffix" class="text-lg text-[#333745]/60">{{ suffix }}</span>
+  </div>
+
+  <p *ngIf="isEmpty" class="text-xs text-[#999999]">Sin datos en este período</p>
+
+</div>

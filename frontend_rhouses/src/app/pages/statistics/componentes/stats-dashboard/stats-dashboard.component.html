@@ -1,0 +1,100 @@
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-semibold text-[#333745] mb-1">{{ title }}</h1>
+      <p *ngIf="subtitle" class="text-sm text-[#333745]/60">{{ subtitle }}</p>
+    </div>
+    <app-date-range-picker
+      [value]="dateRange"
+      (valueChange)="dateRangeChange.emit($event)">
+    </app-date-range-picker>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <app-kpi-card
+      title="Ingresos Generados"
+      [value]="isEmpty ? '$0' : kpis.revenue"
+      suffix="COP"
+      iconName="dollar-sign"
+      valueColor="#2CA58D"
+      [isEmpty]="isEmpty">
+    </app-kpi-card>
+
+    <app-kpi-card
+      title="Porcentaje de Ocupación"
+      [value]="isEmpty ? '0%' : kpis.occupancy"
+      iconName="pie-chart"
+      valueColor="#AA4465"
+      [isEmpty]="isEmpty">
+    </app-kpi-card>
+
+    <app-kpi-card
+      title="Reservas Activas"
+      [value]="isEmpty ? 0 : kpis.reservations"
+      iconName="calendar"
+      valueColor="#333745"
+      [isEmpty]="isEmpty">
+    </app-kpi-card>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <app-chart-card title="Ingresos vs. Tiempo" [isEmpty]="isEmpty">
+      <ngx-charts-bar-vertical
+        [results]="chartRevenueData"
+        [scheme]="colorSchemeRevenue"
+        [xAxis]="true"
+        [yAxis]="true"
+        [showGridLines]="true">
+      </ngx-charts-bar-vertical>
+    </app-chart-card>
+
+    <app-chart-card title="Porcentaje de Ocupación por Mes" [isEmpty]="isEmpty">
+      <ngx-charts-bar-vertical
+        [results]="chartOccupancyData"
+        [scheme]="colorSchemeOccupancy"
+        [xAxis]="true"
+        [yAxis]="true"
+        [showGridLines]="true">
+      </ngx-charts-bar-vertical>
+    </app-chart-card>
+
+    <app-chart-card title="Estado de las Reservas" [isEmpty]="isEmpty">
+      <ngx-charts-pie-chart
+        [results]="chartStatusData"
+        [customColors]="customColorsStatus"
+        [doughnut]="true"
+        [legend]="true"
+        [legendPosition]="legendPositionBelow"
+        [labels]="false">
+      </ngx-charts-pie-chart>
+    </app-chart-card>
+
+    <app-chart-card [title]="fourthChart.title" [isEmpty]="isEmpty">
+
+      <ng-container *ngIf="fourthChart.type === 'horizontal-bar'">
+        <ngx-charts-bar-horizontal
+          [results]="chartFourthData"
+          [scheme]="colorSchemeRevenue"
+          [xAxis]="true"
+          [yAxis]="true"
+          [showGridLines]="true">
+        </ngx-charts-bar-horizontal>
+      </ng-container>
+
+      <ng-container *ngIf="fourthChart.type === 'pie'">
+        <ngx-charts-pie-chart
+          [results]="chartFourthData"
+          [customColors]="customColorsFourth"
+          [doughnut]="true"
+          [legend]="true"
+          [legendPosition]="legendPositionBelow"
+          [labels]="false">
+        </ngx-charts-pie-chart>
+      </ng-container>
+
+    </app-chart-card>
+
+  </div>
+</div>

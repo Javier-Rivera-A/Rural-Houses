@@ -1,0 +1,18 @@
+<div class="bg-white rounded-xl shadow-md p-6">
+  <h3 class="text-base font-medium text-[#333745] mb-4">{{ title }}</h3>
+
+  <div class="w-full h-[280px]">
+    <ng-container *ngIf="isEmpty; else hasContent">
+      <div class="w-full h-full flex flex-col items-center justify-center">
+        <div class="w-16 h-16 rounded-full bg-[#E1E5F2] flex items-center justify-center mb-3">
+          <span class="text-3xl text-[#999999]">0</span>
+        </div>
+        <p class="text-sm text-[#999999]">No hay reservas en este período</p>
+      </div>
+    </ng-container>
+
+    <ng-template #hasContent>
+      <ng-content></ng-content>
+    </ng-template>
+  </div>
+</div>

@@ -12,6 +12,7 @@ import { MakeRentalComponent } from './pages/make-rental/make-rental.component';
 import { MyRentalsComponent } from './pages/my-rentals/my-retals.component';
 import { authGuard, customerGuard, ownerGuard } from './guards/auth.guards';
 import { OwnerReservationsComponent } from './pages/owner-reservations/owner-reservations.component';
+import { StatisticsComponent } from './pages/statistics/statistics.component';
 
 export const routes: Routes = [
   { path: '',                                              component: HomepageComponent      },
@@ -26,5 +27,6 @@ export const routes: Routes = [
   { path: 'owner-reservations', component: OwnerReservationsComponent, canActivate: [ownerGuard] },
   { path: 'make-rental/:id', component: MakeRentalComponent, canActivate: [customerGuard] },
   { path: 'my-rentals',      component: MyRentalsComponent, canActivate: [customerGuard]  },
+  { path: 'estadisticas', component: StatisticsComponent},
   { path: '**',                                            redirectTo: '', pathMatch: 'full'  }
 ];

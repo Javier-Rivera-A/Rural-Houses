@@ -335,6 +335,62 @@
             </div>
           </button>
 
+          <!-- Estadisticas -->
+          <button
+            (click)="goToStatsDashBoard()"
+            class="group bg-white rounded-2xl shadow-md p-7 text-left hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-transparent hover:border-[#AA4465]/20">
+
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+              style="background: linear-gradient(135deg, rgba(170,68,101,0.12), rgba(51,55,69,0.05))">
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="28"
+                   height="28"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="1.5"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   style="color: #AA4465">
+
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+
+              </svg>
+            </div>
+
+            <h3 class="text-lg font-black mb-1"
+                style="color: var(--rhouses-secondary-dark)">
+              Estadisticas
+            </h3>
+
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Revisa las estadisticas generales de tu negocio y de cada una de tus casas
+            </p>
+
+            <div class="flex items-center gap-1 mt-4 text-sm font-bold"
+                 style="color: #AA4465">
+
+              Ver Estadisticas
+
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="16"
+                   height="16"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2.5"
+                   class="group-hover:translate-x-1 transition-transform">
+
+                <path d="m9 18 6-6-6-6"/>
+
+              </svg>
+            </div>
+          </button>
+
         </div>
 
       </div>

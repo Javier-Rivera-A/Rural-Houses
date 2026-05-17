@@ -53,7 +53,14 @@ export interface AvailabilityResponse {
     };
   };
 }
-
+export interface OccupancyResponse {
+  code: string;
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  occupiedDays: number;
+  occupancyPercentage: number;
+}
 export interface RentalPackageResponse {
   id: string;
   startingDate: string;
@@ -231,5 +238,16 @@ export class CountryHouseService {
     return this.http.get<ApiResponse<CountryHouseResponse[]>>(`${this.apiUrl}/search`, {
       params: queryParams
     });
+  }
+
+  /**
+   * GET /api/houses/{houseId}/occupancy?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+   * Retorna el porcentaje de ocupación de una casa en un período determinado.
+   */
+  getOccupancy(houseId: string, startDate: string, endDate: string): Observable<ApiResponse<OccupancyResponse>> {
+    return this.http.get<ApiResponse<OccupancyResponse>>(
+      `${this.apiUrl}/${houseId}/occupancy?startDate=${startDate}&endDate=${endDate}`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

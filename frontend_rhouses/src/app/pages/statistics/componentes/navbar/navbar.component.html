@@ -1,0 +1,63 @@
+<nav class="bg-white border-b border-[#E1E5F2] sticky top-0 z-30">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+
+    <div class="flex items-center gap-2">
+      <button
+        (click)="back.emit()"
+        class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#E1E5F2] text-[#333745] transition-colors"
+        aria-label="Volver atrás"
+      >
+        <lucide-icon name="arrow-left" class="w-4 h-4"></lucide-icon>
+        <span class="hidden sm:inline text-sm">Volver</span>
+      </button>
+      <button
+        (click)="home.emit()"
+        class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#E1E5F2] text-[#333745] transition-colors"
+        aria-label="Inicio"
+      >
+        <lucide-icon name="home" class="w-4 h-4"></lucide-icon>
+        <span class="hidden sm:inline text-sm">Inicio</span>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#AA4465]/10 text-[#AA4465] text-xs font-medium">
+        🏡 Propietario
+      </span>
+
+      <div class="relative" #menuContainer>
+        <button
+          (click)="toggleOpen()"
+          class="flex items-center gap-2 px-2 py-1 rounded-xl hover:bg-[#E1E5F2] transition-colors"
+        >
+          <div class="w-9 h-9 rounded-full bg-[#AA4465] text-white flex items-center justify-center font-medium">
+            {{ userInitial }}
+          </div>
+          <span class="hidden md:inline text-sm text-[#333745]">{{ userName }}</span>
+          <lucide-icon
+            name="chevron-down"
+            class="w-4 h-4 text-[#333745] transition-transform"
+            [class.rotate-180]="open"
+          ></lucide-icon>
+        </button>
+
+        <div *ngIf="open" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-md border border-[#E1E5F2] py-2 overflow-hidden">
+          <button class="w-full flex items-center gap-3 px-4 py-2 text-sm text-[#333745] hover:bg-[#E1E5F2] transition-colors">
+            <lucide-icon name="settings" class="w-4 h-4"></lucide-icon>
+            Configuración de cuenta
+          </button>
+          <button class="w-full flex items-center gap-3 px-4 py-2 text-sm text-[#333745] hover:bg-[#E1E5F2] transition-colors">
+            <lucide-icon name="calendar-days" class="w-4 h-4"></lucide-icon>
+            Reservas
+          </button>
+          <div class="border-t border-[#E1E5F2] my-1"></div>
+          <button class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+            <lucide-icon name="log-out" class="w-4 h-4"></lucide-icon>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</nav>

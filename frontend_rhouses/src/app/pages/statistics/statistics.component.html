@@ -1,0 +1,63 @@
+<div class="min-h-screen bg-[#E1E5F2]">
+
+  <app-navbar
+    (back)="handleBack()"
+    (home)="handleHome()">
+  </app-navbar>
+
+  <ng-container *ngIf="view === 'list'">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+      <div class="flex flex-col md:flex-row gap-3 mb-8">
+
+        <div class="relative flex-1">
+          <lucide-icon name="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#333745]/40"></lucide-icon>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar por ID de casa o nombre..."
+            class="w-full bg-white pl-12 pr-4 py-3 rounded-xl shadow-md border border-transparent focus:border-[#2CA58D] focus:outline-none text-[#333745] placeholder:text-[#333745]/40"
+          />
+        </div>
+
+        <button
+          (click)="openGlobalStats()"
+          class="inline-flex items-center justify-center gap-2 bg-[#2CA58D] hover:bg-[#239078] text-white px-6 py-3 rounded-xl shadow-md font-medium transition-colors"
+        >
+          <lucide-icon name="bar-chart-3" class="w-5 h-5"></lucide-icon>
+          Estadísticas Generales
+        </button>
+      </div>
+
+      <div *ngIf="filteredHouses.length === 0" class="bg-white rounded-xl shadow-md p-12 text-center">
+        <div class="w-16 h-16 rounded-full bg-[#E1E5F2] flex items-center justify-center mx-auto mb-4">
+          <lucide-icon name="search" class="w-8 h-8 text-[#999999]"></lucide-icon>
+        </div>
+        <p class="text-[#333745]/70">Buscando.</p>
+      </div>
+
+      <div *ngIf="filteredHouses.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <app-house-card
+          *ngFor="let house of filteredHouses"
+          [house]="house"
+          (viewStats)="openIndividualStats($event)">
+        </app-house-card>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="view === 'global' || view === 'individual'">
+    <app-stats-dashboard
+      [title]="view === 'global' ? 'Rendimiento Global de tus Propiedades' : 'Estadísticas: ' + (selectedHouse?.description || selectedHouse?.code)"
+      [dateRange]="dateRange"
+      [kpis]="kpis"
+      [revenueData]="revenueData"
+      [occupancyData]="occupancyData"
+      [reservationStatusData]="reservationStatusData"
+      [fourthChart]="fourthChartData"
+      (dateRangeChange)="updateDateRange($event)">
+    </app-stats-dashboard>
+  </ng-container>
+
+</div>

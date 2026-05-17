@@ -121,19 +121,30 @@ export class RentalPackageComponent implements OnInit {
   }
 
   private loadOwnerReservations(houseCode: string): void {
-    this.houseReservationsSub?.unsubscribe();
-    this.houseReservationsSub = this.rentalSvc.observeActiveRentalsByHouse(houseCode)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((rentals) => {
-        this.reservations = rentals.map((r) => this.toOverlay(r));
-      });
+    // 1. Limpiamos las reservas anteriores del calendario
+    this.reservations = [];
 
-    this.rentalSvc.findByOwner(this.ownerId!).subscribe({
-      next: () => {},
-      error: () => {}
+    // 2. Cancelamos suscripciones anteriores por si acaso
+    this.houseReservationsSub?.unsubscribe();
+
+    // 3. ¡AQUÍ ESTÁ LA CORRECCIÓN!
+    // Usamos el método 'findByOwner' pero pasándole el ID DE LA CASA (this.selectedHouseId)
+    this.rentalSvc.findByOwner(this.selectedHouseId).subscribe({
+      next: (res: any) => {
+        // Obtenemos los datos de las reservas que devuelve el backend
+        const houseRentals = res?.data ?? res ?? [];
+
+        console.log('Reservas obtenidas para esta casa concreta:', houseRentals);
+
+        // 4. Transformamos las reservas al formato del calendario
+        this.reservations = houseRentals.map((r: any) => this.toOverlay(r));
+      },
+      error: (err) => {
+        this.toastr.error('No se pudieron obtener las reservas de la casa', 'Error de Red');
+        console.error('Error al llamar a findByOwner con el ID de la casa:', err);
+      }
     });
   }
-
   openForm(): void {
     this.editingId = null;
     this.form = { startingDate: '', endingDate: '', priceNight: null, pricePerRoomNight: null,  typeRental: 'ENTIRE_HOUSE' };
@@ -283,13 +294,20 @@ export class RentalPackageComponent implements OnInit {
       : 'https://images.unsplash.com/photo-1572345901383-be2fcd1625f3?w=800&q=80';
   }
 
-  private toOverlay(rental: RentalResponse): ReservationOverlay {
+  private toOverlay(rental: any): ReservationOverlay {
+    // Convertimos el estado a mayúsculas para evitar problemas de formato
+    let stateUpper = rental.state ? rental.state.toUpperCase() : '';
+
+    if (stateUpper === 'PAID') {
+      stateUpper = 'CONFIRMED';
+    }
+
     return {
-      id: rental.id,
-      rentalCode: rental.rentalCode,
-      checkInDate: rental.checkInDate,
+      id:           rental.id,
+      rentalCode:   rental.rentalCode ?? rental.code,
+      checkInDate:  rental.checkInDate,
       checkOutDate: rental.checkOutDate,
-      state: rental.state
+      state:        stateUpper as any
     };
   }
 }
