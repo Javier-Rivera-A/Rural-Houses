@@ -49,7 +49,7 @@ export class SettingsComponent implements OnInit {
   private http      = inject(HttpClient);
   private fb        = inject(FormBuilder);
 
-  private readonly base = 'http://localhost:8081';
+  private readonly base = 'https://rural-houses-7c6n.onrender.com';
 
   activeTab: 'profile' | 'bank' = 'bank';
 
