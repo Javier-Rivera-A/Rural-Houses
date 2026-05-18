@@ -44,7 +44,7 @@ export interface Photo {
 })
 export class HouseDetailService {
 
-  private readonly apiUrl = 'http://localhost:8081/api/houses';
+  private readonly apiUrl = 'https://rural-houses-7c6n.onrender.com';
 
   constructor(private http: HttpClient) {}
 

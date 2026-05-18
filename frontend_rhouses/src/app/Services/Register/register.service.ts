@@ -21,8 +21,8 @@ export interface OwnerRegisterPayload {
   providedIn: 'root'
 })
 export class RegisterService {
-  private apiCustomersUrl = 'http://localhost:8081/api/customers/register';
-  private apiOwnersUrl = 'http://localhost:8081/api/owners/register';
+  private apiCustomersUrl = 'https://rural-houses-7c6n.onrender.com';
+  private apiOwnersUrl = 'https://rural-houses-7c6n.onrender.com';
 
   constructor(private http: HttpClient) {}
 

@@ -37,7 +37,7 @@ interface ApiResponse<T> {
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
-  private readonly base = 'http://localhost:8081';
+  private readonly base = 'https://rural-houses-7c6n.onrender.com';
 
   constructor(private http: HttpClient) {}
 

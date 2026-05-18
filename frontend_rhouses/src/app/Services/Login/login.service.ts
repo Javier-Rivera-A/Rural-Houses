@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoginService {
-  private readonly base = 'http://localhost:8081';
+  private readonly base = 'https://rural-houses-7c6n.onrender.com';
 
   constructor(private http: HttpClient) {}
 

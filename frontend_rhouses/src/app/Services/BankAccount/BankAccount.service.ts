@@ -21,7 +21,7 @@ export interface BankAccountData {
   providedIn: 'root'
 })
 export class BankAccountService {
-  private readonly apiUrl = 'http://localhost:8081/api/bank-accounts';
+  private readonly apiUrl = 'https://rural-houses-7c6n.onrender.com';
 
   constructor(private http: HttpClient) {}
 
