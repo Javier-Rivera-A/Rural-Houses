@@ -23,7 +23,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${cors.allowed.origins")
+    @Value("${cors.allowed.origins}")
     private String allowedOrigins;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
