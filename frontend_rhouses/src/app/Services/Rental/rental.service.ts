@@ -47,7 +47,7 @@ export interface ApiResponse<T> {
 
 @Injectable({ providedIn: 'root' })
 export class RentalService {
-  private readonly base = 'https://rural-houses-7c6n.onrender.com';
+  private readonly base = 'https://rural-houses-7c6n.onrender.com/api/rentals';
   private readonly rentalsCache$ = new BehaviorSubject<Record<string, RentalResponse>>({});
 
   constructor(private http: HttpClient) {}

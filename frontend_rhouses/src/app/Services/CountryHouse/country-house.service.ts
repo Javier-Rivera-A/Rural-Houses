@@ -99,7 +99,7 @@ export interface RegisterHousePayload {
   providedIn: 'root'
 })
 export class CountryHouseService {
-  private readonly apiUrl = 'https://rural-houses-7c6n.onrender.com';
+  private readonly apiUrl = 'https://rural-houses-7c6n.onrender.com/api/houses';
 
   constructor(private http: HttpClient) {}
 
